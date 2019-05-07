@@ -64,6 +64,40 @@ function(input, output, session) {
   })
 
 
+  # error when the user click on the button on the first page
+  observeEvent(input$btn_DATASET_LOADED, {
+    error <- F
+
+    if (input$sel_taxa == "<unselected>" & input$sel_species_epiteth == "<unselected>" & input$sel_genus == "<unselected>") { # if no taxa
+      error <- T
+      shinyalert("Oops!", "Select taxa or both species epithet and genus", type = "error")
+    }else{
+      if(input$sel_taxa == "<unselected>" & (any(c(input$sel_species_epiteth, input$sel_genus)== "<unselected>"))) {
+        error <- T
+        shinyalert("Oops!", "Select both genus and species epithet", type = "error")
+      }
+    }
+
+    if((any(c(input$sel_LONG, input$sel_LAT)== "<unselected>"))) {
+      error <- T
+      shinyalert("Oops!", "Select both longitude and latitude", type = "error")
+    }
+
+    if (!error) {
+      showMenuItem("tab_MAP")
+      updateTabItems(session, "tab_MAP")
+
+      newData <- original.dataset$df
+
+      newData <-
+        newData %>%
+        mutate(taxa = paste0(!!rlang::sym(input$sel_genus)," " , !!rlang::sym(input$sel_species_epiteth)))
+
+      original.dataset$df <- newData
+
+    }
+  })
+
 
 
   }
