@@ -1,0 +1,14 @@
+Package: conrappli
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Gilles Dauby
+Maintainer: Gilles Dauby <gildauby@gmail.com>
+Description: Shiny application for mapping and computing several range parameters for plant species
+    Dedicated to Central Africa. Provide preliminary IUCN evaluation following Criterion B.
+    Based on ConR package computation.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports: shiny, shinydashboard, dplyr, magrittr, shinyjs, shinyalert, shinyFeedback, ConR, sf, readr, mapview
+RoxygenNote: 6.1.1
