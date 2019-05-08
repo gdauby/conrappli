@@ -122,11 +122,13 @@ dashboardPage(
           sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 4, round=TRUE, step=1),
           numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
+          sliderInput(inputId = "threshold_mayaux", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
           actionButton("eval_species", "Compute and map evaluation")
         )
         ,
         hidden(boxWithId(
           id = "eval_species_res", title = "Parameters values", width = 12,
+          htmlOutput("title_eval"),
           verbatimTextOutput("results_conr")
         )),
         textOutput("summary3"),
