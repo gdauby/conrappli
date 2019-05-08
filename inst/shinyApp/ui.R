@@ -44,6 +44,9 @@ dashboardPage(
             column(9, selectInput("sel_taxa", "Taxa", choices = NULL)),
             column(9, selectInput("sel_genus", "Genus", choices = NULL)),
             column(9, selectInput("sel_species_epiteth", "Species epiteth", choices = NULL)),
+            column(9, selectInput("sel_rank", "Rank infra-specific level ", choices = NULL)),
+            column(9, selectInput("sel_lower_infra", "Name infra-specific level", choices = NULL)),
+
             # column(3, radioButtons("rad_units_diameter", "Unit:", choices = c("mm", "cm", "m"), selected = "cm")),
 
             # wood density argument
@@ -111,7 +114,7 @@ dashboardPage(
       )
        ,
 
-      # Mapping ----------------------------------------------------------------
+      # Evaluation ----------------------------------------------------------------
       tabItem(
         "tab_EVAL",
         box(
