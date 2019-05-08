@@ -120,7 +120,7 @@ dashboardPage(
         box(
           title = "Evaluate preliminary status", width = 12,
           sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 4, round=TRUE, step=1),
-          numericInput("repeat_pos_aoo", "Number of random different position for overlaying the grid", 10),
+          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
           actionButton("eval_species", "Compute and map evaluation")
         )

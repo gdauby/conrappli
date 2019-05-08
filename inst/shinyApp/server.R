@@ -155,18 +155,17 @@ function(input, output, session) {
         #   print()
     })
 
-
-
     dataset_select <-
       original.dataset$df %>%
       filter(taxa==!!name_quo)
+
     dataset_select_coord <-
-      dataset_select %>%
+      dataset_select  %>%
       dplyr::filter(!is.na(!!rlang::sym(input$sel_LONG)) | !is.na(!!rlang::sym(input$sel_LAT)))
 
     dataset_sf <-
       sf::st_as_sf(dataset_select_coord,
-                   coords = c("LONG_DD", "LAT_DD"), crs = 4326)
+                   coords = c(input$sel_LONG, input$sel_LAT), crs = 4326)
 
     dataset_circle_select <-
       original.dataset.accuracy$df %>%
@@ -191,9 +190,79 @@ function(input, output, session) {
   })
 
 
-  observeEvent(input$box_SELECT_TAX, {
+  observeEvent(input$btn_SELECT_TAX, {
     showMenuItem("tab_EVAL")
     updateTabItems(session, "tab_EVAL")
+
+
+    observeEvent(input$eval_species, {
+      Name <-list.names$df[as.numeric(input$name_chosen)]
+      name_quo <- dplyr::enquo(Name)
+
+      data_select <-
+        original.dataset$df %>%
+        filter(taxa==!!name_quo, !is.na(!!rlang::sym(input$sel_LAT)), !is.na(!!rlang::sym(input$sel_LONG))) %>%
+        dplyr::select(!!rlang::sym(input$sel_LAT), !!rlang::sym(input$sel_LONG), taxa)
+
+      dataset_sf <-
+        sf::st_as_sf(original.dataset$df %>%
+                       filter(taxa==!!name_quo, !is.na(!!rlang::sym(input$sel_LAT)), !is.na(!!rlang::sym(input$sel_LONG))),
+                     coords = c(input$sel_LONG, input$sel_LAT), crs = 4326)
+
+      dataset_circle_select <-
+        original.dataset.accuracy$df %>%
+        filter(taxa==!!name_quo)
+
+
+      conr_results <- ConR::IUCN.eval(DATA = data_select,
+                                      Cell_size_AOO = input$aoo_km_res, Cell_size_locations = input$locations_km_res,
+                                      DrawMap = FALSE)
+
+      eoo <-
+        ConR::EOO.computing(XY = data_select, export_shp = TRUE)
+
+      locations <-
+        ConR::locations.comp(XY = data_select, nbe_rep = input$repeat_pos_aoo)
+
+      aoo <-
+        ConR::AOO.computing(XY = data_select, export_shp = T, nbe.rep.rast.AOO = input$repeat_pos_aoo)
+
+      eoo_poly <-
+        sf::st_as_sf(eoo$spatial.polygon_1)
+
+      aoo_poly <-
+        sf::st_as_sf(aoo[[2]][[1]])
+
+      locations_poly <-
+        sf::st_as_sf(locations[[1]])
+
+      showElement("eval_species_res")
+
+      output$results_conr <- renderText({
+        paste("Extent of Occurrences (km2)", conr_results$EOO,
+              "Area of Occupancy (km2)", aoo[[1]],
+              "Number of locations", locations[[2]],
+              "Number of sub-populations", conr_results$Nbe_subPop, sep = "\n")
+
+      })
+
+      output$map2 <- mapview::renderMapview({
+
+        map_types <- c("Esri.NatGeoWorldMap", "Esri.WorldImagery", "OpenStreetMap.DE",
+                       "Esri.WorldPhysical")
+
+        mapview::mapview(dataset_circle_select, map.types = map_types,
+                         col.regions = "red", alpha.regions = 0.1, legend =FALSE, viewer.suppress=T) +
+          mapview::mapview(dataset_sf, col.regions = "red", map.types = map_types, legend =FALSE, viewer.suppress=T) +
+          mapview::mapview(eoo_poly, col.regions = "blue", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
+          mapview::mapview(locations_poly, col.regions = "pink", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
+          mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T)
+
+
+
+      })
+
+    })
 
 
 
