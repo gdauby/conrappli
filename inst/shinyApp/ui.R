@@ -41,29 +41,18 @@ dashboardPage(
             id = "box_FIELDS", title = "Column selection", width = 6,
 
             # obligatory argument
-            column(9, selectInput("sel_taxa", "Taxa", choices = NULL)),
-            column(9, selectInput("sel_genus", "Genus", choices = NULL)),
-            column(9, selectInput("sel_species_epiteth", "Species epiteth", choices = NULL)),
-            column(9, selectInput("sel_rank", "Rank infra-specific level ", choices = NULL)),
-            column(9, selectInput("sel_lower_infra", "Name infra-specific level", choices = NULL)),
-
-            # column(3, radioButtons("rad_units_diameter", "Unit:", choices = c("mm", "cm", "m"), selected = "cm")),
-
-            # wood density argument
+            strong("Taxa column selection - select either taxa OR others columns"),
+            selectInput("sel_taxa", "Taxa", choices = NULL),
+            selectInput("sel_genus", "Genus", choices = NULL),
+            selectInput("sel_species_epiteth", "Species epiteth", choices = NULL),
+            selectInput("sel_rank", "Rank infra-specific level", choices = NULL),
+            selectInput("sel_lower_infra", "Name infra-specific level", choices = NULL),
             hr(),
-            # h4("Provide either wood density values or the taxonomy"),
-            # selectInput("sel_WD", "Wood density", choices = NULL),
-            # selectInput("sel_GENUS", "Genus (e.g. Terminalia) or scientific name (e.g. Terminalia superba or Terminalia superba Engl. & Diels)", choices = NULL),
-            # selectInput("sel_SPECIES", "Species (e.g. superba)", choices = NULL),
-            # hidden(div("Impossible combination", id = "msg_wd", style = "color:red;")),
-            #
-            # # Height argument
-            # hr(),
-            # h4("Optional"),
-            # column(9, selectInput("sel_H", "Height", choices = NULL)),
-            # column(3, radioButtons("rad_units_height", "Unit:", choices = c("cm", "m"), selected = "m")),
-            selectInput("sel_LONG", "Coordinate longitude", choices = NULL),
-            selectInput("sel_LAT", "Coordinate latitude", choices = NULL),
+
+            hr(),
+            strong("Coordinates column selection"),
+            selectInput("sel_LONG", "Longitude", choices = NULL),
+            selectInput("sel_LAT", "Latitude", choices = NULL),
             # hidden(div("Impossible combination", id = "msg_h", style = "color:red;")),
 
             # plot id
@@ -100,9 +89,11 @@ dashboardPage(
         )),
         textOutput("summary2"),
 
-        mapview::mapviewOutput(outputId="map"),
+        boxWithId(id = "box_SELECT_TAX", actionButton("btn_SELECT_TAX", "EVALUATION")),
 
-        boxWithId(id = "box_SELECT_TAX", actionButton("btn_SELECT_TAX", "evaluation"))
+        mapview::mapviewOutput(outputId="map")
+
+
         # ,
         # hidden(boxWithId(
         #   id = "box_RESULT_TAXO", title = "Result", width = 12,
@@ -135,14 +126,7 @@ dashboardPage(
         textOutput("summary3"),
 
         mapview::mapviewOutput(outputId="map2")
-        # ,
-        # hidden(boxWithId(
-        #   id = "box_RESULT_TAXO", title = "Result", width = 12,
-        #   verbatimTextOutput("out_taxo_error"),
-        #   hr(),
-        #   verbatimTextOutput("out_wd_error")
-        # )),
-        # hidden(boxWithId(id = "box_TAXO_DONE", actionButton("btn_TAXO_DONE", "continue")))
+
       )
 
 
