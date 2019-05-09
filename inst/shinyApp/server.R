@@ -207,7 +207,7 @@ function(input, output, session) {
       data("protected_areas")
       for (radius in 2:50) {
         protected_areas_bbox <- sf::st_crop(protected_areas, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
-        if(nrow(protected_areas_bbox)>1) break
+        if(nrow(protected_areas_bbox)>0) break
       }
 
       data("rast_mayaux")
@@ -216,6 +216,13 @@ function(input, output, session) {
       raster::values(rast_mayaux_crop)[which(raster::values(rast_mayaux_crop)<threshold_land_cov)] <- NA
 
       data("mineral_deposit")
+      for (radius in 2:50) {
+        mineral_deposit_crop_bbox <-
+          sf::st_crop(mineral_deposit, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
+        if(nrow(mineral_deposit_crop_bbox)>0) break
+      }
+
+
 
       protected_areas_bbox_sp <- as(protected_areas_bbox, 'Spatial')
 
@@ -285,7 +292,7 @@ function(input, output, session) {
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
               mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
-              mapview::mapview(mineral_deposit, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
+              mapview::mapview(mineral_deposit_crop_bbox, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
 
           }else{
             mapview::mapview(dataset_circle_select, map.types = map_types,
@@ -295,9 +302,7 @@ function(input, output, session) {
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
               mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
-              mapview::mapview(mineral_deposit, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
-
-
+              mapview::mapview(mineral_deposit_crop_bbox, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
 
           }
 
