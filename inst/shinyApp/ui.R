@@ -129,7 +129,8 @@ dashboardPage(
         hidden(boxWithId(
           id = "eval_species_res", title = "Parameters values", width = 12,
           htmlOutput("title_eval"),
-          verbatimTextOutput("results_conr")
+          verbatimTextOutput("results_conr"),
+          dataTableOutput("table_occupied_pa")
         )),
         textOutput("summary3"),
 

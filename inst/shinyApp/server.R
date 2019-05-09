@@ -215,8 +215,17 @@ function(input, output, session) {
       rast_mayaux_crop <- raster::crop(rast_mayaux, raster::extent(dataset_sf)+1)
       raster::values(rast_mayaux_crop)[which(raster::values(rast_mayaux_crop)<threshold_land_cov)] <- NA
 
+      data("mineral_deposit")
 
       protected_areas_bbox_sp <- as(protected_areas_bbox, 'Spatial')
+
+      table_occupied_pa <-
+        sf::st_intersection(protected_areas_bbox, dataset_sf) %>%
+        sf::st_set_geometry(NULL) %>%
+        dplyr::select(ORIG_NAME, DESIG, IUCN_CAT, INT_CRIT, ISO3)
+
+      output$table_occupied_pa <- renderDataTable(table_occupied_pa %>% distinct())
+
       # protected_areas_bbox_sp <- as(protected_areas, 'Spatial')
 
       conr_results <- ConR::IUCN.eval(DATA = data_select,
@@ -248,14 +257,17 @@ function(input, output, session) {
       })
 
       output$results_conr <- renderText({
-        paste("Extent of Occurrences (km2)", conr_results$EOO,
+        paste("Number of unique occurrences (unique georeferences)", conr_results$Nbe_unique_occ.,
+              "Extent of Occurrences (km2)", conr_results$EOO,
               "Area of Occupancy (km2)", aoo[[1]],
               "Number of locations", locations[[2]],
               "Number of locations as protected areas", conr_results$Nbe_loc_PA,
               "Number of sub-populations", conr_results$Nbe_subPop,
+              "Number of occurrences within protected areas", nrow(table_occupied_pa),
               "Ratio of occurrences within protected areas", conr_results$Ratio_occ_within_PA,
               "Preliminary IUCN category based on Criterion B", conr_results$Category_CriteriaB,
-              "IUCN code", conr_results$Category_code ,sep = "\n")
+              "IUCN code", conr_results$Category_code ,
+              sep = "\n")
 
       })
 
@@ -272,7 +284,8 @@ function(input, output, session) {
               mapview::mapview(locations_poly, col.regions = "pink", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
-              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
+              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
+              mapview::mapview(mineral_deposit, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
 
           }else{
             mapview::mapview(dataset_circle_select, map.types = map_types,
@@ -281,7 +294,8 @@ function(input, output, session) {
               mapview::mapview(locations_poly, col.regions = "pink", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
-              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
+              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
+              mapview::mapview(mineral_deposit, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
 
 
 
