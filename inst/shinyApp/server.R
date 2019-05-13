@@ -35,19 +35,33 @@ function(input, output, session) {
       showElement("box_DATASET")
       showElement("box_FIELDS")
 
+
+      output$show_col <- renderUI({
+        checkboxGroupInput("show_vars", "Columns to show:",
+                           colnames(dataset), selected = colnames(dataset))
+      })
+
+
+      # output$summary <- renderPrint({
+      #   print(input$show_vars)
+      #   # original.dataset$df %>%
+      #   # filter(taxa==!!name_quo) %>%
+      #   #   print()
+      # })
+
       # show the content
-      output$table_DATASET <- renderDataTable(dataset)
+      output$table_DATASET <- renderDataTable(dataset[,input$show_vars, drop=FALSE])
 
       int_num_col <- names(dataset)[ sapply(dataset, class) %in% c("integer", "numeric", "double") ]
 
       # fill the selector with the column name
-      for (id in c("sel_LONG", "sel_LAT")) {
+      for (id in c("sel_LONG", "sel_LAT", "sel_ALT")) {
         updateSelectInput(session, id, choices = c("<unselected>", int_num_col))
       }
       #
       char_col <- names(dataset)[ sapply(dataset, class) %in% "character" ]
       #
-      for (id in c("sel_taxa", "sel_species_epiteth", "sel_genus", "sel_rank", "sel_lower_infra")) {
+      for (id in c("sel_taxa", "sel_species_epiteth", "sel_genus", "sel_rank", "sel_lower_infra", "sel_authors", "sel_lower_infra_authors")) {
         updateSelectInput(session, id, choices = c("<unselected>", char_col))
       }
 
@@ -92,9 +106,11 @@ function(input, output, session) {
             newData %>%
             mutate(taxa = paste0(!!rlang::sym(input$sel_genus)," " ,
                                  !!rlang::sym(input$sel_species_epiteth),
-                                 ifelse(is.na(!!rlang::sym(input$sel_rank)), "", " ") ,
+                                 ifelse(!!rlang::sym(input$sel_authors)!="<unselected>", paste0(" ",!!rlang::sym(input$sel_authors), " "), ""),
+                                 ifelse(is.na(!!rlang::sym(input$sel_rank)), "", " "),
                                  ifelse(is.na(!!rlang::sym(input$sel_rank)), "", paste0(!!rlang::sym(input$sel_rank), " ")),
-                                 ifelse(is.na(!!rlang::sym(input$sel_rank)), "", !!rlang::sym(input$sel_lower_infra)) ))
+                                 ifelse(is.na(!!rlang::sym(input$sel_rank)), "", !!rlang::sym(input$sel_lower_infra)) ,
+                                 ifelse(!is.na(!!rlang::sym(input$sel_lower_infra_authors)), paste0(" ",!!rlang::sym(input$sel_lower_infra_authors)), "")))
         }else{
           newData <-
             newData %>%
@@ -111,7 +127,6 @@ function(input, output, session) {
 
       original.dataset.accuracy$df <-
         circles_accuracy_sf(xy = newData, col_x = input$sel_LONG, col_y = input$sel_LAT)
-
 
       list.names$df <- newData %>%
         dplyr::distinct(taxa) %>%
@@ -139,12 +154,19 @@ function(input, output, session) {
     Name <-list.names$df[as.numeric(input$name_chosen)]
     name_quo <- dplyr::enquo(Name)
 
-    output$summary2 <- renderPrint({
-      print(Name)
-        # original.dataset$df %>%
-        # filter(taxa==!!name_quo) %>%
-        #   print()
-    })
+    # output$summary2 <- renderPrint({
+    #   print(Name)
+    #
+    #   alt_select <-
+    #     dataset_select %>%
+    #     dplyr::select(!!rlang::sym(input$sel_ALT)) %>%
+    #     dplyr::filter(!!rlang::sym(input$sel_ALT)>0) %>%
+    #     pull()
+    #   print(alt_select)
+    #     # original.dataset$df %>%
+    #     # filter(taxa==!!name_quo) %>%
+    #     #   print()
+    # })
 
     dataset_select <-
       original.dataset$df %>%
@@ -163,8 +185,20 @@ function(input, output, session) {
       filter(taxa==!!name_quo)
 
     output$nbe_occ <- renderText({
-   paste("Number of occurrences", nrow(dataset_select),
-         "Number of georeferenced occurrences", nrow(dataset_select_coord), sep = "\n")
+      if(input$sel_ALT!="<unselected>") {
+        alt_range <-
+          dataset_select %>%
+          dplyr::select(!!rlang::sym(input$sel_ALT)) %>%
+          dplyr::filter(!!rlang::sym(input$sel_ALT)>0) %>%
+          pull()
+      }
+
+   paste(paste("Number of occurrences", nrow(dataset_select)),
+         paste("Number of georeferenced occurrences", nrow(dataset_select_coord)),
+         ifelse(input$sel_ALT!="<unselected>", paste("Altitude range",
+                                                     ifelse(length(alt_range)>0,
+                                                            paste(range(alt_range), collapse = "-"), NA)), ""),
+         sep = "\n")
 
     })
 
@@ -177,6 +211,31 @@ function(input, output, session) {
                        col.regions = "red", alpha.regions = 0.1, legend =FALSE, viewer.suppress=T) +
         mapview::mapview(dataset_sf, col.regions = "red", map.types = map_types, legend =FALSE, viewer.suppress=T)
     })
+
+
+    output$plot_alt <- renderPlot({
+      if(input$sel_ALT!="<unselected>") {
+        alt_select <-
+          dataset_select %>%
+          dplyr::select(!!rlang::sym(input$sel_ALT), taxa) %>%
+          dplyr::filter(!!rlang::sym(input$sel_ALT)>0)
+
+        alt_range <-
+          alt_select %>%
+          dplyr::select(!!rlang::sym(input$sel_ALT)) %>%
+          pull()
+
+        ggplot2::ggplot(alt_select, mapping = ggplot2::aes(factor(taxa), !!rlang::sym(input$sel_ALT))) +
+          ggplot2::geom_violin(trim = TRUE)+
+          ggplot2::geom_jitter(height = 0, width = 0.05) +
+          ggplot2::ylim(range(alt_range)[1]-100, range(alt_range)[2]+100) +
+          ggplot2::labs(x = "", y="Altitude (m)")+
+          ggplot2::theme(axis.text=ggplot2::element_text(size=12),
+                axis.title=ggplot2::element_text(size=14,face="bold"))
+
+      }
+    })
+
 
   })
 
@@ -291,7 +350,7 @@ function(input, output, session) {
               mapview::mapview(locations_poly, col.regions = "pink", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
-              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
+              mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = 0.5, map.types = map_types, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
               mapview::mapview(mineral_deposit_crop_bbox, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
 
           }else{

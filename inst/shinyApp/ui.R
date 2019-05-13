@@ -1,5 +1,20 @@
 dashboardPage(
-  dashboardHeader(title = "Preliminary IUCN evaluation and mapping"),
+  dashboardHeader(title = "Preliminary Conservation Assessments following IUCN criteria",
+                  titleWidth=845,
+                  tags$li(class = "dropdown",
+                          tags$a(href="https://en.ird.fr/", target="_blank",
+                                 tags$img(height = "20px",
+                                          src="https://en.ird.fr/themes/custom/ird_theme/logo.png")
+                          ),
+                          tags$a(href="http://www.missouribotanicalgarden.org/", target="_blank",
+                                 tags$img(height = "20px",
+                                          src="http://www.missouribotanicalgarden.org/Portals/0/Images/logo.gif?ver=2011-10-24-173805-843")
+                          ),
+                          tags$a(href="https://www.plantentuinmeise.be/", target="_blank",
+                                 tags$img(height = "20px",
+                                          src="https://www.plantentuinmeise.be/images/cc/logo_en.svg")
+                          )
+                          )),
   dashboardSidebar(
     sidebarMenu(
       id = "menu1",
@@ -45,19 +60,17 @@ dashboardPage(
             selectInput("sel_taxa", "Taxa", choices = NULL),
             selectInput("sel_genus", "Genus", choices = NULL),
             selectInput("sel_species_epiteth", "Species epiteth", choices = NULL),
+            selectInput("sel_authors", "Authors", choices = NULL),
             selectInput("sel_rank", "Rank infra-specific level", choices = NULL),
             selectInput("sel_lower_infra", "Name infra-specific level", choices = NULL),
+            selectInput("sel_lower_infra_authors", "Authors infra-specific level", choices = NULL),
             hr(),
 
             hr(),
-            strong("Coordinates column selection"),
-            selectInput("sel_LONG", "Longitude", choices = NULL),
-            selectInput("sel_LAT", "Latitude", choices = NULL),
-            # hidden(div("Impossible combination", id = "msg_h", style = "color:red;")),
-
-            # plot id
-            # hr(),
-            # selectInput("sel_PLOT", "Plot name", choices = NULL),
+            strong("Coordinates and altitude column selection"),
+            selectInput("sel_LONG", "Longitude (decimal degrees)", choices = NULL),
+            selectInput("sel_LAT", "Latitude (decimal degrees)", choices = NULL),
+            selectInput("sel_ALT", "Altitude (m)", choices = NULL),
 
             # action button to continue
             hr(),
@@ -66,7 +79,8 @@ dashboardPage(
 
           hidden(boxWithId(
             id = "box_DATASET", title = "Dataset file preview content", width = 12,
-            dataTableOutput("table_DATASET")
+            dataTableOutput("table_DATASET"),
+            uiOutput("show_col")
           ))
         ),
         textOutput("summary")
@@ -91,7 +105,12 @@ dashboardPage(
 
         boxWithId(id = "box_SELECT_TAX", actionButton("btn_SELECT_TAX", "EVALUATION")),
 
-        mapview::mapviewOutput(outputId="map")
+        mapview::mapviewOutput(outputId="map"),
+
+        hr(),
+
+        hr(),
+        plotOutput("plot_alt", width = "20%")
 
 
         # ,
