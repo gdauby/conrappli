@@ -5,6 +5,8 @@ function(input, output, session) {
     stopApp()
   })
 
+  options(shiny.maxRequestSize=30*1024^2)
+
   observe({
     # hide few menu at the begining
     hideMenuItem("tab_TAXO")
@@ -212,6 +214,7 @@ function(input, output, session) {
         mapview::mapview(dataset_sf, col.regions = "red", map.types = map_types, legend =FALSE, viewer.suppress=T)
     })
 
+    if(input$sel_ALT!="<unselected>") showElement("plot_alt")
 
     output$plot_alt <- renderPlot({
       if(input$sel_ALT!="<unselected>") {

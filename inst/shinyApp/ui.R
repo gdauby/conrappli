@@ -110,7 +110,7 @@ dashboardPage(
         hr(),
 
         hr(),
-        plotOutput("plot_alt", width = "20%")
+        hidden(plotOutput("plot_alt", width = "20%"))
 
 
         # ,
