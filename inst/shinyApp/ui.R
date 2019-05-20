@@ -22,7 +22,11 @@ dashboardPage(
       ,
       menuItem("Mapping", tabName = "tab_MAP")
       ,
-      menuItem("Evaluation", tabName = "tab_EVAL")
+      menuItem("Evaluation - Criterion B", tabName = "tab_EVAL")
+      ,
+      menuItem("Evaluation - Criterion A", tabName = "tab_EVAL2")
+      ,
+      menuItem("Summary report", tabName = "tab_SUMMARY")
       # ,
       # menuItem("Height-diameter model", tabName = "tab_HEIGHT"),
       # menuItem("AGB calculation", tabName = "tab_AGB")
@@ -71,7 +75,8 @@ dashboardPage(
             selectInput("sel_LONG", "Longitude (decimal degrees)", choices = NULL),
             selectInput("sel_LAT", "Latitude (decimal degrees)", choices = NULL),
             selectInput("sel_ALT", "Altitude (m)", choices = NULL),
-
+            hr(),
+            selectInput("sel_YEAR", "Collection year", choices = NULL),
             # action button to continue
             hr(),
             actionButton("btn_DATASET_LOADED", "Continue", color = "#0040FF")
@@ -110,7 +115,13 @@ dashboardPage(
         hr(),
 
         hr(),
-        hidden(plotOutput("plot_alt", width = "20%"))
+        hidden(plotOutput("plot_alt", width = "50%")),
+        hr(),
+        hidden(boxWithId(
+          id = "box_DATASET_SPECIES", title = "Species dataset file preview content", width = 12,
+          dataTableOutput("table_DATASET_SPECIES"),
+          uiOutput("show_col_species")
+        ))
 
 
         # ,
@@ -121,19 +132,43 @@ dashboardPage(
         #   verbatimTextOutput("out_wd_error")
         # )),
         # hidden(boxWithId(id = "box_TAXO_DONE", actionButton("btn_TAXO_DONE", "continue")))
-      )
-       ,
+      ),
 
-      # Evaluation ----------------------------------------------------------------
+      # Evaluation Criterion B ----------------------------------------------------------------
       tabItem(
         "tab_EVAL",
         box(
-          title = "Evaluate preliminary status", width = 12,
+          title = "Evaluate preliminary status", width = 8,
           sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 4, round=TRUE, step=1),
-          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
+          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
+          sliderInput(inputId = "sub_pop_resol", label = "Resolution of sub-population (circular buffer method)", min=1, max=200, value = 10, round=TRUE, step=1),
           sliderInput(inputId = "threshold_mayaux", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
-          actionButton("eval_species", "Compute and map evaluation")
+          shinyWidgets::actionBttn(
+            inputId = "info_mayaux",
+            label = "Info on this threshold?",
+            color = "primary",
+            style = "bordered"
+          ),
+
+          sliderInput(inputId = "deforest",
+                      label = "Threshold of the proportion of forest cover loss between 2000 and 2018",
+                      min=0, max=1, value = 0.5, round=FALSE, step=0.1),
+
+          shinyWidgets::actionBttn(
+            inputId = "info_deforest",
+            label = "Info on this threshold?",
+            color = "primary",
+            style = "bordered"
+          ),
+
+          shinyWidgets::actionBttn(
+            inputId = "eval_species",
+            label = "Compute evaluation and map",
+            color = "royal",
+            style = "simple"
+          )
+          # actionButton("eval_species", "Compute and map evaluation")
         )
         ,
         hidden(boxWithId(
@@ -144,8 +179,65 @@ dashboardPage(
         )),
         textOutput("summary3"),
 
-        mapview::mapviewOutput(outputId="map2")
+        mapview::mapviewOutput(outputId="map2"),
 
+        uiOutput("evaluation_CA")
+
+      ),
+
+
+      # Evaluation Criterion A ----------------------------------------------------------------
+      tabItem(
+        "tab_EVAL2",
+        box(
+          title = "Evaluate preliminary status following Criterion A", width = 8,
+          sliderInput(inputId = "threshold_mayaux_CA", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
+          shinyWidgets::actionBttn(
+            inputId = "info_mayaux",
+            label = "Info on this threshold?",
+            color = "primary",
+            style = "bordered"
+          ),
+
+          sliderInput(inputId = "deforest_CA",
+                      label = "Threshold of the proportion of forest cover loss between 2000 and 2018",
+                      min=0, max=1, value = 0.5, round=FALSE, step=0.1),
+
+          shinyWidgets::actionBttn(
+            inputId = "info_deforest",
+            label = "Info on this threshold?",
+            color = "primary",
+            style = "bordered"
+          ),
+
+          shinyWidgets::actionBttn(
+            inputId = "eval_species_CA",
+            label = "Compute evaluation and map",
+            color = "royal",
+            style = "simple"
+          )
+          # actionButton("eval_species", "Compute and map evaluation")
+        )
+        ,
+        hidden(boxWithId(
+          id = "eval_species_res_CA", title = "Parameters values", width = 12,
+          htmlOutput("title_eval_CA"),
+          verbatimTextOutput("results_CA")
+        )),
+        textOutput("summary3_CA"),
+
+        mapview::mapviewOutput(outputId="map_CA"),
+
+        uiOutput("see_report")
+
+      ),
+
+      # Summary report ----------------------------------------------------------------
+      tabItem(
+        "tab_SUMMARY",
+        boxWithId(
+          id = "box_Report", downloadButton("species_report", label = "Report")
+        )
       )
 
 
