@@ -150,6 +150,11 @@ function(input, output, session) {
                                  ifelse(is.na(!!rlang::sym(input$sel_lower_infra_authors)), "",
                                         !!rlang::sym(input$sel_lower_infra_authors))))
           }
+      }else{
+        newData <-
+          newData %>%
+          mutate(taxa = input$sel_taxa)
+
       }
 
 
@@ -165,7 +170,7 @@ function(input, output, session) {
       output$list_taxa = renderUI( {
 
         id.names <- as.list(seq(1, length(list.names$df), 1))
-        names(id.names) <- enc2utf8(list.names$df)
+        names(id.names) <- enc2utf8(as.character(list.names$df))
 
         # Encoding(names(id.names)) <-  "UTF-8"
 
