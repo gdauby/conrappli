@@ -203,3 +203,257 @@ circles_accuracy_sf <- function(xy, col_x, col_y) {
 
   return(xy_circles)
 }
+
+
+# data <-
+#   dataset %>%
+#   dplyr::select(LAT_DD, LONG_DD, taxa) %>%
+#   filter(taxa=="Bikinia congensis")
+# #
+# #
+# dataset_sf <-
+#   sf::st_as_sf(data %>%
+#                  filter(!is.na(LONG_DD), !is.na(LAT_DD)),
+#                coords = c("LONG_DD", "LAT_DD"), crs = 4326)
+#
+#
+# data("rast_mayaux")
+# threshold_land_cov <- 0.5
+# rast_mayaux_crop <- raster::crop(rast_mayaux, raster::extent(dataset_sf)+1)
+# raster::values(rast_mayaux_crop)[which(raster::values(rast_mayaux_crop)<threshold_land_cov)] <- NA
+#
+# data("hansen_deforestation_aggreg")
+# threshold_deforest <- 0.5
+# hansen_deforestation_aggreg_crop <- raster::crop(hansen_deforestation_aggreg, raster::extent(dataset_sf)+1)
+# raster::values(hansen_deforestation_aggreg_crop)[which(raster::values(hansen_deforestation_aggreg_crop)<threshold_deforest)] <- NA
+# if(all(is.na(raster::values(hansen_deforestation_aggreg_crop)))) raster::values(hansen_deforestation_aggreg_crop) <- 0
+#
+# data("protected_areas")
+# for (radius in 2:50) {
+#   protected_areas_bbox <- sf::st_crop(protected_areas, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
+#   if(nrow(protected_areas_bbox)>0) break
+# }
+#
+# rasters <- c(rast_mayaux_crop, hansen_deforestation_aggreg_crop)
+#
+# thresholds_rasters <- c(0.5, 0.5)
+# col_coordinates = c("LONG_DD", "LAT_DD")
+
+IUCN_eval_CA <- function(data,
+                         rasters = NULL,
+                         mineral = NULL,
+                         protected_areas = NULL,
+                         thresholds_rasters  = NULL,
+                         col_coordinates = c("ddlon", "ddlat"),
+                         col_tax= "taxa",
+                         cells_size_aoo = 2,
+                         export_shp_eoo = FALSE) {
+  data <-
+    data %>%
+    tibble::add_column(ID=1:nrow(data))
+
+  extract.rasts.hum.impacted <- list()
+  for (i in 1:length(rasters)) {
+    extract.rasts.hum.impacted[[i]] <-
+      raster::extract(rasters[[i]],
+                      dplyr::select(data,
+                                    !!rlang::sym(col_coordinates[1]),
+                                    !!rlang::sym(col_coordinates[2])) %>%
+                        tidyr::drop_na())
+  }
+
+  sp.foc.sf<-
+    sf::st_as_sf(dplyr::select(data, !!rlang::sym(col_coordinates[1]),
+                               !!rlang::sym(col_coordinates[2])) %>%
+               tidyr::drop_na(), coords = c(col_coordinates[1], col_coordinates[2]),
+             crs = 4326)
+
+  # plot(sp.foc.sf$geometry, col="blue", pch=19)
+  # plot(africa$geometry, add=T)
+  # plot(Mineral_deposit$geometry, add=T, col="red", fill="red")
+
+  ids_impacted <- list()
+
+  if(!is.null(mineral))
+    suppressMessages(suppressWarnings(ids_impacted[[length(ids_impacted)+1]] <-
+                                        sf::st_intersection(sp.foc.sf, mineral)$ID))
+
+  if(!is.null(protected_areas)) {
+    suppressMessages(suppressWarnings(Intersect_protected_areas <-
+                                        sf::st_intersection(sp.foc.sf, protected_areas)))
+    ### ID of all points within protected areas
+    ID.occ.protected.areas <- Intersect_protected_areas$ID
+  }
+
+  # plot(Intersect$geometry, col="green", pch=19, add=T)
+
+  ### ID of all points impacted
+  for (i in 1:length(extract.rasts.hum.impacted))
+    ids_impacted[[length(ids_impacted)+1]] <-
+    data$ID[which(extract.rasts.hum.impacted[[i]]>thresholds_rasters[i])]
+
+  ids_impacted <- data$ID[unique(do.call(c, ids_impacted))]
+
+  # ID.occ.impacted <- unique(c(data$ID[which(extract.rasts.hum.impacted[[1]]>0.5)], Intersect$ID))
+
+  # ID.occ.impacted  <-
+  #   ID.occ.impacted[!ID.occ.impacted %in% ID.occ.protected.areas]
+
+  ### AOO REDUCTION
+  full_aoo <-
+    ConR::AOO.computing(XY = data %>%
+                        dplyr::select(!!rlang::sym(col_coordinates[2]),
+                                         !!rlang::sym(col_coordinates[1]),
+                                      !!rlang::sym(col_tax)) %>%
+                        tidyr::drop_na(),
+                      Cell_size_AOO = cells_size_aoo)
+
+  # AOO.all <- .AOO.estimation(coordEAC=sp.foc.sf, Cell_size_AOO = 2, nbe.rep.rast.AOO = NULL)[1]
+
+  if(length(ids_impacted)>0) {
+
+    left_aoo <-
+      ConR::AOO.computing(XY = data %>%
+                            dplyr::select(!!rlang::sym(col_coordinates[2]),
+                                          !!rlang::sym(col_coordinates[1]),
+                                          !!rlang::sym(col_tax),
+                                          ID) %>%
+                            dplyr::filter(!ID %in% ids_impacted) %>%
+                            tidyr::drop_na(),
+                          Cell_size_AOO = cells_size_aoo)
+
+  }else{
+    left_aoo <- full_aoo
+  }
+
+
+  ### EOO REDUCTION
+  full_eoo <-
+    ConR::EOO.computing(XY = data %>%
+                          dplyr::select(!!rlang::sym(col_coordinates[2]),
+                                        !!rlang::sym(col_coordinates[1]),
+                                        !!rlang::sym(col_tax)) %>%
+                          tidyr::drop_na(),
+                        export_shp = export_shp_eoo)
+  if(export_shp_eoo & all(!is.na(full_eoo))) {
+    full_eoo_shp <- full_eoo[[2]]
+    full_eoo <- full_eoo[[1]]
+  }
+
+  if(length(ids_impacted)>0) {
+
+    left_eoo <-
+      ConR::EOO.computing(XY = data %>%
+                            dplyr::select(!!rlang::sym(col_coordinates[2]),
+                                          !!rlang::sym(col_coordinates[1]),
+                                          !!rlang::sym(col_tax),
+                                          ID) %>%
+                            dplyr::filter(!ID %in% ids_impacted) %>%
+                            tidyr::drop_na(),
+                          export_shp = export_shp_eoo)
+
+    if(export_shp_eoo & all(!is.na(left_eoo))) {
+      left_eoo_shp <- left_eoo[[2]]
+      left_eoo <- left_eoo[[1]]
+    }
+
+  }else{
+    left_eoo <- full_eoo
+    left_eoo_shp <- NA
+  }
+
+  res_table <-
+    tibble(taxa =
+             data %>%
+             dplyr::select(!!rlang::sym(col_tax)) %>%
+             dplyr::distinct() %>%
+             dplyr::pull(),
+           nbe_occ =
+             data %>%
+             dplyr::select(!!rlang::sym(col_coordinates[2]),
+                           !!rlang::sym(col_coordinates[1])) %>%
+             dplyr::distinct() %>%
+             nrow(),
+           nbe_occ_human_impacted =
+             length(ids_impacted),
+           AOO_full = full_aoo,
+           AOO_left = left_aoo,
+           EOO_full = full_eoo,
+           EOO_left = left_eoo,
+           nbe_occ_protected_area =
+             ifelse(!is.null(protected_areas), length(ID.occ.protected.areas), NA)
+           )
+
+  if(export_shp_eoo & !is.na(res_table$EOO_full))
+    return(list(results = res_table, shapefiles = list(full_eoo_shp = full_eoo_shp, left_eoo_shp = left_eoo_shp)))
+  if(!export_shp_eoo | is.na(res_table$EOO_full))
+    return(list(results = res_table))
+
+}
+
+cat_criterion_A <- function(x,...) {
+  cat <- NA
+  if(x>=80) cat <- "CR"
+  if(x<80 & x>=50) cat <- "EN"
+  if(x<50 & x>=30) cat <- "VU"
+  if(x<30) cat <- "LC or NT"
+  return(cat)
+}
+
+
+# criterionA_reduction <-
+#   IUCN_eval_CA(data = data, rasters =
+#                  c(rast_mayaux_crop, hansen_deforestation_aggreg_crop),
+#                mineral = NULL,
+#                protected_areas = protected_areas_bbox,
+#                thresholds_rasters =
+#                  c(0.5, 0.5),
+#                col_coordinates = c("LONG_DD", "LAT_DD"),
+#                col_tax = "taxa",
+#                cells_size_aoo = 2,
+#                export_shp_eoo = TRUE)
+# #
+# criterionA_reduction_results <-
+#   criterionA_reduction$results
+# #
+# criterionA_reduction_results <-
+#   criterionA_reduction_results %>%
+#   mutate(AOO_decline=(AOO_full-AOO_left)/AOO_full*100) %>%
+#   mutate(EOO_decline=(EOO_full-EOO_left)/EOO_full*100)
+# #
+# #
+# criterionA_reduction_results <-
+#   criterionA_reduction_results %>%
+#   tibble::add_column(category_code_ca_aoo = plyr::aaply(criterionA_reduction_results$AOO_decline, 1, cat_criterion_A)) %>%
+#   tibble::add_column(category_code_ca_eoo = plyr::aaply(criterionA_reduction_results$EOO_decline, 1, cat_criterion_A)) %>%
+#   View()
+
+# library(raster)
+# all_files_hansen <- list.files(path = "D:/SIG/globalforestwatch/", full.names = TRUE)
+# raster_list <- list()
+# for (i in 1:length(all_files_hansen)) raster_list[[i]] <- raster(all_files_hansen[i])
+# # raster_brick <- brick(raster_list)
+#
+# # levelplot(raster_list[[1]])
+#
+# aggreg_rast <- list()
+# for (i in 1:length(raster_list)) {
+#   prop_deforest <- aggregate(raster_list[[i]], fact=400, fun=function(vals, na.rm) {
+#     sum(vals>0, na.rm=na.rm)/length(vals)
+#   })
+#   aggreg_rast[[i]] <- prop_deforest
+# }
+#
+# merge_rast <- do.call(raster::merge, aggreg_rast)
+#
+#
+# merge_rast <- calc(merge_rast, fun = function(x) ifelse(x<0.0001, NA, x))
+#
+# writeRaster(merge_rast, "hansen_aggregated.tif")
+# raster("hansen_aggregated.tif")
+
+
+# hansen_deforestation_aggreg <- raster("hansen_aggregated.tif")
+
+
+
