@@ -153,7 +153,7 @@ function(input, output, session) {
       }else{
         newData <-
           newData %>%
-          mutate(taxa = input$sel_taxa)
+          mutate(taxa = !!rlang::sym(input$sel_taxa))
 
       }
 
