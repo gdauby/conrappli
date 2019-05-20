@@ -565,7 +565,11 @@ function(input, output, session) {
 
     if(length(criterionA_reduction)>1) {
       eoo_poly_full <- sf::st_as_sf(criterionA_reduction$shapefiles$full_eoo_shp)
-      eoo_poly_left <- sf::st_as_sf(criterionA_reduction$shapefiles$left_eoo_shp)
+      if(!is.na(criterionA_reduction$shapefiles$left_eoo_shp)) {
+        eoo_poly_left <- sf::st_as_sf(criterionA_reduction$shapefiles$left_eoo_shp)
+      }else{
+        eoo_poly_left <- eoo_poly_full
+      }
     }
 
       criterionA_reduction_results <-
