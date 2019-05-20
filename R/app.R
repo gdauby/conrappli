@@ -38,3 +38,11 @@ app <- function() {
 #' @format sf object
 #'
 "mineral_deposit"
+
+#' Deforestation estimates for Central Africa
+#'
+#' Raster of 0.1 decimal degrees resolution indicating proportion of cells 25m from Hansen where deforestation occur since 2001
+#'
+#' @format raster object
+#'
+"hansen_deforestation_aggreg"
