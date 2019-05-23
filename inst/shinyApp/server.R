@@ -60,9 +60,9 @@ function(input, output, session) {
       # })
 
       # show the content
-      output$table_DATASET <- renderDataTable(dataset[,input$show_vars, drop=FALSE])
+      output$table_DATASET <- renderDataTable(dataset[,input$show_vars]) # , drop=FALSE
 
-      int_num_col <- names(dataset)[ sapply(dataset, class) %in% c("integer", "numeric", "double") ]
+      int_num_col <- names(dataset)[ sapply(dataset, class) %in% c("integer", "numeric", "double")]
 
       # fill the selector with the column name
       for (id in c("sel_LONG", "sel_LAT", "sel_ALT", "sel_YEAR")) {
@@ -327,7 +327,7 @@ function(input, output, session) {
 
     # show the content
     output$table_DATASET_SPECIES <-
-      renderDataTable(dataset_select[,input$show_vars_species, drop=FALSE])
+      renderDataTable(dataset_select[,input$show_vars_species]) # , drop=FALSE
 
 
   })
@@ -427,7 +427,9 @@ function(input, output, session) {
           ConR::locations.comp(XY = data_select, nbe_rep = input$repeat_pos_aoo)
 
         aoo <-
-          ConR::AOO.computing(XY = data_select, export_shp = T, nbe.rep.rast.AOO = input$repeat_pos_aoo)
+          ConR::AOO.computing(XY = data_select,
+                              export_shp = T,
+                              nbe.rep.rast.AOO = input$repeat_pos_aoo, Cell_size_AOO = input$aoo_km_res)
 
 
         subpop <-
@@ -657,6 +659,13 @@ function(input, output, session) {
         }
       })
 
+      # output$summary_CA <- renderPrint({
+      #   print(input$aoo_km_res)
+      #   print(criterionA_reduction_results)
+      #
+      #
+      # })
+
 
 
       output$see_report <- renderUI({
@@ -668,12 +677,6 @@ function(input, output, session) {
 
     })
     })
-
-
-
-
-
-
 
 
   observeEvent(input$info_mayaux, {

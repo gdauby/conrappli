@@ -139,7 +139,7 @@ dashboardPage(
         "tab_EVAL",
         box(
           title = "Evaluate preliminary status", width = 8,
-          sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 4, round=TRUE, step=1),
+          sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 2, round=TRUE, step=1),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
           numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
           sliderInput(inputId = "sub_pop_resol", label = "Resolution of sub-population (circular buffer method)", min=1, max=200, value = 10, round=TRUE, step=1),
@@ -227,6 +227,7 @@ dashboardPage(
         textOutput("summary3_CA"),
 
         mapview::mapviewOutput(outputId="map_CA"),
+        textOutput("summary_CA"),
 
         uiOutput("see_report")
 
