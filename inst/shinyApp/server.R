@@ -23,8 +23,10 @@ function(input, output, session) {
   raster_hansen_cropped <- reactiveValues(df = NULL)
   mineral_cropped <- reactiveValues(df = NULL)
   protected_areas_cropped <- reactiveValues(df = NULL)
+  logging_concessions_CA_cropped <- reactiveValues(df = NULL)
   alpha_raster_deforest <- reactiveValues(df = NULL)
   alpha_raster_mayaux <- reactiveValues(df = NULL)
+
 
   # load dataset ------------------------------------------------------------
 
@@ -368,6 +370,15 @@ function(input, output, session) {
         }
         protected_areas_cropped$df <- protected_areas_bbox
 
+
+        data("logging_concessions_CA")
+        logging_concessions_CA <- sf::st_transform(logging_concessions_CA, sf::st_crs(dataset_sf))
+        for (radius in 2:50) {
+          logging_concessions_CA_bbox <- sf::st_crop(logging_concessions_CA, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
+          if(nrow(logging_concessions_CA_bbox)>0) break
+        }
+        logging_concessions_CA_cropped$df <- logging_concessions_CA_bbox
+
         data("rast_mayaux")
         threshold_land_cov <- input$threshold_mayaux
         rast_mayaux_crop <- raster::crop(rast_mayaux, raster::extent(dataset_sf)+1)
@@ -486,6 +497,7 @@ function(input, output, session) {
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(subpop_poly, col.regions = "green", lwd =3, alpha.regions = 0.05, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
+              mapview::mapview(logging_concessions_CA_bbox, col.regions = "blueviolet", lwd=2, alpha.regions = 0.2, map.types = map_types, legend = TRUE, layer.name = "Logging concessions", viewer.suppress=T) +
               mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = alpha_raster_mayaux$df, map.types = map_types, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
               mapview::mapview(hansen_deforestation_aggreg_crop, col.regions = "purple", alpha.regions = alpha_raster_deforest$df, map.types = map_types, legend =FALSE, layer.name = "proportion of forest cover loss", viewer.suppress=T)  +
               mapview::mapview(mineral_deposit_crop_bbox, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
@@ -500,6 +512,7 @@ function(input, output, session) {
               mapview::mapview(aoo_poly, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(subpop_poly, col.regions = "green", lwd =3, alpha.regions = 0.05, map.types = map_types, legend =FALSE, viewer.suppress=T) +
               mapview::mapview(protected_areas_bbox, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
+              mapview::mapview(logging_concessions_CA_bbox, col.regions = "blueviolet", lwd=2, alpha.regions = 0.2, map.types = map_types, legend = TRUE, layer.name = "Logging concessions", viewer.suppress=T) +
               mapview::mapview(rast_mayaux_crop, col.regions = "red", alpha.regions = alpha_raster_mayaux$df, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
               mapview::mapview(hansen_deforestation_aggreg_crop, col.regions = "purple", alpha.regions = alpha_raster_deforest$df, map.types = map_types, legend =FALSE, layer.name = "proportion of forest cover loss", viewer.suppress=T)  +
               mapview::mapview(mineral_deposit_crop_bbox, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T) # pal(100), at = seq(0, 1, 0.1)
@@ -520,7 +533,7 @@ function(input, output, session) {
       output$evaluation_CA <- renderUI({
         shinyWidgets::actionBttn(
           inputId = "go_evaluation_CA",
-          label = "Evaluation criterion A",
+          label = "Evaluation of population/habitat decline",
           color = "royal",
           style = "jelly"
         )
@@ -643,6 +656,7 @@ function(input, output, session) {
             mapview::mapview(eoo_poly_full, col.regions = "blue", alpha.regions = 0.05, map.types = map_types, legend =FALSE, viewer.suppress=T) +
             mapview::mapview(eoo_poly_left, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
             mapview::mapview(protected_areas_cropped$df, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
+            mapview::mapview(logging_concessions_CA_cropped$df, col.regions = "blueviolet", lwd=2, alpha.regions = 0.2, map.types = map_types, legend = TRUE, layer.name = "Logging concessions", viewer.suppress=T) +
             mapview::mapview(raster_mayaux_cropped$df, col.regions = "red", alpha.regions = alpha_raster_mayaux$df, map.types = map_types, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
             mapview::mapview(raster_hansen_cropped$df, col.regions = "purple", alpha.regions = alpha_raster_deforest$df, map.types = map_types, legend =FALSE, layer.name = "proportion of forest cover loss", viewer.suppress=T)  +
             mapview::mapview(mineral_cropped$df, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
@@ -652,6 +666,7 @@ function(input, output, session) {
                            col.regions = "red", alpha.regions = 0.1, legend =FALSE, viewer.suppress=T) +
             mapview::mapview(dataset_sf, col.regions = "red", map.types = map_types, legend =FALSE, viewer.suppress=T) +
             mapview::mapview(protected_areas_cropped$df, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
+            mapview::mapview(logging_concessions_CA_cropped$df, col.regions = "blueviolet", lwd=2, alpha.regions = 0.2, map.types = map_types, legend = TRUE, layer.name = "Logging concessions", viewer.suppress=T) +
             mapview::mapview(raster_mayaux_cropped$df, col.regions = "red", alpha.regions = alpha_raster_mayaux$df, map.types = map_types, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
             mapview::mapview(raster_hansen_cropped$df, col.regions = "purple", alpha.regions = alpha_raster_deforest$df, map.types = map_types, legend =FALSE, layer.name = "proportion of forest cover loss", viewer.suppress=T)  +
             mapview::mapview(mineral_cropped$df, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)

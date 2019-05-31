@@ -108,7 +108,12 @@ dashboardPage(
         )),
         textOutput("summary2"),
 
-        boxWithId(id = "box_SELECT_TAX", actionButton("btn_SELECT_TAX", "EVALUATION")),
+        boxWithId(id = "box_SELECT_TAX", shinyWidgets::actionBttn(
+          inputId = "btn_SELECT_TAX",
+          label = "EVALUATION",
+          color = "royal",
+          style = "jelly"
+        )),
 
         mapview::mapviewOutput(outputId="map"),
 
@@ -141,7 +146,7 @@ dashboardPage(
           title = "Evaluate preliminary status", width = 8,
           sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 2, round=TRUE, step=1),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
-          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 10),
+          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 100),
           sliderInput(inputId = "sub_pop_resol", label = "Resolution of sub-population (circular buffer method)", min=1, max=200, value = 10, round=TRUE, step=1),
           sliderInput(inputId = "threshold_mayaux", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
           shinyWidgets::actionBttn(
@@ -190,7 +195,7 @@ dashboardPage(
       tabItem(
         "tab_EVAL2",
         box(
-          title = "Evaluate preliminary status following Criterion A", width = 8,
+          title = "Infer habitat and population decline", width = 8,
           sliderInput(inputId = "threshold_mayaux_CA", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
           shinyWidgets::actionBttn(
             inputId = "info_mayaux",
