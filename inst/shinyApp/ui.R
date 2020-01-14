@@ -24,7 +24,7 @@ dashboardPage(
       ,
       menuItem("Evaluation - Criterion B", tabName = "tab_EVAL")
       ,
-      menuItem("Evaluation - Criterion A", tabName = "tab_EVAL2")
+      menuItem("Habitat quality/population decline", tabName = "tab_EVAL2")
       ,
       menuItem("Summary report", tabName = "tab_SUMMARY")
       # ,
@@ -84,7 +84,7 @@ dashboardPage(
 
           hidden(boxWithId(
             id = "box_DATASET", title = "Dataset file preview content", width = 12,
-            dataTableOutput("table_DATASET"),
+            DT::dataTableOutput("table_DATASET"),
             uiOutput("show_col")
           ))
         ),
@@ -124,7 +124,7 @@ dashboardPage(
         hr(),
         hidden(boxWithId(
           id = "box_DATASET_SPECIES", title = "Species dataset file preview content", width = 12,
-          dataTableOutput("table_DATASET_SPECIES"),
+          DT::dataTableOutput("table_DATASET_SPECIES"),
           uiOutput("show_col_species")
         ))
 
@@ -146,7 +146,7 @@ dashboardPage(
           title = "Evaluate preliminary status", width = 8,
           sliderInput(inputId = "aoo_km_res", label = "AOO resolution", min=0.1, max=50, value = 2, round=TRUE, step=1),
           sliderInput(inputId = "locations_km_res", label = "Locations resolution", min=0.1, max=50, value = 10, round=TRUE, step=1),
-          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 100),
+          numericInput("repeat_pos_aoo", "Number of random different position for overlaying grids", 50),
           sliderInput(inputId = "sub_pop_resol", label = "Resolution of sub-population (circular buffer method)", min=1, max=200, value = 10, round=TRUE, step=1),
           sliderInput(inputId = "threshold_mayaux", label = "Threshold of the proportion of human-impacted land cover", min=0, max=1, value = 0.5, round=FALSE, step=0.1),
           shinyWidgets::actionBttn(
@@ -180,7 +180,7 @@ dashboardPage(
           id = "eval_species_res", title = "Parameters values", width = 12,
           htmlOutput("title_eval"),
           verbatimTextOutput("results_conr"),
-          dataTableOutput("table_occupied_pa")
+          DT::dataTableOutput("table_occupied_pa")
         )),
         textOutput("summary3"),
 
@@ -241,118 +241,12 @@ dashboardPage(
       # Summary report ----------------------------------------------------------------
       tabItem(
         "tab_SUMMARY",
+
+        textOutput("summary_rep"),
         boxWithId(
           id = "box_Report", downloadButton("species_report", label = "Report")
         )
       )
-
-
-      # tabItem(
-      #   "tab_TAXO",
-      #   box(
-      #     title = "Wood density (WD) extraction", width = 12,
-      #     radioButtons(
-      #       "rad_WD", "Correct the taxonomy (mispelling) before wood density extraction?",
-      #       c(
-      #         "Correct taxonomy and extract WD" = "corr",
-      #         "Extract WD without taxonomic correction" = "WD"
-      #       )
-      #     ),
-      #     actionButton("btn_TAXO_RESULT", "Go on")
-      #   ),
-      #   hidden(boxWithId(
-      #     id = "box_RESULT_TAXO", title = "Result", width = 12,
-      #     verbatimTextOutput("out_taxo_error"),
-      #     hr(),
-      #     verbatimTextOutput("out_wd_error")
-      #   )),
-      #   hidden(boxWithId(id = "box_TAXO_DONE", actionButton("btn_TAXO_DONE", "continue")))
-      # )
-      # ,
-
-
-      # heigth ------------------------------------------------------------------
-
-
-      # tabItem(
-      #   "tab_HEIGHT",
-      #   box(
-      #     title = "HD model", width = 12,
-      #     checkboxGroupInput(
-      #       "chkgrp_HEIGHT", "Choose the HD model:",
-      #       inline = T,
-      #       c(
-      #         "Local HD model" = "HDloc",
-      #         "Feldpausch" = "feld",
-      #         "Chave" = "chave"
-      #       )
-      #     )
-      #   ),
-      #   column(
-      #     6,
-      #     ## HD model
-      #     hidden(boxWithId(
-      #       id = "box_RESULT_HDMOD", title = "Local HD model (model accuracy is estimated on all HD data)", width = 12,
-      #       tableOutput("out_tab_HD"),
-      #       radioButtons("rad_HDMOD", "Choose your HD model:", choices = "NULL")
-      #     )),
-      #
-      #     ## Map
-      #     hidden(boxWithId(
-      #       id = "box_MAP", title = "Map", width = 12,
-      #       numericInput("num_LONG", "longitude", 3.8614, min = -180, max = 180, step = 0.01),
-      #       numericInput("num_LAT", "latitude", 43.652, min = -90, max = 90, step = 0.01),
-      #       plotOutput("plot_MAP")
-      #     ))
-      #   ),
-      #
-      #   column(
-      #     6,
-      #     ## Feldpauch
-      #     hidden(boxWithId(
-      #       id = "box_RESULT_FELD", title = "Feldpausch et al. (2012)", width = 12,
-      #       textOutput("txt_feld")
-      #     )),
-      #
-      #     ## chave
-      #     hidden(boxWithId(
-      #       id = "box_result_chave", title = "Chave et al. (2014)", width = 12,
-      #       textOutput("txt_chave")
-      #     )),
-      #
-      #     ## comparison of the methods
-      #     hidden(boxWithId(
-      #       id = "box_plot_comparison", title = "Model comparison", width = 12,
-      #       plotOutput("out_plot_comp")
-      #     )),
-      #
-      #     hidden(boxWithId(
-      #       id = "box_RESULT_HDEND", title = NULL, width = 12,
-      #       actionButton("btn_HD_DONE", "continue")
-      #     ))
-      #   )
-      # ),
-
-
-      # AGB -----------------------------------------------------------------
-      # tabItem(
-      #   "tab_AGB",
-      #   fluidRow(
-      #     box(
-      #       title = "AGB estimation",
-      #       radioButtons("rad_AGB_MOD", NULL, choices = c("AGB" = "agb", "AGB + error" = "agbe"), inline = T),
-      #       actionButton("btn_AGB_DONE", "Go on")
-      #     ),
-      #     hidden(boxWithId(
-      #       id = "box_AGB_res", title = "AGB result", width = 12,
-      #       plotOutput("out_plot_AGB")
-      #     )),
-      #     hidden(boxWithId(
-      #       id = "box_AGB_Report", downloadButton("dwl_report", label = "Report"),
-      #       downloadButton("dwl_file", label = "file FOS")
-      #     ))
-      #   )
-      # )
     )
   )
 )

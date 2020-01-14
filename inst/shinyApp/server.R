@@ -26,7 +26,7 @@ function(input, output, session) {
   logging_concessions_CA_cropped <- reactiveValues(df = NULL)
   alpha_raster_deforest <- reactiveValues(df = NULL)
   alpha_raster_mayaux <- reactiveValues(df = NULL)
-
+  # name_taxa <- reactiveValues(df = NULL)
 
   # load dataset ------------------------------------------------------------
 
@@ -62,7 +62,7 @@ function(input, output, session) {
       # })
 
       # show the content
-      output$table_DATASET <- renderDataTable(dataset[,input$show_vars]) # , drop=FALSE
+      output$table_DATASET <- DT::renderDataTable(dataset[,input$show_vars]) # , drop=FALSE
 
       int_num_col <- names(dataset)[ sapply(dataset, class) %in% c("integer", "numeric", "double")]
 
@@ -188,9 +188,9 @@ function(input, output, session) {
   observeEvent(input$check_species, {
     showElement("check_species_stat")
 
-    Name <-list.names$df[as.numeric(input$name_chosen)]
+    Name <- list.names$df[as.numeric(input$name_chosen)]
     name_quo <- dplyr::enquo(Name)
-
+    # name_taxa$df <- Name
     # output$summary2 <- renderPrint({
     #   print(Name)
     #
@@ -329,7 +329,7 @@ function(input, output, session) {
 
     # show the content
     output$table_DATASET_SPECIES <-
-      renderDataTable(dataset_select[,input$show_vars_species]) # , drop=FALSE
+      DT::renderDataTable(dataset_select[,input$show_vars_species]) # , drop=FALSE
 
 
   })
@@ -347,7 +347,7 @@ function(input, output, session) {
 
       data_select <-
         original.dataset$df %>%
-        filter(taxa==!!name_quo, !is.na(!!rlang::sym(input$sel_LAT)), !is.na(!!rlang::sym(input$sel_LONG))) %>%
+        dplyr::filter(taxa==!!name_quo, !is.na(!!rlang::sym(input$sel_LAT)), !is.na(!!rlang::sym(input$sel_LONG))) %>%
         dplyr::select(!!rlang::sym(input$sel_LAT),
                       !!rlang::sym(input$sel_LONG), taxa)
 
@@ -358,15 +358,15 @@ function(input, output, session) {
 
       dataset_circle_select <-
         original.dataset.accuracy$df %>%
-        filter(taxa==!!name_quo)
+        dplyr::filter(taxa==!!name_quo)
 
       withProgress(message = 'Making evaluation', value = 0, {
-        incProgress(1/3, detail = paste("Preparing layers", 1))
+        shiny::incProgress(1/3, detail = paste("Preparing layers", 1))
 
         data("protected_areas")
         for (radius in 2:50) {
           protected_areas_bbox <- sf::st_crop(protected_areas, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
-          if(nrow(protected_areas_bbox)>0) break
+          if(nrow(protected_areas_bbox)>3) break
         }
         protected_areas_cropped$df <- protected_areas_bbox
 
@@ -375,13 +375,13 @@ function(input, output, session) {
         logging_concessions_CA <- sf::st_transform(logging_concessions_CA, sf::st_crs(dataset_sf))
         for (radius in 2:50) {
           logging_concessions_CA_bbox <- sf::st_crop(logging_concessions_CA, sf::st_bbox(sf::st_buffer(dataset_sf, radius)))
-          if(nrow(logging_concessions_CA_bbox)>0) break
+          if(nrow(logging_concessions_CA_bbox)>3) break
         }
         logging_concessions_CA_cropped$df <- logging_concessions_CA_bbox
 
         data("rast_mayaux")
         threshold_land_cov <- input$threshold_mayaux
-        rast_mayaux_crop <- raster::crop(rast_mayaux, raster::extent(dataset_sf)+1)
+        rast_mayaux_crop <- raster::crop(rast_mayaux, raster::extent(dataset_sf)+3)
         raster::values(rast_mayaux_crop)[which(raster::values(rast_mayaux_crop)<threshold_land_cov)] <- NA
         if(all(is.na(raster::values(rast_mayaux_crop)))) {
           raster::values(rast_mayaux_crop) <- 0
@@ -393,7 +393,7 @@ function(input, output, session) {
 
         data("hansen_deforestation_aggreg")
         threshold_deforest <- input$deforest
-        hansen_deforestation_aggreg_crop <- raster::crop(hansen_deforestation_aggreg, raster::extent(dataset_sf)+1)
+        hansen_deforestation_aggreg_crop <- raster::crop(hansen_deforestation_aggreg, raster::extent(dataset_sf)+3)
         raster::values(hansen_deforestation_aggreg_crop)[which(raster::values(hansen_deforestation_aggreg_crop)<threshold_deforest)] <- NA
         if(all(is.na(raster::values(hansen_deforestation_aggreg_crop)))) {
           raster::values(hansen_deforestation_aggreg_crop) <- 0
@@ -422,7 +422,7 @@ function(input, output, session) {
           sf::st_set_geometry(NULL) %>%
           dplyr::select(ORIG_NAME, DESIG, IUCN_CAT, INT_CRIT, ISO3)
 
-        output$table_occupied_pa <- renderDataTable(table_occupied_pa %>% distinct())
+        output$table_occupied_pa <- DT::renderDataTable(table_occupied_pa %>% distinct())
 
         # protected_areas_bbox_sp <- as(protected_areas, 'Spatial')
         incProgress(2/3, detail = paste("Running ConR", 2))
@@ -442,10 +442,8 @@ function(input, output, session) {
                               export_shp = T,
                               nbe.rep.rast.AOO = input$repeat_pos_aoo, Cell_size_AOO = input$aoo_km_res)
 
-
         subpop <-
           ConR::subpop.comp(XY = data_select, Resol_sub_pop = input$sub_pop_resol)
-
 
         if(length(eoo)>1) eoo_poly <-
           sf::st_as_sf(eoo$spatial.polygon_1)
@@ -528,8 +526,6 @@ function(input, output, session) {
       #   actionButton("go_evaluation_CA", "Evaluation criterion A")
       # })
 
-
-
       output$evaluation_CA <- renderUI({
         shinyWidgets::actionBttn(
           inputId = "go_evaluation_CA",
@@ -538,8 +534,6 @@ function(input, output, session) {
           style = "jelly"
         )
       })
-
-
 
     })
 
@@ -712,17 +706,29 @@ function(input, output, session) {
       type = "info"
     )
   })
+
   observeEvent(input$see_report_tab, {
     showMenuItem("tab_SUMMARY")
     updateTabItems(session, "tab_SUMMARY")
 
   })
 
+  # Name <- list.names$df[as.numeric(input$name_chosen)]
+
+  # output$summary_rep <- renderPrint({
+  #   # print(list.names$df[as.numeric(input$name_chosen)])
+  #   # print(list.names$df)
+  #   # print(input$name_chosen)
+  #   print(paste0(gsub(" ", "_", list.names$df[as.numeric(input$name_chosen)]), "_Report_", Sys.Date(), ".html"))
+  # })
 
   ##### download the report
   output$species_report <- downloadHandler(
+
+    # ,
+
     filename = function() {
-      paste0("Report_", Sys.Date(), ".html")
+      paste0(gsub(" ", "_", list.names$df[as.numeric(input$name_chosen)]), "_Report_", Sys.Date(), ".html")
     },
     content = function(file) {
       tempReport <- file.path(tempdir(), "report.Rmd")
@@ -739,6 +745,10 @@ function(input, output, session) {
     },
     contentType = "text/html"
   )
+
+
+
+
 
 
   }
