@@ -35,6 +35,7 @@ function(input, output, session) {
     input$file_DATASET
     # input$num_skip_line
     # input$rad_decimal
+
   }, {
     # file importation
     if (!is.null(input$file_DATASET)) {
