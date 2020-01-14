@@ -11,4 +11,4 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: shiny, shinydashboard, dplyr, magrittr, shinyjs, shinyalert, shinyFeedback, ConR, sf, readr, mapview, measurements, ggplot2, shinyWidgets
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
