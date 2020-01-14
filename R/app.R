@@ -46,3 +46,11 @@ app <- function() {
 #' @format raster object
 #'
 "hansen_deforestation_aggreg"
+
+#' Logging concessions Central Africa
+#'
+#' sf multypolygon
+#'
+#' @format sf object
+#'
+"logging_concessions_CA"

@@ -115,13 +115,13 @@ function(input, output, session) {
       if(input$sel_taxa == "<unselected>" & (all(c(input$sel_species_epiteth, input$sel_genus)!= "<unselected>"))) {
         newData <-
           newData %>%
-          mutate(taxa = paste0(!!rlang::sym(input$sel_genus)," " ,
+          dplyr::mutate(taxa = paste0(!!rlang::sym(input$sel_genus)," " ,
                                !!rlang::sym(input$sel_species_epiteth)))
 
         if(input$sel_authors!="<unselected>") {
           newData <-
             newData %>%
-            mutate(taxa = paste0(taxa," " ,
+            dplyr::mutate(taxa = paste0(taxa," " ,
                                  ifelse(is.na(!!rlang::sym(input$sel_authors)), "",
                                         !!rlang::sym(input$sel_authors))))
 
