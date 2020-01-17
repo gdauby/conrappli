@@ -394,7 +394,13 @@ function(input, output, session) {
 
         data("hansen_deforestation_aggreg")
         threshold_deforest <- input$deforest
-        hansen_deforestation_aggreg_crop <- raster::crop(hansen_deforestation_aggreg, raster::extent(dataset_sf)+3)
+
+        for (radius in 2:50) {
+          if(tryCatch(!is.null(crop(hansen_deforestation_aggreg, raster::extent(dataset_sf) + radius)),
+                      error=function(e) return(FALSE))) break
+        }
+
+        hansen_deforestation_aggreg_crop <- raster::crop(hansen_deforestation_aggreg, raster::extent(dataset_sf) + radius + 5)
         raster::values(hansen_deforestation_aggreg_crop)[which(raster::values(hansen_deforestation_aggreg_crop)<threshold_deforest)] <- NA
         if(all(is.na(raster::values(hansen_deforestation_aggreg_crop)))) {
           raster::values(hansen_deforestation_aggreg_crop) <- 0
