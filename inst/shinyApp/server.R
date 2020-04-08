@@ -164,6 +164,7 @@ function(input, output, session) {
       original.dataset.accuracy$df <-
         circles_accuracy_sf(xy = newData, col_x = input$sel_LONG, col_y = input$sel_LAT)
 
+
       list.names$df <-
         newData %>%
         dplyr::filter(!is.na(taxa)) %>%
