@@ -1,20 +1,4 @@
 
-
-#' Launch shiny app
-#'
-#' Launch the application for mapping and evaluating the IUCN status
-#'
-#' @return Launch in web browser the app
-#'
-#' @author Gilles Dauby, \email{gilles.dauby@@ird.fr}
-#'
-#' @import shiny
-#' @export
-app <- function() {
-  shiny::runApp(system.file("shinyApp", package = "conrappli"), launch.browser = T)
-}
-
-
 #' Protected areas of Africa
 #'
 #' An sf object of protected areas in Africa
