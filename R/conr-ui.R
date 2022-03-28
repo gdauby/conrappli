@@ -18,7 +18,7 @@ conr_ui <- function() {
       nav(
         title = "Data Import",
         value = "data_import",
-        "Data"
+        import_data_ui("data-import")
       )
     )
   }
