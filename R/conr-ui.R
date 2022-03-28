@@ -14,7 +14,11 @@
 conr_ui <- function() {
   function(request) {
     page_navbar(
+      theme = bs_theme_conr(),
       title = "ConR",
+      header = tagList(
+        tags$style(".swal2-popup {font-size: 1rem !important;}")
+      ),
       nav(
         title = "Data Import",
         value = "data_import",

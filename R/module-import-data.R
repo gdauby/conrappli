@@ -27,7 +27,7 @@ import_data_ui <- function(id) {
       column(
         width = 8,
 
-        tags$h4("Taxa column selection - select either taxa OR others columns"),
+        tags$h5("Taxa column selection - select either taxa OR others columns:"),
         esquisse::dragulaInput(
           inputId = ns("taxa_cols_selection"),
           label = NULL,
@@ -41,21 +41,25 @@ import_data_ui <- function(id) {
             "Rank infra-specific level",
             "Name infra-specific level",
             "Authors infra-specific level"
-          )
+          ),
+          # ncolSource = 1,
+          ncolGrid = 3,
+          replace = TRUE
         ),
 
-        tags$h4("Coordinates and altitude column selection"),
+        tags$h5("Coordinates and altitude column selection:"),
         esquisse::dragulaInput(
           inputId = ns("other_cols_selection"),
           label = NULL,
           choices = character(0),
           sourceLabel = "Available variables",
           targetsLabels = c(
-            "Longitude (decimal degrees)",
-            "Latitude (decimal degrees)",
+            "Longitude",
+            "Latitude",
             "Altitude (m)",
             "Collection year"
-          )
+          ),
+          replace = TRUE
         )
 
       )
@@ -75,7 +79,7 @@ import_data_server <- function(id) {
     id = id,
     module = function(input, output, session) {
 
-      raw_data <- datamods::import_file_server(id = "import-file")
+      raw_data <- datamods::import_file_server(id = "import-file", trigger_return = "change")
 
       observeEvent(raw_data$data(), {
         imported <- raw_data$data()
