@@ -23,4 +23,5 @@ Imports:
     datamods,
     esquisse,
     htmltools,
-    shiny
+    shiny,
+    shinyWidgets

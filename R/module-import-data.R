@@ -27,7 +27,7 @@ import_data_ui <- function(id) {
       column(
         width = 8,
 
-        tags$h5("Taxa column selection - select either taxa OR others columns:"),
+        tags$h5("Taxa column selection:"),
         esquisse::dragulaInput(
           inputId = ns("taxa_cols_selection"),
           label = NULL,
@@ -42,10 +42,10 @@ import_data_ui <- function(id) {
             "Name infra-specific level",
             "Authors infra-specific level"
           ),
-          # ncolSource = 1,
           ncolGrid = 3,
           replace = TRUE
         ),
+        uiOutput(outputId = ns("feedback_sel_taxa")),
 
         tags$h5("Coordinates and altitude column selection:"),
         esquisse::dragulaInput(
@@ -60,7 +60,8 @@ import_data_ui <- function(id) {
             "Collection year"
           ),
           replace = TRUE
-        )
+        ),
+        uiOutput(outputId = ns("feedback_sel_other"))
 
       )
     )
@@ -92,6 +93,33 @@ import_data_server <- function(id) {
           session = session,
           inputId = "other_cols_selection",
           choices = names(imported)
+        )
+      })
+
+      output$feedback_sel_taxa <- renderUI({
+        var_sel <- input$taxa_cols_selection$target
+        vars_other <- c(
+          "Genus",
+          "Species epiteth",
+          "Authors",
+          "Rank infra-specific level",
+          "Name infra-specific level",
+          "Authors infra-specific level"
+        )
+        if (!is.null(var_sel[["Taxa"]]) | all(lengths(var_sel[vars_other]) > 0)) {
+          tags$div()
+        } else {
+          shinyWidgets::alert(
+            status = "info",
+            icon("info-circle"), "Select either taxa OR others columns."
+          )
+        }
+      })
+
+      output$feedback_sel_other <- renderUI({
+        shinyWidgets::alert(
+          status = "info",
+          icon("info-circle"), "Longitude and latitude are required."
         )
       })
 
