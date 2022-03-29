@@ -4,9 +4,11 @@
 #'  to map input's columns to variable of interest for the simulation
 #'  and to validate that all is in order to proceed.
 #'
+#' @param id Module's ID.
+#'
 #' @export
 #'
-#' #' @return
+#' @return
 #'  * UI: HTML tags that can be included in the UI part of the application.
 #'  * Server: a [shiny::reactive()] function returning a `data.frame`.
 

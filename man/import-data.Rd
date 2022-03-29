@@ -10,6 +10,15 @@ import_data_ui(id)
 
 import_data_server(id)
 }
+\arguments{
+\item{id}{Module's ID.}
+}
+\value{
+\itemize{
+\item UI: HTML tags that can be included in the UI part of the application.
+\item Server: a \code{\link[shiny:reactive]{shiny::reactive()}} function returning a \code{data.frame}.
+}
+}
 \description{
 This module allow to import data into the application,
 to map input's columns to variable of interest for the simulation
