@@ -17,18 +17,44 @@
 #'
 #' @importFrom shiny NS fluidRow column uiOutput
 #' @importFrom htmltools tagList tags
-#' @importFrom bslib navs_pill_card nav
+#' @importFrom bslib navs_pill navs_hidden nav nav_content
 import_data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import data",
 
-    navs_pill_card(
+    navs_pill(
       id = ns("navs"),
+      header = tags$hr(),
       nav(
         title = "Import dataset",
         value = "import_dataset",
-        datamods::import_file_ui(id = ns("import-file"), title = NULL),
+        fluidRow(
+          column(
+            width = 3,
+            shinyWidgets::radioGroupButtons(
+              inputId = ns("type_import"),
+              label = NULL,
+              choices = c("From file", "From copy/paste"),
+              direction = "vertical",
+              width = "100%"
+            )
+          ),
+          column(
+            width = 9,
+            navs_hidden(
+              id = ns("navs_type_import"),
+              nav_content(
+                value = "From file",
+                datamods::import_file_ui(id = ns("file"), title = NULL)
+              ),
+              nav_content(
+                value = "From copy/paste",
+                datamods::import_copypaste_ui(id = ns("copypaste"), title = NULL)
+              )
+            )
+          )
+        ),
         uiOutput(outputId = ns("btn_nav_import_dataset"))
       ),
       nav(
@@ -96,10 +122,15 @@ import_data_server <- function(id) {
 
       dataset_rv <- reactiveValues(value = NULL)
 
-      raw_data_file <- datamods::import_file_server(id = "import-file", trigger_return = "change")
+      observeEvent(input$type_import, nav_select("navs_type_import", input$type_import))
+      raw_data_file <- datamods::import_file_server(id = "file", trigger_return = "change")
+      raw_data_copypaste <- datamods::import_copypaste_server(id = "copypaste", trigger_return = "change")
 
       observeEvent(raw_data_file$data(), {
         dataset_rv$value <- raw_data_file$data()
+      })
+      observeEvent(raw_data_copypaste$data(), {
+        dataset_rv$value <- raw_data_copypaste$data()
       })
 
 
