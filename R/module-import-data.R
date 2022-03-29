@@ -13,20 +13,25 @@
 #'
 #' @name import-data
 #'
-#' @importFrom shiny NS fluidRow column
+#' @importFrom shiny NS fluidRow column uiOutput
 #' @importFrom htmltools tagList tags
+#' @importFrom bslib navs_pill_card nav
 import_data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import data",
-    fluidRow(
-      column(
-        width = 4,
-        datamods::import_file_ui(id = ns("import-file"), title = NULL)
-      ),
-      column(
-        width = 8,
 
+    navs_pill_card(
+      id = ns("navs"),
+      nav(
+        title = "Import dataset",
+        value = "import_dataset",
+        datamods::import_file_ui(id = ns("import-file"), title = NULL),
+        uiOutput(outputId = ns("btn_nav_import_dataset"))
+      ),
+      nav(
+        title = "Variable selection",
+        value = "variable_selection",
         tags$h5("Taxa column selection:"),
         esquisse::dragulaInput(
           inputId = ns("taxa_cols_selection"),
@@ -62,7 +67,10 @@ import_data_ui <- function(id) {
           replace = TRUE
         ),
         uiOutput(outputId = ns("feedback_sel_other"))
-
+      ),
+      nav(
+        title = "Data validation",
+        value = "data_validation"
       )
     )
   )
@@ -74,16 +82,39 @@ import_data_ui <- function(id) {
 #' @rdname import-data
 #'
 #'
-#' @importFrom shiny moduleServer reactive observeEvent
+#' @importFrom shiny moduleServer reactive reactiveValues
+#'  observeEvent renderUI actionButton icon
+#' @importFrom bslib nav_select
 import_data_server <- function(id) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
 
-      raw_data <- datamods::import_file_server(id = "import-file", trigger_return = "change")
+      ns <- session$ns
 
-      observeEvent(raw_data$data(), {
-        imported <- raw_data$data()
+      dataset_rv <- reactiveValues(value = NULL)
+
+      raw_data_file <- datamods::import_file_server(id = "import-file", trigger_return = "change")
+
+      observeEvent(raw_data_file$data(), {
+        dataset_rv$value <- raw_data_file$data()
+      })
+
+
+      output$btn_nav_import_dataset <- renderUI({
+        if (is.data.frame(dataset_rv$value)) {
+          actionButton(
+            inputId = ns("go_to_variable_selection"),
+            label = "Go to variable selection",
+            icon = icon("arrow-circle-right"),
+            class = "float-end"
+          )
+        }
+      })
+      observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
+
+      observeEvent(dataset_rv$value, {
+        imported <- dataset_rv$value
         esquisse::updateDragulaInput(
           session = session,
           inputId = "taxa_cols_selection",
