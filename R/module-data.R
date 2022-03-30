@@ -1,4 +1,4 @@
-#' @title Import Data Module
+#' @title Data Module
 #'
 #' @description This module allow to import data into the application,
 #'  to map input's columns to variable of interest for the simulation
@@ -13,15 +13,15 @@
 #'  * Server: a [shiny::reactive()] function returning a `data.frame`.
 
 #'
-#' @name import-data
+#' @name module-data
 #'
 #' @importFrom shiny NS fluidRow column uiOutput
 #' @importFrom htmltools tagList tags
 #' @importFrom bslib navs_pill navs_hidden nav nav_content
-import_data_ui <- function(id) {
+data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Import data",
+    title = "Import & validate data",
 
     navs_pill(
       id = ns("navs"),
@@ -112,13 +112,13 @@ import_data_ui <- function(id) {
 
 #' @export
 #'
-#' @rdname import-data
+#' @rdname module-data
 #'
 #'
 #' @importFrom shiny moduleServer reactive reactiveValues
 #'  observeEvent renderUI actionButton icon
 #' @importFrom bslib nav_select
-import_data_server <- function(id) {
+data_server <- function(id) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
