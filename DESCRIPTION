@@ -25,6 +25,8 @@ Imports:
     dplyr,
     esquisse,
     htmltools,
+    pkgload,
     shiny,
+    shinyjs,
     shinyWidgets,
     validate
