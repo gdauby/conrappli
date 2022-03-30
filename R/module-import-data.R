@@ -94,11 +94,16 @@ import_data_ui <- function(id) {
           ),
           replace = TRUE
         ),
-        uiOutput(outputId = ns("feedback_sel_other"))
+        uiOutput(outputId = ns("feedback_sel_other")),
+        uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
       nav(
         title = "Data validation",
         value = "data_validation"
+      ),
+      nav(
+        title = "Map",
+        value = "map"
       )
     )
   )
@@ -120,6 +125,8 @@ import_data_server <- function(id) {
 
       ns <- session$ns
 
+      # Data Import ---- 
+      
       dataset_rv <- reactiveValues(value = NULL)
 
       observeEvent(input$type_import, nav_select("navs_type_import", input$type_import))
@@ -146,6 +153,12 @@ import_data_server <- function(id) {
       })
       observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
 
+      
+      
+      # Variable Selection ---- 
+      
+      var_sel_rv <- reactiveValues(taxa = FALSE, other  = FALSE)
+      
       observeEvent(dataset_rv$value, {
         imported <- dataset_rv$value
         esquisse::updateDragulaInput(
@@ -159,8 +172,8 @@ import_data_server <- function(id) {
           choices = names(imported)
         )
       })
-
-      output$feedback_sel_taxa <- renderUI({
+      
+      observeEvent(input$taxa_cols_selection$target, {
         var_sel <- input$taxa_cols_selection$target
         vars_other <- c(
           "Genus",
@@ -170,7 +183,10 @@ import_data_server <- function(id) {
           "Name infra-specific level",
           "Authors infra-specific level"
         )
-        if (!is.null(var_sel[["Taxa"]]) | all(lengths(var_sel[vars_other]) > 0)) {
+        var_sel_rv$taxa <- !is.null(var_sel[["Taxa"]]) | all(lengths(var_sel[vars_other]) > 0)
+      })
+      output$feedback_sel_taxa <- renderUI({
+        if (isTRUE(var_sel_rv$taxa)) {
           tags$div()
         } else {
           shinyWidgets::alert(
@@ -179,13 +195,35 @@ import_data_server <- function(id) {
           )
         }
       })
-
-      output$feedback_sel_other <- renderUI({
-        shinyWidgets::alert(
-          status = "info",
-          icon("info-circle"), "Longitude and latitude are required."
-        )
+      
+      
+      observeEvent(input$other_cols_selection$target, {
+        var_oth <- input$other_cols_selection$target
+        var_sel_rv$other <- !is.null(var_oth[["Longitude"]]) & !is.null(var_oth[["Latitude"]])
       })
+      output$feedback_sel_other <- renderUI({
+        if (isTRUE(var_sel_rv$other)) {
+          tags$div()
+        } else {
+          shinyWidgets::alert(
+            status = "info",
+            icon("info-circle"), "Longitude and latitude are required."
+          )
+        }
+      })
+      
+      
+      output$btn_nav_variable_selection <- renderUI({
+        if (isTRUE(var_sel_rv$taxa) & isTRUE(var_sel_rv$other)) {
+          actionButton(
+            inputId = ns("go_to_data_validation"),
+            label = "Go to data validation",
+            icon = icon("arrow-circle-right"),
+            class = "float-end"
+          )
+        }
+      })
+      observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
 
 
       return(reactive(NULL))

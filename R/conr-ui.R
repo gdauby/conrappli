@@ -19,13 +19,15 @@ conr_ui <- function() {
       header = tagList(
         tags$style(
           ".swal2-popup {font-size: 1rem !important;}",
-          ".badge-dragula {font-size: 1rem !important;}"
+          ".badge-dragula {font-size: 1rem !important;}",
+          ".container-drag-source {border-style: solid !important; border-color: #9b9b9b !important;}",
+          ".box-dad {border-color: #9b9b9b !important; margin: 1px !important;}"
         )
       ),
       nav(
-        title = "Data Import",
-        value = "data_import",
-        import_data_ui("data-import")
+        title = "Data",
+        value = "data",
+        import_data_ui("data")
       )
     )
   }

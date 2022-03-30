@@ -14,7 +14,7 @@
 conr_server <- function() {
   function(input, output, session) {
 
-    import_data_server("data-import")
+    import_data_server("data")
 
   }
 }
