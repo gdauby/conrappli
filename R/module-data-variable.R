@@ -8,7 +8,7 @@
 #'
 #' @return
 #'  * UI: HTML tags that can be included in the UI part of the application.
-#'  * Server: a [shiny::reactive()] function returning a `data.frame`.
+#'  * Server: a [shiny::reactive()] function returning a `list`.
 
 #'
 #' @name module-data-variable
@@ -56,12 +56,15 @@ data_variable_ui <- function(id) {
   )
 }
 
+
+#' @param data_r A `reactive` function returning a `data.frame`.
+#' 
 #' @export
 #'
 #' @rdname module-data-variable
 #' 
 #' @importFrom shiny moduleServer observeEvent reactiveValues
-#'  reactive reactiveValuesToList renderUI
+#'  reactive reactiveValuesToList renderUI req bindEvent observe isTruthy
 #'
 data_variable_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
@@ -122,6 +125,14 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           )
         }
       })
+      
+      bindEvent(observe({
+        if (isTruthy(data_r()) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
+          imported <- data_r()
+          var_sel <- c(input$taxa_cols$target, input$other_cols$target)
+          var_sel_rv$data <- dplyr::select(imported, !!!var_sel)
+        }
+      }), input$taxa_cols$target, input$other_cols$target)
       
       return(reactive(reactiveValuesToList(var_sel_rv)))
     }

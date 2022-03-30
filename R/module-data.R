@@ -40,7 +40,9 @@ data_ui <- function(id) {
       ),
       nav(
         title = "Data validation",
-        value = "data_validation"
+        value = "data_validation",
+        data_validation_ui(ns("validation")),
+        uiOutput(outputId = ns("btn_nav_data_validation"))
       ),
       nav(
         title = "Map",
@@ -103,6 +105,13 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
 
+      
+      # Data validation ---- 
+      
+      data_validation_server(
+        id = "validation", 
+        data_r = reactive(variable_r()$data)
+      )
 
       
       return(reactive(NULL))
