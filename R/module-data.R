@@ -67,10 +67,10 @@ data_server <- function(id) {
     module = function(input, output, session) {
 
       ns <- session$ns
-      
 
-      # Data Import ---- 
-      
+
+      # Data Import ----
+
       data_r <- data_import_server("import")
 
       output$btn_nav_import_dataset <- renderUI({
@@ -86,12 +86,12 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
 
-      
-      
-      # Variable Selection ---- 
-      
+
+
+      # Variable Selection ----
+
       variable_r <- data_variable_server("variable", data_r = data_r)
-      
+
       output$btn_nav_variable_selection <- renderUI({
         vars <- variable_r()
         if (isTRUE(vars$taxa) & isTRUE(vars$other)) {
@@ -105,15 +105,27 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
 
-      
-      # Data validation ---- 
-      
-      data_validation_server(
-        id = "validation", 
+
+      # Data validation ----
+
+      data_validated_r <- data_validation_server(
+        id = "validation",
         data_r = reactive(variable_r()$data)
       )
+      output$btn_nav_data_validation <- renderUI({
+        validated <- data_validated_r()
+        if (nrow(validated) > 0) {
+          actionButton(
+            inputId = ns("go_to_map"),
+            label = "Go to mapping",
+            icon = icon("arrow-circle-right"),
+            class = "float-end"
+          )
+        }
+      })
+      observeEvent(input$go_to_map, nav_select("navs", "map"))
 
-      
+
       return(reactive(NULL))
     }
   )
