@@ -41,12 +41,22 @@ data_ui <- function(id) {
       nav(
         title = "Data validation",
         value = "data_validation",
+        shinyWidgets::alert(
+          status = "info",
+          class = "alert-no-data-no-variables",
+          icon("info-circle"), "You need to import data and select variable."
+        ),
         data_validation_ui(ns("validation")),
         uiOutput(outputId = ns("btn_nav_data_validation"))
       ),
       nav(
         title = "Map",
-        value = "map"
+        value = "map",
+        shinyWidgets::alert(
+          status = "info",
+          class = "alert-no-data-no-variables",
+          icon("info-circle"), "You need to import data and select variable."
+        )
       )
     )
   )
@@ -74,6 +84,7 @@ data_server <- function(id) {
       data_r <- data_import_server("import")
 
       output$btn_nav_import_dataset <- renderUI({
+        shinyjs::show(selector = ".alert-no-data-no-variables")
         req(data_r())
         if (is.data.frame(data_r())) {
           actionButton(
@@ -95,6 +106,7 @@ data_server <- function(id) {
       output$btn_nav_variable_selection <- renderUI({
         vars <- variable_r()
         if (isTRUE(vars$taxa) & isTRUE(vars$other)) {
+          shinyjs::hide(selector = ".alert-no-data-no-variables")
           actionButton(
             inputId = ns("go_to_data_validation"),
             label = "Go to data validation",

@@ -17,6 +17,7 @@ conr_ui <- function() {
       theme = bs_theme_conr(),
       title = "ConR",
       header = tagList(
+        shinyjs::useShinyjs(),
         tags$style(
           ".swal2-popup {font-size: 1rem !important;}",
           ".badge-dragula {font-size: 1rem !important;}",
