@@ -1,0 +1,129 @@
+
+#' @title Map point selection Module
+#'
+#'
+#' @param id Module's ID.
+#'
+#' @export
+#'
+#' @return
+#'  * UI: HTML tags that can be included in the UI part of the application.
+#'  * Server: a [shiny::reactive()] function returning a `list`.
+
+#'
+#' @name module-data-map
+#'
+#' @importFrom shiny NS uiOutput fluidRow column actionButton
+#' @importFrom htmltools tagList tags
+#' @importFrom leaflet leafletOutput
+data_map_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    leafletOutput(outputId = ns("map"), height = "500px"),
+    fluidRow(
+      class = "mt-3",
+      column(
+        width = 6,
+        actionButton(
+          inputId = ns("remove"),
+          label = "Remove selected points",
+          width = "100%",
+          icon = icon("ban"),
+          class = "btn-outline-danger"
+        )
+      ),
+      column(
+        width = 6,
+        actionButton(
+          inputId = ns("cancel"),
+          label = "Restore original data",
+          width = "100%",
+          icon = icon("undo"),
+          class = "btn-outline-primary"
+        )
+      )
+    )
+  )
+}
+
+
+#' @param data_r A `reactive` function returning a `data.frame`.
+#'
+#' @export
+#'
+#' @rdname module-data-map
+#'
+#' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe updateActionButton req outputOptions
+#' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
+data_map_server <- function(id, data_r = reactive(NULL)) {
+  moduleServer(
+    id = id,
+    module = function(input, output, session) {
+
+      data_rv <- reactiveValues(init = NULL, select = NULL, ts = NULL)
+
+      observeEvent(data_r(), {
+        datamap <- req(data_r()) %>%
+          dplyr::group_by(Latitude, Longitude) %>%
+          dplyr::summarise(n = dplyr::n(), id = dplyr::cur_group_id())
+        pts_sf <- sf::st_as_sf(datamap, coords = c("Latitude", "Longitude"))
+        pts_sf <- crosstalk::SharedData$new(pts_sf, key = ~id)
+        data_rv$init <- data_rv$select <- pts_sf
+      })
+
+      output$map <- renderLeaflet({
+        if (is.null(data_rv$init)) {
+          leaflet() %>%
+            addTiles()
+        } else {
+          leaflet(data_rv$init) %>%
+            addTiles() %>%
+            addMarkers(
+              popup = ~paste("Number of records: ", n)
+            )
+        }
+      })
+
+      observe({
+        if (isTruthy(data_rv$init)) {
+          data_sel <- data_rv$init$data(withSelection = TRUE)
+          n <- sum(data_sel$selected_)
+          if (is.na(n)) {
+            label <- "No points selected"
+          } else {
+            label <- sprintf("Remove %s selected point(s)", n)
+          }
+          updateActionButton(
+            session = session,
+            inputId = "remove",
+            label = label
+          )
+        }
+      })
+
+      # Cancel selection
+      observeEvent(input$cancel, {
+        data_rv$select <- data_rv$init
+        leafletProxy("map", data = data_rv$select) %>%
+          clearMarkers() %>%
+          addMarkers(
+            popup = ~paste("Number of records: ", n)
+          )
+      })
+
+      # Remove points
+      observeEvent(input$remove, {
+        data_sel <- data_rv$select$data(withSelection = TRUE)
+        new_data <- data_sel %>% dplyr::filter(selected_ == FALSE)
+        data_rv$select <- crosstalk::SharedData$new(new_data, key = ~id)
+        leafletProxy("map", data = data_rv$select) %>%
+          clearMarkers() %>%
+          addMarkers(
+            popup = ~paste("Number of records: ", n)
+          )
+      })
+
+      return(reactive(NULL))
+    }
+  )
+}

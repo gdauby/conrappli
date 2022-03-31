@@ -56,7 +56,8 @@ data_ui <- function(id) {
           status = "info",
           class = "alert-no-data-no-variables",
           icon("info-circle"), "You need to import data and select variable."
-        )
+        ),
+        data_map_ui(ns("map"))
       )
     )
   )
@@ -137,6 +138,13 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_map, nav_select("navs", "map"))
 
+
+      # Map validation ----
+
+      data_map_server(
+        id = "map",
+        data_r = data_validated_r
+      )
 
       return(reactive(NULL))
     }

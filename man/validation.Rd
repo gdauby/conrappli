@@ -6,7 +6,12 @@
 \alias{validation_rules}
 \title{Validation of data}
 \usage{
-prepare_data_validate(data, lat = "lat", lon = lon, sci_names = "sci_names")
+prepare_data_validate(
+  data,
+  lat = "Latitude",
+  lon = "Longitude",
+  sci_names = "Taxa"
+)
 
 validation_rules()
 }

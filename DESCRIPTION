@@ -2,7 +2,6 @@ Package: conrappli
 Type: Package
 Title: Web Interface for 'ConR' package
 Version: 0.1.0
-Author: Gilles Dauby
 Authors@R: c(
       person("Gilles", "Dauby", , "gildauby@gmail.com", role = c("aut", "cre")),
       person("Victor", "Perrier", , "victor.perrier@dreamrs.fr", role = c("ctb"))
@@ -21,12 +20,18 @@ Imports:
     bdc,
     bslib,
     ConR,
-    datamods,
+    crosstalk,
+    datamods (>= 1.2.0.9300),
     dplyr,
     esquisse,
     htmltools,
+    leaflet,
     pkgload,
+    sf,
     shiny,
     shinyjs,
-    shinyWidgets,
+    shinyWidgets (>= 0.6.4.9000),
     validate
+Remotes: dreamRs/datamods,
+    dreamRs/shinyWidgets,
+    rstudio/crosstalk
