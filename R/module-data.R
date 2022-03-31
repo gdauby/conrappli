@@ -80,6 +80,7 @@ data_server <- function(id) {
       ns <- session$ns
 
 
+
       # Data Import ----
 
       data_r <- data_import_server("import")
@@ -119,11 +120,15 @@ data_server <- function(id) {
       observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
 
 
+
       # Data validation ----
 
       data_validated_r <- data_validation_server(
         id = "validation",
-        data_r = reactive(variable_r()$data)
+        data_r = reactive({
+          input$navs
+          variable_r()$data
+        })
       )
       output$btn_nav_data_validation <- renderUI({
         validated <- data_validated_r()
@@ -137,6 +142,7 @@ data_server <- function(id) {
         }
       })
       observeEvent(input$go_to_map, nav_select("navs", "map"))
+
 
 
       # Map validation ----

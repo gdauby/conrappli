@@ -14,7 +14,7 @@
 #' @name module-data-variable
 #'
 #' @importFrom shiny NS uiOutput
-#' @importFrom htmltools tagList tags 
+#' @importFrom htmltools tagList tags
 data_variable_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -37,7 +37,7 @@ data_variable_ui <- function(id) {
       replace = TRUE
     ),
     uiOutput(outputId = ns("feedback_sel_taxa")),
-    
+
     tags$h5("Coordinates and altitude column selection:"),
     esquisse::dragulaInput(
       inputId = ns("other_cols"),
@@ -58,11 +58,11 @@ data_variable_ui <- function(id) {
 
 
 #' @param data_r A `reactive` function returning a `data.frame`.
-#' 
+#'
 #' @export
 #'
 #' @rdname module-data-variable
-#' 
+#'
 #' @importFrom shiny moduleServer observeEvent reactiveValues
 #'  reactive reactiveValuesToList renderUI req bindEvent observe isTruthy
 #'
@@ -70,9 +70,9 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
-      
+
       var_sel_rv <- reactiveValues(taxa = FALSE, other  = FALSE)
-      
+
       observeEvent(data_r(), {
         imported <- data_r()
         esquisse::updateDragulaInput(
@@ -86,7 +86,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           choices = names(imported)
         )
       })
-      
+
       observeEvent(input$taxa_cols$target, {
         var_sel <- input$taxa_cols$target
         vars_other <- c(
@@ -109,8 +109,8 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           )
         }
       })
-      
-      
+
+
       observeEvent(input$other_cols$target, {
         var_oth <- input$other_cols$target
         var_sel_rv$other <- !is.null(var_oth[["Longitude"]]) & !is.null(var_oth[["Latitude"]])
@@ -125,15 +125,15 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           )
         }
       })
-      
-      bindEvent(observe({
+
+      observe({
         if (isTruthy(data_r()) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
           imported <- data_r()
           var_sel <- c(input$taxa_cols$target, input$other_cols$target)
           var_sel_rv$data <- dplyr::select(imported, !!!var_sel)
         }
-      }), input$taxa_cols$target, input$other_cols$target)
-      
+      })
+
       return(reactive(reactiveValuesToList(var_sel_rv)))
     }
   )

@@ -85,20 +85,21 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       })
 
       observe({
-        if (isTruthy(data_rv$init)) {
-          data_sel <- data_rv$init$data(withSelection = TRUE)
-          n <- sum(data_sel$selected_)
-          if (is.na(n)) {
-            label <- "No points selected"
-          } else {
-            label <- sprintf("Remove %s selected point(s)", n)
-          }
-          updateActionButton(
-            session = session,
-            inputId = "remove",
-            label = label
-          )
+        req(data_rv$select)
+        data_sel <- data_rv$select$data(withSelection = TRUE)
+        n <- sum(data_sel$selected_)
+        if (is.na(n)) {
+          label <- "No points selected"
+          shinyjs::disable(id = "remove")
+        } else {
+          label <- sprintf("Remove %s selected point(s)", n)
+          shinyjs::enable(id = "remove")
         }
+        updateActionButton(
+          session = session,
+          inputId = "remove",
+          label = label
+        )
       })
 
       # Cancel selection
