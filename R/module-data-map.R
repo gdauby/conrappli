@@ -104,6 +104,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       # Cancel selection
       observeEvent(input$cancel, {
+        req(data_rv$init)
         data_rv$select <- data_rv$init
         leafletProxy("map", data = data_rv$select) %>%
           clearMarkers() %>%
@@ -114,6 +115,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       # Remove points
       observeEvent(input$remove, {
+        req(data_rv$select)
         data_sel <- data_rv$select$data(withSelection = TRUE)
         new_data <- data_sel %>% dplyr::filter(selected_ == FALSE)
         data_rv$select <- crosstalk::SharedData$new(new_data, key = ~id)
