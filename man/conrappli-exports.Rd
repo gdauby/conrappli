@@ -6,6 +6,6 @@
 \title{conrappli exported operators and S3 methods}
 \description{
 The following functions are imported and then re-exported
-from the apexcharter package to avoid listing packages
+from the conrappli package to avoid listing packages
 as Depends of conrappli
 }

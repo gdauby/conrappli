@@ -20,7 +20,7 @@ Imports:
     bdc,
     bslib,
     ConR,
-    crosstalk,
+    crosstalk (>= 1.2.0.9000),
     datamods (>= 1.2.0.9300),
     dplyr,
     esquisse,

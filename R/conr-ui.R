@@ -29,6 +29,22 @@ conr_ui <- function() {
         title = "Data",
         value = "data",
         data_ui("data")
+      ),
+      nav(
+        title = "Mapping",
+        value = "mapping"
+      ),
+      nav(
+        title = "Evaluation - Criterion B",
+        value = "evaluation"
+      ),
+      nav(
+        title = "Habitat quality/population decline",
+        value = "habitat"
+      ),
+      nav(
+        title = "Summary report",
+        value = "summary"
       )
     )
   }

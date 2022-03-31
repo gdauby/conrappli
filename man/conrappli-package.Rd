@@ -4,6 +4,11 @@
 \name{conrappli-package}
 \alias{conrappli-package}
 \title{Web Interface for 'ConR' package}
+\description{
+Shiny application for mapping and computing several range parameters for plant species
+Dedicated to Central Africa. Provide preliminary IUCN evaluation following Criterion B.
+Based on \href{https://github.com/gdauby/ConR}{ConR} package computation.
+}
 \author{
 Gilles Dauby
 }
