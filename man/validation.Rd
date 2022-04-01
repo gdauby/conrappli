@@ -4,6 +4,8 @@
 \alias{validation}
 \alias{prepare_data_validate}
 \alias{validation_rules}
+\alias{exclude_violating_records}
+\alias{extract_violating_records}
 \title{Validation of data}
 \usage{
 prepare_data_validate(
@@ -14,6 +16,10 @@ prepare_data_validate(
 )
 
 validation_rules()
+
+exclude_violating_records(data)
+
+extract_violating_records(data)
 }
 \arguments{
 \item{data}{A \code{data.frame} or similar.}

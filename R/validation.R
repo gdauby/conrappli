@@ -50,3 +50,50 @@ validation_rules <- function() {
   )
   return(validation_rules)
 }
+
+
+
+#' @export
+#'
+#' @rdname validation
+#'
+#' @importFrom dplyr filter if_all all_of select any_of
+exclude_violating_records <- function(data) {
+  dplyr::filter(
+    data,
+    dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE)
+  ) %>%
+    dplyr::select(!dplyr::any_of(validation_cols()))
+}
+
+
+#' @export
+#'
+#' @rdname validation
+#'
+#' @importFrom dplyr mutate n case_when filter group_by across summarise select
+#' @importFrom tidyr pivot_longer
+extract_violating_records <- function(data) {
+  tidyr::pivot_longer(
+    data = data %>% dplyr::mutate(.id = seq_len(dplyr::n())),
+    cols = validation_cols(),
+    names_to = "validation_label",
+    values_to = "validation_result"
+  ) %>%
+    dplyr::mutate(
+      validation_label = dplyr::case_when(
+        validation_label == ".coordinates_outOfRange" ~ "out-of-range geographic coordinates",
+        validation_label == ".coordinates_empty" ~ "empty geographic coordinates",
+        validation_label == ".scientificName_empty" ~ "empty scientific names",
+        TRUE ~ ""
+      )
+    ) %>%
+    dplyr::filter(validation_result == FALSE) %>%
+    dplyr::group_by(dplyr::across(setdiff(names(.), c("validation_label", "validation_result")))) %>%
+    dplyr::summarise(validation_label = paste(validation_label, collapse = ", ")) %>%
+    dplyr::select(-.id)
+}
+
+
+
+

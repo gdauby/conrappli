@@ -29,7 +29,7 @@ data_validation_ui <- function(id) {
 #'
 #' @rdname module-data-validation
 #'
-#' @importFrom shiny moduleServer observeEvent reactive req
+#' @importFrom shiny moduleServer observeEvent reactive req actionLink
 data_validation_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -49,11 +49,7 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
 
       validated_r <- reactive({
         req(to_validate_r())
-        data <- to_validate_r()
-        dplyr::filter(
-          data,
-          dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE)
-        )
+        exclude_violating_records(to_validate_r())
       })
 
       output$alert_result <- renderUI({
@@ -69,11 +65,24 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
             status = "warning",
             icon("exclamation-triangle"),
             nrow(to_validate) - nrow(validated),
-            "rows will be removed in order to proceed."
+            "rows will be discarded in order to proceed.",
+            actionLink(inputId = session$ns("see_data"), label = "click to see problematic rows.")
           )
         } else {
-          tags$div()
+          shinyWidgets::alert(
+            status = "success",
+            icon("check"),
+            "All rows are OK."
+          )
         }
+      })
+
+      observeEvent(input$see_data, {
+        datamods::show_data(
+          data = extract_violating_records(to_validate_r()),
+          title = "Violating validation rules records",
+          type = "modal"
+        )
       })
 
       return(validated_r)
