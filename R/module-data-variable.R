@@ -24,15 +24,8 @@ data_variable_ui <- function(id) {
       label = NULL,
       choices = character(0),
       sourceLabel = "Available variables",
-      targetsLabels = c(
-        "Taxa",
-        "Genus",
-        "Species epiteth",
-        "Authors",
-        "Rank infra-specific level",
-        "Name infra-specific level",
-        "Authors infra-specific level"
-      ),
+      targetsLabels = taxa_cols("label"),
+      targetsIds = taxa_cols("id"),
       ncolGrid = 3,
       replace = TRUE
     ),
@@ -44,12 +37,8 @@ data_variable_ui <- function(id) {
       label = NULL,
       choices = character(0),
       sourceLabel = "Available variables",
-      targetsLabels = c(
-        "Longitude",
-        "Latitude",
-        "Altitude (m)",
-        "Collection year"
-      ),
+      targetsLabels = other_cols("label"),
+      targetsIds = other_cols("id"),
       replace = TRUE
     ),
     uiOutput(outputId = ns("feedback_sel_other"))
@@ -97,7 +86,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           "Name infra-specific level",
           "Authors infra-specific level"
         )
-        var_sel_rv$taxa <- !is.null(var_sel[["Taxa"]]) | all(lengths(var_sel[vars_other]) > 0)
+        var_sel_rv$taxa <- !is.null(var_sel[[".__taxa"]]) | all(lengths(var_sel[vars_other]) > 0)
       })
       output$feedback_sel_taxa <- renderUI({
         if (isTRUE(var_sel_rv$taxa)) {
@@ -113,7 +102,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(input$other_cols$target, {
         var_oth <- input$other_cols$target
-        var_sel_rv$other <- !is.null(var_oth[["Longitude"]]) & !is.null(var_oth[["Latitude"]])
+        var_sel_rv$other <- !is.null(var_oth[[".__longitude"]]) & !is.null(var_oth[[".__latitude"]])
       })
       output$feedback_sel_other <- renderUI({
         if (isTRUE(var_sel_rv$other)) {
@@ -128,13 +117,60 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
 
       observe({
         if (isTruthy(data_r()) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
-          imported <- data_r()
-          var_sel <- c(input$taxa_cols$target, input$other_cols$target)
-          var_sel_rv$data <- dplyr::select(imported, !!!var_sel)
+          vars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target))
+          var_sel_rv$vars <- vars
+          var_sel_rv$data <- dplyr::bind_cols(data_r(), dplyr::select(data_r(), !!!vars))
         }
       })
 
       return(reactive(reactiveValuesToList(var_sel_rv)))
     }
   )
+}
+
+
+taxa_cols <- function(x = NULL) {
+  cols <- list(
+    label = c(
+      "Taxa",
+      "Genus",
+      "Species epiteth",
+      "Authors",
+      "Rank infra-specific level",
+      "Name infra-specific level",
+      "Authors infra-specific level"
+    ),
+    id = c(
+      ".__taxa",
+      ".__genus",
+      ".__species_epiteth",
+      ".__authors",
+      ".__rank_infra_specific_level",
+      ".__name_infra_specific_level",
+      ".__authors_infra_specific_level"
+    )
+  )
+  if (!is.null(x))
+    cols <- cols[[x]]
+  return(cols)
+}
+
+other_cols <- function(x = NULL) {
+  cols <- list(
+    label = c(
+      "Longitude",
+      "Latitude",
+      "Altitude (m)",
+      "Collection year"
+    ),
+    id = c(
+      ".__longitude",
+      ".__latitude",
+      ".__altitude",
+      ".__collection_year"
+    )
+  )
+  if (!is.null(x))
+    cols <- cols[[x]]
+  return(cols)
 }

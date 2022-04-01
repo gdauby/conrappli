@@ -64,9 +64,9 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(data_r(), {
         datamap <- req(data_r()) %>%
-          dplyr::group_by(Latitude, Longitude) %>%
+          dplyr::group_by(.__latitude, .__longitude) %>%
           dplyr::summarise(n = dplyr::n(), id = dplyr::cur_group_id())
-        pts_sf <- sf::st_as_sf(datamap, coords = c("Latitude", "Longitude"))
+        pts_sf <- sf::st_as_sf(datamap, coords = c(".__latitude", ".__longitude"))
         pts_sf <- crosstalk::SharedData$new(pts_sf, key = ~id)
         data_rv$init <- data_rv$select <- pts_sf
       })

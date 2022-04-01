@@ -37,7 +37,12 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
 
       to_validate_r <- reactive({
         req(data_r())
-        prepare_data_validate(data_r())
+        prepare_data_validate(
+          data = data_r(),
+          lat = ".__latitude",
+          lon = ".__longitude",
+          sci_names = ".__taxa"
+        )
       })
 
       datamods::validation_server(
@@ -79,7 +84,9 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(input$see_data, {
         datamods::show_data(
-          data = extract_violating_records(to_validate_r()),
+          data = to_validate_r() %>%
+            unselect_internal_vars() %>%
+            extract_violating_records(),
           title = "Violating validation rules records",
           type = "modal"
         )
