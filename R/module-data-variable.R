@@ -18,7 +18,13 @@
 data_variable_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    tags$h5("Taxa column selection:"),
+    tags$h5(
+      "Taxa column selection:",
+      btn_help(
+        "Select either a column identifying species or fill all other columns to contruct a taxa column.",
+        class = "float-right"
+      )
+    ),
     esquisse::dragulaInput(
       inputId = ns("taxa_cols"),
       label = NULL,
@@ -31,7 +37,13 @@ data_variable_ui <- function(id) {
     ),
     uiOutput(outputId = ns("feedback_sel_taxa")),
 
-    tags$h5("Coordinates and altitude column selection:"),
+    tags$h5(
+      "Coordinates and altitude column selection:",
+      btn_help(
+        "Latitude and longitude are required for analyse, altitude and year are optionnal.",
+        class = "float-right"
+      )
+    ),
     esquisse::dragulaInput(
       inputId = ns("other_cols"),
       label = NULL,
@@ -41,7 +53,23 @@ data_variable_ui <- function(id) {
       targetsIds = other_cols("id"),
       replace = TRUE
     ),
-    uiOutput(outputId = ns("feedback_sel_other"))
+    uiOutput(outputId = ns("feedback_sel_other")),
+
+    tags$h5(
+      "Other columns of interest:",
+      btn_help(
+        "Thos columns won't be used in analysis but they will be kept with the data, others columns will be dropped..",
+        class = "float-right"
+      )
+    ),
+    esquisse::dragulaInput(
+      inputId = ns("optionnal_cols"),
+      label = NULL,
+      choices = character(0),
+      sourceLabel = "Available variables",
+      targetsLabels = "Variables to keep",
+      targetsIds = "keep"
+    )
   )
 }
 
@@ -72,6 +100,11 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         esquisse::updateDragulaInput(
           session = session,
           inputId = "other_cols",
+          choices = names(imported)
+        )
+        esquisse::updateDragulaInput(
+          session = session,
+          inputId = "optionnal_cols",
           choices = names(imported)
         )
       })
@@ -119,7 +152,12 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         if (isTruthy(data_r()) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
           vars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target))
           var_sel_rv$vars <- vars
-          var_sel_rv$data <- dplyr::bind_cols(data_r(), dplyr::select(data_r(), !!!vars))
+          allvars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target, input$optionnal_cols$target))
+          allvars <- unlist(allvars, recursive = TRUE, use.names = FALSE)
+          var_sel_rv$data <- dplyr::bind_cols(
+            dplyr::select(data_r(), dplyr::any_of(allvars)),
+            dplyr::select(data_r(), !!!vars)
+          )
         }
       })
 
@@ -135,19 +173,15 @@ taxa_cols <- function(x = NULL) {
       "Taxa",
       "Genus",
       "Species epiteth",
-      "Authors",
       "Rank infra-specific level",
-      "Name infra-specific level",
-      "Authors infra-specific level"
+      "Name infra-specific level"
     ),
     id = c(
       ".__taxa",
       ".__genus",
       ".__species_epiteth",
-      ".__authors",
       ".__rank_infra_specific_level",
-      ".__name_infra_specific_level",
-      ".__authors_infra_specific_level"
+      ".__name_infra_specific_level"
     )
   )
   if (!is.null(x))
