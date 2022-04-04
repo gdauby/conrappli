@@ -23,7 +23,8 @@ conr_ui <- function() {
           ".badge-dragula {font-size: 1rem !important;}",
           ".container-drag-source {border-style: solid !important; border-color: #9b9b9b !important;}",
           ".box-dad {border-color: #9b9b9b !important; margin: 1px !important;}"
-        )
+        ),
+        tags$script(src = "conrappli/js/script.js")
       ),
       nav(
         title = "Data",

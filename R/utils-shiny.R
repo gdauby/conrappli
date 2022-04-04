@@ -14,3 +14,16 @@ template_ui <- function(..., title = NULL) {
     )
   )
 }
+
+
+btn_help <- function(text, ...) {
+  tags$a(
+    tabindex = "0",
+    class = "btn btn-link conrapp-popover",
+    style = "padding: 0;",
+    `data-bs-content` = htmltools::doRenderTags(text),
+    `data-bs-toggle` = "popover",
+    icon("question-circle"),
+    ...
+  )
+}
