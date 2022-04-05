@@ -23,6 +23,7 @@ Imports:
     crosstalk (>= 1.2.0.9000),
     datamods (>= 1.2.0.9300),
     dplyr,
+    DT,
     esquisse,
     htmltools,
     leaflet,

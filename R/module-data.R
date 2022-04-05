@@ -15,9 +15,9 @@
 #'
 #' @name module-data
 #'
-#' @importFrom shiny NS uiOutput
+#' @importFrom shiny NS uiOutput icon
 #' @importFrom htmltools tagList tags
-#' @importFrom bslib navs_pill nav
+#' @importFrom bslib navs_pill nav nav_spacer
 data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
@@ -29,18 +29,21 @@ data_ui <- function(id) {
       nav(
         title = "Import dataset",
         value = "import_dataset",
+        icon = icon("file-import"),
         data_import_ui(ns("import")),
         uiOutput(outputId = ns("btn_nav_import_dataset"))
       ),
       nav(
         title = "Variable selection",
         value = "variable_selection",
+        icon = icon("table"),
         data_variable_ui(ns("variable")),
         uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
       nav(
         title = "Data validation",
         value = "data_validation",
+        icon = icon("check"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
@@ -52,12 +55,25 @@ data_ui <- function(id) {
       nav(
         title = "Map",
         value = "map",
+        icon = icon("map-marker"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
           icon("info-circle"), "You need to import data and select variable."
         ),
         data_map_ui(ns("map"))
+      ),
+      nav_spacer(),
+      nav(
+        title = "Data",
+        value = "data",
+        icon = icon("database"),
+        shinyWidgets::alert(
+          status = "info",
+          class = "alert-no-data-no-variables",
+          icon("info-circle"), "You need to import data and select variable."
+        ),
+        data_display_ui(ns("display"))
       )
     )
   )
@@ -79,6 +95,7 @@ data_server <- function(id) {
 
       ns <- session$ns
 
+      rv <- reactiveValues(data = NULL)
 
 
       # Data Import ----
@@ -99,6 +116,8 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
 
+      observeEvent(data_r(), rv$data <- data_r())
+
 
 
       # Variable Selection ----
@@ -118,6 +137,8 @@ data_server <- function(id) {
         }
       })
       observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
+
+      observeEvent(variable_r()$data, rv$data <- variable_r()$data)
 
 
 
@@ -143,6 +164,8 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_map, nav_select("navs", "map"))
 
+      observeEvent(data_validated_r(), rv$data <- data_validated_r())
+
 
 
       # Map validation ----
@@ -150,6 +173,15 @@ data_server <- function(id) {
       data_map_server(
         id = "map",
         data_r = data_validated_r
+      )
+
+
+
+      # Data display ----
+
+      data_display_server(
+        id = "display",
+        data_r = reactive(rv$data)
       )
 
       return(reactive(NULL))
