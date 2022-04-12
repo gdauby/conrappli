@@ -25,7 +25,7 @@ data_import_ui <- function(id) {
         shinyWidgets::radioGroupButtons(
           inputId = ns("type_import"),
           label = NULL,
-          choices = c("From file", "From copy/paste"),
+          choices = c("GBIF", "From file", "From copy/paste"),
           direction = "vertical",
           width = "100%"
         )
@@ -34,6 +34,10 @@ data_import_ui <- function(id) {
         width = 10,
         navs_hidden(
           id = ns("navs_type_import"),
+          nav_content(
+            value = "GBIF",
+            data_import_gbif_ui(id = ns("gbif"))
+          ),
           nav_content(
             value = "From file",
             datamods::import_file_ui(id = ns("file"), title = NULL)
@@ -61,6 +65,10 @@ data_import_server <- function(id) {
       dataset_rv <- reactiveValues(value = NULL)
 
       observeEvent(input$type_import, nav_select("navs_type_import", input$type_import))
+
+      raw_data_gbif <- data_import_gbif_server(
+        id = "gbif"
+      )
 
       raw_data_file <- datamods::import_file_server(
         id = "file",
