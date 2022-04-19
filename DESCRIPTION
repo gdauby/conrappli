@@ -21,7 +21,7 @@ Imports:
     bslib,
     ConR,
     crosstalk (>= 1.2.0.9000),
-    datamods (>= 1.2.0.9300),
+    datamods (>= 1.2.0.9320),
     dplyr,
     DT,
     esquisse,

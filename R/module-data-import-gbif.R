@@ -83,10 +83,13 @@ data_import_gbif_server <- function(id) {
       species_copypaste_r <- datamods::import_copypaste_server(
         id = "copypaste",
         btn_show_data = FALSE,
-        trigger_return = "button"
+        trigger_return = "button",
+        fread_args = list(header = FALSE)
       )
       observeEvent(species_copypaste_r$data(), {
-        species_rv$data <- species_copypaste_r$data()
+        x <- species_copypaste_r$data()
+        x[[1]] <- apply(x, MARGIN = 1, FUN = paste, collapse = " ")
+        species_rv$data <- x
       })
 
 

@@ -8,7 +8,7 @@
 #' @return A `tibble` with info found for each species provided.
 #' @export
 #'
-#' @importFrom dplyr bind_rows as_tibble filter %>%
+#' @importFrom dplyr bind_rows as_tibble filter
 #' @importFrom taxize get_gbifid_
 #'
 #' @examples
@@ -19,10 +19,12 @@
 #' }
 search_species_info <- function(species_name, match_type = c("exact", "confidence"), confidence_level = 0.95) {
   match_type <- match.arg(match_type, several.ok = TRUE)
-  infos <- taxize::get_gbifid_(sci = species_name, method = "backbone") %>%
-    bind_rows(.id = "provided_sciname") %>%
-    filter(kingdom == "Plantae") %>%
-    as_tibble()
+  infos <- taxize::get_gbifid_(sci = species_name, method = "backbone")
+  infos <- bind_rows(infos, .id = "provided_sciname")
+  if (nrow(infos) < 1)
+    return(infos)
+  infos <- filter(infos, kingdom == "Plantae")
+  infos <- as_tibble(infos)
   infos_exact <- filter(infos, matchtype == "EXACT" & status == "ACCEPTED")
   infos_conf <- filter(infos, matchtype != "EXACT" & status == "ACCEPTED" & confidence > confidence_level)
 
