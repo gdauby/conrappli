@@ -100,12 +100,12 @@ data_server <- function(id) {
 
       # Data Import ----
 
-      data_r <- data_import_server("import")
+      data_imported_r <- data_import_server("import")
 
       output$btn_nav_import_dataset <- renderUI({
         shinyjs::show(selector = ".alert-no-data-no-variables")
-        req(data_r())
-        if (is.data.frame(data_r())) {
+        req(data_imported_r())
+        if (is.data.frame(data_imported_r())) {
           actionButton(
             inputId = ns("go_to_variable_selection"),
             label = "Go to variable selection",
@@ -116,13 +116,13 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
 
-      observeEvent(data_r(), rv$data <- data_r())
+      observeEvent(data_imported_r(), rv$data <- data_imported_r())
 
 
 
       # Variable Selection ----
 
-      variable_r <- data_variable_server("variable", data_r = data_r)
+      variable_r <- data_variable_server("variable", data_r = data_imported_r)
 
       output$btn_nav_variable_selection <- renderUI({
         vars <- variable_r()
@@ -147,7 +147,7 @@ data_server <- function(id) {
       data_validated_r <- data_validation_server(
         id = "validation",
         data_r = reactive({
-          input$navs
+          # input$navs
           variable_r()$data
         })
       )
@@ -170,11 +170,11 @@ data_server <- function(id) {
 
       # Map validation ----
 
-      data_map_server(
+      data_map_r <- data_map_server(
         id = "map",
-        data_r = data_validated_r
+        data_r = reactive(rv$data)
       )
-
+      observeEvent(data_map_r(), rv$data <- data_map_r())
 
 
       # Data display ----
@@ -184,7 +184,7 @@ data_server <- function(id) {
         data_r = reactive(rv$data)
       )
 
-      return(reactive(NULL))
+      return(reactive(rv$data))
     }
   )
 }

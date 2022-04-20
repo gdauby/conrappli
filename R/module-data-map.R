@@ -21,7 +21,7 @@ data_map_ui <- function(id) {
   tagList(
     leafletOutput(outputId = ns("map"), height = "500px"),
     fluidRow(
-      class = "mt-3",
+      class = "mt-3 mb-3",
       column(
         width = 6,
         actionButton(
@@ -42,6 +42,13 @@ data_map_ui <- function(id) {
           class = "btn-outline-primary"
         )
       )
+    ),
+    actionButton(
+      inputId = ns("validate"),
+      label = "Validate selection",
+      width = "100%",
+      icon = icon("check"),
+      class = "btn-outline-primary"
     )
   )
 }
@@ -66,11 +73,13 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         # datamap <- req(data_r()) %>%
         #   dplyr::group_by(.__latitude, .__longitude) %>%
         #   dplyr::summarise(n = dplyr::n(), id = dplyr::cur_group_id())
-        datamap <- req(data_r()) %>%
+        req(data_r(), hasName(data_r(), ".__latitude"), hasName(data_r(), ".__longitude"))
+        datamap <- data_r() %>%
           dplyr::mutate(id = seq_len(dplyr::n()))
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__latitude", ".__longitude"))
         pts_sf <- crosstalk::SharedData$new(pts_sf, key = ~id)
         data_rv$init <- data_rv$select <- pts_sf
+        returned_rv$x <- NULL
       })
 
 
@@ -134,7 +143,15 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
           leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
       })
 
-      return(reactive(NULL))
+
+      returned_rv <- reactiveValues(x = NULL)
+
+      observeEvent(input$validate, {
+        returned_rv$x <- sf::st_drop_geometry(data_rv$select$data(withSelection = FALSE))
+        print(str(returned_rv$x))
+      })
+
+      return(reactive(returned_rv$x))
     }
   )
 }
