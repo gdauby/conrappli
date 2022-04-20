@@ -69,6 +69,7 @@ data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
       width = "100%"
     ),
     tags$br(),
+    tags$br()
   )
 }
 
@@ -135,10 +136,17 @@ data_import_gbif_server <- function(id) {
             type = "warning"
           )
         } else {
+          shinybusy::show_modal_spinner(
+            spin = "fulfilling-bouncing-circle",
+            color = "#088A08",
+            text = "Retrieving data, please wait..."
+          )
           keys <- species_rv$names$specieskey[index]
-          dataset_rv$value <- shinyWidgets::execute_safely({
+          occdata <- shinyWidgets::execute_safely({
             retrieve_occ_data(keys)
           })
+          shinybusy::remove_modal_spinner()
+          dataset_rv$value <- occdata
         }
       })
 

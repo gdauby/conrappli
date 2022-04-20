@@ -32,6 +32,7 @@ Imports:
     rgbif,
     sf,
     shiny,
+    shinybusy,
     shinyjs,
     shinyWidgets (>= 0.6.4.9000),
     taxize,
