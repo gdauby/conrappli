@@ -16,33 +16,45 @@
 #' @importFrom shiny NS fluidRow column
 #' @importFrom htmltools tagList
 #' @importFrom bslib navs_hidden nav_content
-data_import_gbif_ui <- function(id) {
+data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
   ns <- NS(id)
+  from <- match.arg(from)
   tagList(
     tags$style(sprintf(
       "#%s {display: none;}",
       ns("file-import-result")
     )),
-    tags$h5(
-      "Import a file containing species names or enter species names in box below"
-    ),
-    datamods::import_file_ui(
-      id = ns("file"),
-      preview_data = FALSE,
-      title = NULL
-    ),
-    tags$div(
-      style = "width: 100%; height: 25px; border-bottom: 1px solid #dee2e6; margin-bottom: 35px; text-align: center;",
-      tags$span(
-        style = "font-size: 30px; color: #dee2e6; background-color: #FFF; padding: 0 10px;",
-        "OR"
+    if (identical(from, "file")) {
+      tagList(
+        tags$h5(
+          "Import a file containing species names:"
+        ),
+        datamods::import_file_ui(
+          id = ns("file"),
+          preview_data = FALSE,
+          title = NULL
+        )
       )
-    ),
-    datamods::import_copypaste_ui(
-      id = ns("copypaste"),
-      title = NULL,
-      name_field = FALSE
-    ),
+    },
+    # tags$div(
+    #   style = "width: 100%; height: 25px; border-bottom: 1px solid #dee2e6; margin-bottom: 35px; text-align: center;",
+    #   tags$span(
+    #     style = "font-size: 30px; color: #dee2e6; background-color: #FFF; padding: 0 10px;",
+    #     "OR"
+    #   )
+    # ),
+    if (identical(from, "copypaste")) {
+      tagList(
+        tags$h5(
+          "Paste species names below:"
+        ),
+        datamods::import_copypaste_ui(
+          id = ns("copypaste"),
+          title = NULL,
+          name_field = FALSE
+        )
+      )
+    },
     tags$h4("Species found"),
     checkboxInput(
       inputId = ns("exact"),
@@ -50,11 +62,13 @@ data_import_gbif_ui <- function(id) {
       value = TRUE
     ),
     reactable::reactableOutput(outputId = ns("species")),
+    tags$br(),
     actionButton(
       inputId = ns("import"),
       label = "Import data for selected species",
       width = "100%"
-    )
+    ),
+    tags$br(),
   )
 }
 
@@ -68,6 +82,7 @@ data_import_gbif_server <- function(id) {
     id = id,
     module = function(input, output, session) {
 
+      dataset_rv <- reactiveValues(value = NULL)
       species_rv <- reactiveValues(names = data.frame(name = character(0)), data = NULL)
 
       species_file_r <- datamods::import_file_server(
@@ -104,12 +119,30 @@ data_import_gbif_server <- function(id) {
         reactable::reactable(
           data = species_rv$names,
           selection = "multiple",
+          onClick = "select",
           defaultSelected = seq_len(nrow(species_rv$names)),
           compact = TRUE,
           bordered = TRUE
         )
       })
 
+      observeEvent(input$import, {
+        index <- reactable::getReactableState("species", "selected")
+        if (length(index) < 1) {
+          shinyWidgets::show_alert(
+            title = "No species specified",
+            text = "You must specify species for which to import data.",
+            type = "warning"
+          )
+        } else {
+          keys <- species_rv$names$specieskey[index]
+          dataset_rv$value <- shinyWidgets::execute_safely({
+            retrieve_occ_data(keys)
+          })
+        }
+      })
+
+      return(reactive(dataset_rv$value))
     }
   )
 }

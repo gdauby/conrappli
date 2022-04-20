@@ -28,6 +28,7 @@ Imports:
     htmltools,
     leaflet,
     pkgload,
+    reactable,
     rgbif,
     sf,
     shiny,
