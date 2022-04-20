@@ -148,7 +148,6 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(input$validate, {
         returned_rv$x <- sf::st_drop_geometry(data_rv$select$data(withSelection = FALSE))
-        print(str(returned_rv$x))
       })
 
       return(reactive(returned_rv$x))

@@ -18,7 +18,7 @@
 data_display_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    DT::DTOutput(outputId = ns("table"))
+    reactable::reactableOutput(outputId = ns("table"))
   )
 }
 
@@ -35,14 +35,13 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
     id = id,
     module = function(input, output, session) {
 
-      output$table <- DT::renderDT({
+      output$table <- reactable::renderReactable({
         req(data_r())
-        DT::datatable(
+        reactable::reactable(
           data = data_r() %>%
             unselect_internal_vars(),
-          class = "display compact cell-border",
-          selection = "none",
-          rownames = FALSE
+          bordered = TRUE,
+          compact = TRUE
         )
       })
 
