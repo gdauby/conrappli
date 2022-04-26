@@ -26,6 +26,7 @@ Imports:
     esquisse,
     htmltools,
     leaflet,
+    measurements,
     pkgload,
     reactable,
     rgbif,
@@ -35,6 +36,7 @@ Imports:
     shinyjs,
     shinyWidgets (>= 0.6.4.9000),
     taxize,
+    tidyr,
     validate
 Remotes: dreamRs/datamods,
     dreamRs/shinyWidgets,

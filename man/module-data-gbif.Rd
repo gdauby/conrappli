@@ -5,7 +5,7 @@
 \alias{data_import_gbif_ui}
 \title{Import data from GBIF Module}
 \usage{
-data_import_gbif_ui(id)
+data_import_gbif_ui(id, from = c("file", "copypaste"))
 }
 \arguments{
 \item{id}{Module's ID.}
