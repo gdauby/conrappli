@@ -19,7 +19,7 @@ Depends: R (>= 2.10)
 Imports:
     bdc,
     bslib,
-    ConR,
+    ConR (>= 2.0.1),
     crosstalk (>= 1.2.0.9000),
     datamods (>= 1.2.0.9320),
     dplyr,
@@ -38,6 +38,6 @@ Imports:
     taxize,
     tidyr,
     validate
-Remotes: dreamRs/datamods,
+Remotes: gdauby/ConR@devel,
     dreamRs/shinyWidgets,
     rstudio/crosstalk
