@@ -8,7 +8,8 @@
 bs_theme_conr <- function() {
   theme <- bslib::bs_theme(
     version = 5,
-    "modal-lg" = "1000px"
+    "modal-lg" = "1000px",
+    primary = "#2472b5"
   )
   bslib::bs_add_rules(
     theme = theme,

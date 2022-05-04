@@ -37,7 +37,8 @@ conr_ui <- function() {
       ),
       nav(
         title = "Evaluation - Criterion B",
-        value = "evaluation"
+        value = "evaluation",
+        criterion_b_ui("criterion_b")
       ),
       nav(
         title = "Habitat quality/population decline",

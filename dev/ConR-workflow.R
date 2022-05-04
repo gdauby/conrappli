@@ -29,11 +29,11 @@ locations <- locations.comp(XY = test_data,
 )
 
 categories <-
-  cat_criterion_b(EOO = p1$results$eoo, AOO = aoo_res$AOO$aoo, locations = locations$locations$locations)
+  cat_criterion_b(EOO = eoo_res$results$eoo, AOO = aoo_res$AOO$aoo, locations = locations$locations$locations)
 
 results_full <-
   data.frame(
-    taxa = row.names(aoo_res),
+    taxa = row.names(aoo_res$AOO),
     EOO = eoo_res$results$eoo,
     AOO = aoo_res$AOO$aoo,
     locations = locations$locations$locations,

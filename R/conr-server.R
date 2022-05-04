@@ -14,7 +14,9 @@
 conr_server <- function() {
   function(input, output, session) {
 
-    data_server("data")
+    data_r <- data_server("data")
+
+    criterion_b_server(id = "criterion_b", data_r = data_r)
 
   }
 }
