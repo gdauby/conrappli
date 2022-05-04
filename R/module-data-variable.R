@@ -201,7 +201,7 @@ other_cols <- function(x = NULL) {
       ".__longitude",
       ".__latitude",
       ".__altitude",
-      ".__collection_year"
+      ".__year"
     )
   )
   if (!is.null(x))

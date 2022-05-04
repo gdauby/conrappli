@@ -19,6 +19,16 @@
 data_map_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    fluidRow(
+      column(
+        width = 4,
+        uiOutput(outputId = ns("filter_year"))
+      ),
+      column(
+        width = 4,
+        uiOutput(outputId = ns("filter_coord_accuracy"))
+      )
+    ),
     leafletOutput(outputId = ns("map"), height = "500px"),
     fluidRow(
       class = "mt-3 mb-3",
@@ -60,50 +70,106 @@ data_map_ui <- function(id) {
 #'
 #' @rdname module-data-map
 #'
-#' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe updateActionButton req outputOptions
+#' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe
+#'  updateActionButton req outputOptions selectizeInput sliderInput
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 data_map_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
 
-      data_rv <- reactiveValues(init = NULL, select = NULL, ts = NULL)
+      ns <- session$ns
 
-      observeEvent(data_r(), {
-        # datamap <- req(data_r()) %>%
-        #   dplyr::group_by(.__latitude, .__longitude) %>%
-        #   dplyr::summarise(n = dplyr::n(), id = dplyr::cur_group_id())
+      data_rv <- reactiveValues()
+
+      observeEvent(list(data_r(), input$cancel), {
         req(data_r(), hasName(data_r(), ".__latitude"), hasName(data_r(), ".__longitude"))
         datamap <- data_r() %>%
-          dplyr::mutate(id = seq_len(dplyr::n()))
+          dplyr::mutate(
+            id = seq_len(dplyr::n()),
+            display_year = TRUE,
+            display_coord_accuracy = TRUE,
+            selected = TRUE
+          ) %>%
+          coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__latitude", ".__longitude"))
-        pts_sf <- crosstalk::SharedData$new(pts_sf, key = ~id)
-        data_rv$init <- data_rv$select <- pts_sf
+        data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
 
 
+      shared_map <- crosstalk::SharedData$new(reactive({
+        req(data_rv$map) %>%
+          dplyr::filter(
+            display_year == TRUE,
+            display_coord_accuracy == TRUE,
+            selected == TRUE
+          )
+      }), key = ~id)
+
+      output$filter_year <- renderUI({
+        datamap <- req(data_r())
+        if (hasName(datamap, ".__year")) {
+          selectizeInput(
+            inputId = ns("year"),
+            label = "Year:",
+            choices = sort(unique(datamap$.__year)),
+            selected = sort(unique(datamap$.__year)),
+            multiple = TRUE,
+            width = "100%",
+            options = list(
+              plugins = list("remove_button")
+            )
+          )
+        }
+      })
+
+      output$filter_coord_accuracy <- renderUI({
+        datamap <- req(data_r())
+        sliderInput(
+          inputId = ns("coord_accuracy"),
+          label = "Accuracy of coordinates:",
+          min = 1,
+          max = 8,
+          value = c(1, 8),
+          step = 1,
+          width = "100%"
+        )
+      })
+
 
       output$map <- renderLeaflet({
-        basemap <- leaflet::leaflet(data = data_rv$init) %>%
+        leaflet::leaflet(data = shared_map) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
           leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
           leaflet::addLayersControl(
             baseGroups = c("OSM", "Esri", "Open Topo Map"),
             options = leaflet::layersControlOptions(collapsed = FALSE)
-          )
-        if (!is.null(data_rv$init)) {
-          basemap <- basemap %>%
-            leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
-            leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
-        }
-        basemap
+          ) %>%
+          leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
+          leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
       })
 
+
+      observeEvent(input$year, {
+        req(input$year)
+        data_rv$map <- data_rv$map %>%
+          dplyr:::mutate(display_year = .__year %in% input$year)
+      })
+
+      observeEvent(input$coord_accuracy, {
+        req(input$coord_accuracy)
+        data_rv$map <- data_rv$map %>%
+          dplyr:::mutate(
+            display_coord_accuracy = dplyr:::between(calc_accuracy, input$coord_accuracy[1], input$coord_accuracy[2])
+          )
+      })
+
+
       observe({
-        req(data_rv$select)
-        data_sel <- data_rv$select$data(withSelection = TRUE)
+        req(shared_map)
+        data_sel <- shared_map$data(withSelection = TRUE)
         n <- sum(data_sel$selected_)
         if (is.na(n)) {
           label <- "No points selected"
@@ -119,35 +185,26 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         )
       })
 
-      # Cancel selection
-      observeEvent(input$cancel, {
-        req(data_rv$init)
-        data_rv$select <- data_rv$init
-        leafletProxy("map", data = data_rv$select) %>%
-          leaflet::clearMarkers() %>%
-          leaflet::clearMarkerClusters() %>%
-          leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
-          leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
-      })
-
       # Remove points
       observeEvent(input$remove, {
-        req(data_rv$select)
-        data_sel <- data_rv$select$data(withSelection = TRUE)
-        new_data <- data_sel %>% dplyr::filter(selected_ == FALSE)
-        data_rv$select <- crosstalk::SharedData$new(new_data, key = ~id)
-        leafletProxy("map", data = data_rv$select) %>%
-          leaflet::clearMarkers() %>%
-          leaflet::clearMarkerClusters() %>%
-          leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
-          leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
+        req(data_rv$map)
+        data_sel <- shared_map$data(withSelection = TRUE)
+        id_selected <- data_sel %>% dplyr::filter(selected_ == TRUE) %>% pull(id)
+
+        data_map <- data_rv$map
+        data_map$selected[data_map$id %in% id_selected] <- FALSE
+        data_rv$map <- data_map
+
       })
 
 
       returned_rv <- reactiveValues(x = NULL)
 
       observeEvent(input$validate, {
-        returned_rv$x <- sf::st_drop_geometry(data_rv$select$data(withSelection = FALSE))
+        returned_rv$x <- data_rv$map %>%
+          dplyr::filter(selected == TRUE) %>%
+          dplyr::select(-dplyr::any_of(c("selected", "display"))) %>%
+          sf::st_drop_geometry()
       })
 
       return(reactive(returned_rv$x))
