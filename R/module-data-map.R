@@ -23,6 +23,10 @@ data_map_ui <- function(id) {
       column(
         width = 4,
         uiOutput(outputId = ns("filter_year"))
+      ),
+      column(
+        width = 4,
+        uiOutput(outputId = ns("filter_coord_accuracy"))
       )
     ),
     leafletOutput(outputId = ns("map"), height = "500px"),
@@ -66,7 +70,8 @@ data_map_ui <- function(id) {
 #'
 #' @rdname module-data-map
 #'
-#' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe updateActionButton req outputOptions
+#' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe
+#'  updateActionButton req outputOptions selectizeInput sliderInput
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 data_map_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
@@ -82,9 +87,11 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         datamap <- data_r() %>%
           dplyr::mutate(
             id = seq_len(dplyr::n()),
-            display = TRUE,
+            display_year = TRUE,
+            display_coord_accuracy = TRUE,
             selected = TRUE
-          )
+          ) %>%
+          coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__latitude", ".__longitude"))
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
@@ -93,21 +100,41 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       shared_map <- crosstalk::SharedData$new(reactive({
         req(data_rv$map) %>%
-          dplyr::filter(display == TRUE, selected == TRUE)
+          dplyr::filter(
+            display_year == TRUE,
+            display_coord_accuracy == TRUE,
+            selected == TRUE
+          )
       }), key = ~id)
 
       output$filter_year <- renderUI({
         datamap <- req(data_r())
         if (hasName(datamap, ".__year")) {
-          selectInput(
+          selectizeInput(
             inputId = ns("year"),
             label = "Year:",
             choices = sort(unique(datamap$.__year)),
             selected = sort(unique(datamap$.__year)),
             multiple = TRUE,
-            width = "100%"
+            width = "100%",
+            options = list(
+              plugins = list("remove_button")
+            )
           )
         }
+      })
+
+      output$filter_coord_accuracy <- renderUI({
+        datamap <- req(data_r())
+        sliderInput(
+          inputId = ns("coord_accuracy"),
+          label = "Accuracy of coordinates:",
+          min = 1,
+          max = 8,
+          value = c(1, 8),
+          step = 1,
+          width = "100%"
+        )
       })
 
 
@@ -128,7 +155,15 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       observeEvent(input$year, {
         req(input$year)
         data_rv$map <- data_rv$map %>%
-          dplyr:::mutate(display = .__year %in% input$year)
+          dplyr:::mutate(display_year = .__year %in% input$year)
+      })
+
+      observeEvent(input$coord_accuracy, {
+        req(input$coord_accuracy)
+        data_rv$map <- data_rv$map %>%
+          dplyr:::mutate(
+            display_coord_accuracy = dplyr:::between(calc_accuracy, input$coord_accuracy[1], input$coord_accuracy[2])
+          )
       })
 
 
