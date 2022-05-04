@@ -22,11 +22,11 @@ data_map_ui <- function(id) {
     fluidRow(
       column(
         width = 4,
-        uiOutput(outputId = ns("filter_year"))
+        uiOutput(outputId = ns("filter_coord_accuracy"))
       ),
       column(
         width = 4,
-        uiOutput(outputId = ns("filter_coord_accuracy"))
+        uiOutput(outputId = ns("filter_year"))
       )
     ),
     leafletOutput(outputId = ns("map"), height = "500px"),

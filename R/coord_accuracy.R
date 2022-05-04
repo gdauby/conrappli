@@ -31,6 +31,8 @@ coord_accuracy <- function(.data, col_x, col_y, rounding = TRUE) {
 
 
 #' @importFrom measurements conv_unit
+#' @importFrom dplyr near tibble mutate pull
+#' @importFrom tidyr separate
 coord_accuracy_vec <- function(x, rounding = TRUE) {
   if (isTRUE(rounding)) {
     rounding_fun <- function(x) {
