@@ -36,13 +36,6 @@ data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
         )
       )
     },
-    # tags$div(
-    #   style = "width: 100%; height: 25px; border-bottom: 1px solid #dee2e6; margin-bottom: 35px; text-align: center;",
-    #   tags$span(
-    #     style = "font-size: 30px; color: #dee2e6; background-color: #FFF; padding: 0 10px;",
-    #     "OR"
-    #   )
-    # ),
     if (identical(from, "copypaste")) {
       tagList(
         tags$h5(
@@ -116,18 +109,27 @@ data_import_gbif_server <- function(id) {
         })
       })
 
+      species_names_r <- reactive({
+        data <- req(species_rv$names, nrow(species_rv$names) > 0)
+        if (isTRUE(input$exact)) {
+          data <- dplyr::filter(data, matchtype == "EXACT" & status == "ACCEPTED")
+        }
+        data
+      })
+
       output$species <- reactable::renderReactable({
         reactable::reactable(
-          data = species_rv$names,
+          data = species_names_r(),
           selection = "multiple",
           onClick = "select",
-          defaultSelected = seq_len(nrow(species_rv$names)),
+          defaultSelected = seq_len(nrow(species_names_r())),
           compact = TRUE,
           bordered = TRUE
         )
       })
 
       observeEvent(input$import, {
+        req(species_names_r())
         index <- reactable::getReactableState("species", "selected")
         if (length(index) < 1) {
           shinyWidgets::show_alert(
@@ -141,7 +143,7 @@ data_import_gbif_server <- function(id) {
             color = "#088A08",
             text = "Retrieving data, please wait..."
           )
-          keys <- species_rv$names$specieskey[index]
+          keys <- species_names_r()$specieskey[index]
           occdata <- shinyWidgets::execute_safely({
             retrieve_occ_data(keys)
           })
