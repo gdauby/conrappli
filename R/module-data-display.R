@@ -18,6 +18,8 @@
 data_display_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    downloadButton(outputId = ns("download"), label = "Download data", class = "float-end mb-3"),
+    tags$div(class = "clearfix"),
     reactable::reactableOutput(outputId = ns("table"))
   )
 }
@@ -34,6 +36,17 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
+
+      output$download <- downloadHandler(
+        filename = function() {
+          "conr-data.csv"
+        },
+        content = function(file) {
+          data_r() %>%
+            unselect_internal_vars() %>%
+            write.csv(file, row.names = FALSE)
+        }
+      )
 
       output$table <- reactable::renderReactable({
         req(data_r())

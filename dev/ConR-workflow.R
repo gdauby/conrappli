@@ -38,5 +38,8 @@ results_full <-
     AOO = aoo_res$AOO$aoo,
     locations = locations$locations$locations,
     category = categories$ranks_B,
-    cat_codes = categories$cats_code
+    cat_codes = categories$cats_code,
+    issue_aoo = aoo_res$AOO$issue_aoo,
+    issue_eoo = eoo_res$results$issue_eoo,
+    issue_locations = locations$locations$issue_locations
   )
