@@ -59,8 +59,10 @@ data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
     actionButton(
       inputId = ns("import"),
       label = "Import data for selected species",
-      width = "100%"
+      width = "100%",
+      class = "mb-3"
     ),
+    uiOutput(outputId = ns("feedback_gbif")),
     tags$br(),
     tags$br()
   )
@@ -124,7 +126,9 @@ data_import_gbif_server <- function(id) {
           onClick = "select",
           defaultSelected = seq_len(nrow(species_names_r())),
           compact = TRUE,
-          bordered = TRUE
+          bordered = TRUE,
+          defaultPageSize = 5,
+          searchable = TRUE
         )
       })
 
@@ -151,6 +155,21 @@ data_import_gbif_server <- function(id) {
           dataset_rv$value <- occdata
         }
       })
+
+      output$feedback_gbif <- renderUI({
+        if (isTruthy(dataset_rv$value)) {
+          shinyWidgets::alert(
+            status = "success",
+            icon("check"), "Data successfully downloaded from GBIF.",
+            actionLink(inputId = session$ns("see_data"), label = tagList(icon("table")))
+          )
+        }
+      })
+      observeEvent(
+        input$see_data,
+        datamods::show_data(dataset_rv$value, title = "GBIF data", show_classes = FALSE, type = "modal")
+      )
+
 
       return(reactive(dataset_rv$value))
     }

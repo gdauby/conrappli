@@ -110,7 +110,7 @@ data_server <- function(id) {
             inputId = ns("go_to_variable_selection"),
             label = "Go to variable selection",
             icon = icon("arrow-circle-right"),
-            class = "float-end"
+            class = "float-end btn-outline-primary"
           )
         }
       })
@@ -132,7 +132,7 @@ data_server <- function(id) {
             inputId = ns("go_to_data_validation"),
             label = "Go to data validation",
             icon = icon("arrow-circle-right"),
-            class = "float-end"
+            class = "float-end btn-outline-primary"
           )
         }
       })
@@ -158,7 +158,7 @@ data_server <- function(id) {
             inputId = ns("go_to_map"),
             label = "Go to mapping",
             icon = icon("arrow-circle-right"),
-            class = "float-end"
+            class = "float-end btn-outline-primary"
           )
         }
       })
