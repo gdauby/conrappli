@@ -87,7 +87,9 @@ data_import_gbif_server <- function(id) {
         trigger_return = "button"
       )
       observeEvent(species_file_r$data(), {
-        species_rv$data <- species_file_r$data()
+        x <- species_file_r$data()
+        x[[1]] <- apply(x, MARGIN = 1, FUN = paste, collapse = " ")
+        species_rv$data <- x
       })
 
 

@@ -109,17 +109,16 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       output$filter_year <- renderUI({
         datamap <- req(data_r())
-        if (hasName(datamap, ".__year")) {
-          selectizeInput(
+        if (is_valid_year_col(datamap)) {
+          values <- range(datamap$.__year, na.rm = TRUE)
+          sliderInput(
             inputId = ns("year"),
             label = "Year:",
-            choices = sort(unique(datamap$.__year)),
-            selected = sort(unique(datamap$.__year)),
-            multiple = TRUE,
-            width = "100%",
-            options = list(
-              plugins = list("remove_button")
-            )
+            min = values[1],
+            max = values[2],
+            value = values,
+            sep = "",
+            width = "100%"
           )
         }
       })
@@ -153,16 +152,18 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
 
       observeEvent(input$year, {
-        req(input$year)
+        years <- req(input$year)
         data_rv$map <- data_rv$map %>%
-          dplyr:::mutate(display_year = .__year %in% input$year)
+          dplyr:::mutate(
+            display_year = between(.__year, years[1], years[2])
+          )
       })
 
       observeEvent(input$coord_accuracy, {
-        req(input$coord_accuracy)
+        coords <- req(input$coord_accuracy)
         data_rv$map <- data_rv$map %>%
           dplyr:::mutate(
-            display_coord_accuracy = dplyr:::between(calc_accuracy, input$coord_accuracy[1], input$coord_accuracy[2])
+            display_coord_accuracy = dplyr::between(calc_accuracy, coords[1], coords[2])
           )
       })
 

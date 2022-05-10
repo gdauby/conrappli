@@ -19,6 +19,8 @@
 #' }
 search_species_info <- function(species_name, match_type = c("exact", "confidence"), confidence_level = 0.95) {
   match_type <- match.arg(match_type, several.ok = TRUE)
+  species_name <- unique(species_name)
+  species_name <- species_name[!is.na(species_name)]
   infos <- taxize::get_gbifid_(sci = species_name, method = "backbone")
   infos <- bind_rows(infos, .id = "provided_sciname")
   if (nrow(infos) < 1)
