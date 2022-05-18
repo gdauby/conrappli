@@ -97,7 +97,7 @@ data_import_gbif_server <- function(id) {
         id = "copypaste",
         btn_show_data = FALSE,
         trigger_return = "button",
-        fread_args = list(header = FALSE)
+        fread_args = list(header = FALSE, fill = TRUE)
       )
       observeEvent(species_copypaste_r$data(), {
         x <- species_copypaste_r$data()
