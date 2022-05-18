@@ -17,7 +17,7 @@
 #' search_species_info(c("Uapaca niangadoumae"), match_type = "exact")
 #' search_species_info(c("Uapaca niangadoumae", "do not exist"))
 #' }
-search_species_info <- function(species_name, match_type = c("exact", "confidence"), confidence_level = 0.95) {
+search_species_info <- function(species_name, match_type = c("exact", "confidence"), confidence_level = 95) {
   match_type <- match.arg(match_type, several.ok = TRUE)
   species_name <- unique(species_name)
   species_name <- species_name[!is.na(species_name)]
