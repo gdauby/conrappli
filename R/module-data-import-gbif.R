@@ -84,7 +84,12 @@ data_import_gbif_server <- function(id) {
       species_file_r <- datamods::import_file_server(
         id = "file",
         btn_show_data = FALSE,
-        trigger_return = "button"
+        trigger_return = "change",
+        read_fns = list(
+          csv = function(file, sheet, skip, encoding) {
+            read.csv(file = file, encoding = encoding, skip = skip)
+          }
+        )
       )
       observeEvent(species_file_r$data(), {
         x <- species_file_r$data()
@@ -96,7 +101,7 @@ data_import_gbif_server <- function(id) {
       species_copypaste_r <- datamods::import_copypaste_server(
         id = "copypaste",
         btn_show_data = FALSE,
-        trigger_return = "button",
+        trigger_return = "change",
         fread_args = list(header = FALSE, fill = TRUE)
       )
       observeEvent(species_copypaste_r$data(), {
