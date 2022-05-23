@@ -54,15 +54,16 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
 
       validated_r <- reactive({
         req(to_validate_r())
-        exclude_violating_records(to_validate_r())
+        identify_violating_records(to_validate_r())
       })
 
       output$alert_result <- renderUI({
         to_validate <- to_validate_r()
-        validated <- validated_r()
+        validated <- validated_r() %>%
+          dplyr::filter(STATUS_CONR == "IN")
         if (nrow(validated) < 1) {
           shinyWidgets::alert(
-            status = "error",
+            status = "danger",
             icon("exclamation-triangle"), "There are not enough rows to proceed."
           )
         } else if (nrow(validated) < nrow(to_validate)) {
@@ -71,7 +72,10 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
             icon("exclamation-triangle"),
             nrow(to_validate) - nrow(validated),
             "rows will be discarded in order to proceed.",
-            actionLink(inputId = session$ns("see_data"), label = "click to see problematic rows.")
+            tags$br(),
+            actionLink(inputId = session$ns("see_data"), label = "Click here to display problematic rows."),
+            tags$br(),
+            downloadLink(outputId = session$ns("download_data"), label = "Click here to download problematic rows.")
           )
         } else {
           shinyWidgets::alert(
@@ -91,6 +95,18 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
           type = "modal"
         )
       })
+
+      output$download_data <- downloadHandler(
+        filename = function() {
+          "conr-violating-records.csv"
+        },
+        content = function(file) {
+          to_validate_r() %>%
+            unselect_internal_vars() %>%
+            extract_violating_records() %>%
+            write.csv(file, row.names = FALSE)
+        }
+      )
 
       return(validated_r)
     }

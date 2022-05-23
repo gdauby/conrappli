@@ -83,13 +83,20 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       data_rv <- reactiveValues()
 
       observeEvent(list(data_r(), input$cancel), {
-        req(data_r(), hasName(data_r(), ".__latitude"), hasName(data_r(), ".__longitude"))
+        req(
+          data_r(),
+          hasName(data_r(), ".__latitude"),
+          hasName(data_r(), ".__longitude"),
+          hasName(data_r(), "STATUS_CONR")
+        )
         datamap <- data_r() %>%
           dplyr::mutate(
             id = seq_len(dplyr::n()),
             display_year = TRUE,
             display_coord_accuracy = TRUE,
-            selected = TRUE
+            selected = TRUE,
+            .__longitude = ifelse(is.na(.__longitude), 0, .__longitude),
+            .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
           ) %>%
           coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"))
@@ -101,6 +108,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       shared_map <- crosstalk::SharedData$new(reactive({
         req(data_rv$map) %>%
           dplyr::filter(
+            STATUS_CONR == "IN",
             display_year == TRUE,
             display_coord_accuracy == TRUE,
             selected == TRUE
@@ -202,8 +210,9 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       returned_rv <- reactiveValues(x = NULL)
 
       observeEvent(input$validate, {
+        req(data_rv$map)
         returned_rv$x <- data_rv$map %>%
-          dplyr::filter(selected == TRUE) %>%
+          dplyr::mutate(STATUS_CONR = ifelse(selected == TRUE, STATUS_CONR, FALSE)) %>%
           dplyr::select(-dplyr::any_of(c("selected", "display"))) %>%
           sf::st_drop_geometry()
       })

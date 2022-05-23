@@ -66,6 +66,19 @@ exclude_violating_records <- function(data) {
     dplyr::select(!dplyr::any_of(validation_cols()))
 }
 
+#' @export
+#'
+#' @rdname validation
+#'
+#' @importFrom dplyr mutate if_all all_of select any_of
+identify_violating_records <- function(data) {
+  dplyr::mutate(
+    data,
+    STATUS_CONR = dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE),
+    STATUS_CONR = ifelse(STATUS_CONR == TRUE, "IN", "OUT")
+  ) %>%
+    dplyr::select(!dplyr::any_of(validation_cols()))
+}
 
 #' @export
 #'

@@ -54,7 +54,12 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
           data = data_r() %>%
             unselect_internal_vars(),
           bordered = TRUE,
-          compact = TRUE
+          compact = TRUE,
+          columns = list(
+            STATUS_CONR = colDef(name = "Status ConR", cell = function(value, index) {
+              if (value == "OUT") "\u274c Out" else "\u2714\ufe0f In"
+            })
+          )
         )
       })
 
