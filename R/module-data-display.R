@@ -56,7 +56,7 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
           bordered = TRUE,
           compact = TRUE,
           columns = list(
-            STATUS_CONR = colDef(name = "Status ConR", cell = function(value, index) {
+            STATUS_CONR = reactable::colDef(name = "Status ConR", cell = function(value, index) {
               if (value == "OUT") "\u274c Out" else "\u2714\ufe0f In"
             })
           )
