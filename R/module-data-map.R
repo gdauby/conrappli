@@ -92,7 +92,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             selected = TRUE
           ) %>%
           coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
-        pts_sf <- sf::st_as_sf(datamap, coords = c(".__latitude", ".__longitude"))
+        pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"))
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
