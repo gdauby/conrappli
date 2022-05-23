@@ -56,6 +56,10 @@ search_species_info <- function(species_name, match_type = c("exact", "confidenc
 #' }
 retrieve_occ_data <- function(specieskey) {
   res <- rgbif::occ_data(taxonKey = unique(specieskey), limit = 100000)
-  dplyr::bind_rows(lapply(X = res, FUN = `[[`, "data"))
+  if (identical(attr(res, "type"), "many")) {
+    dplyr::bind_rows(lapply(X = res, FUN = `[[`, "data"))
+  } else {
+    res$data
+  }
 }
 
