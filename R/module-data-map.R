@@ -26,6 +26,10 @@ data_map_ui <- function(id) {
       ),
       column(
         width = 4,
+        uiOutput(outputId = ns("filter_taxa"))
+      ),
+      column(
+        width = 4,
         uiOutput(outputId = ns("filter_year"))
       )
     ),
@@ -94,6 +98,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             id = seq_len(dplyr::n()),
             display_year = TRUE,
             display_coord_accuracy = TRUE,
+            display_taxa = TRUE,
             selected = TRUE,
             .__longitude = ifelse(is.na(.__longitude), 0, .__longitude),
             .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
@@ -111,6 +116,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             STATUS_CONR == "IN",
             display_year == TRUE,
             display_coord_accuracy == TRUE,
+            display_taxa == TRUE,
             selected == TRUE
           )
       }), key = ~id)
@@ -129,6 +135,19 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             width = "100%"
           )
         }
+      })
+
+      output$filter_taxa <- renderUI({
+        datamap <- req(data_r())
+        selectizeInput(
+          inputId = ns("taxa"),
+          label = "Taxa:",
+          choices = list(
+            " " = list("All"),
+            "Species" = as.list(unique(datamap$.__taxa))
+          ),
+          width = "100%"
+        )
       })
 
       output$filter_coord_accuracy <- renderUI({
@@ -173,6 +192,20 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
           dplyr:::mutate(
             display_coord_accuracy = dplyr::between(calc_accuracy, coords[1], coords[2])
           )
+      })
+      observeEvent(input$taxa, {
+        req(input$taxa)
+        if (identical(input$taxa, "All")) {
+          data_rv$map <- data_rv$map %>%
+            dplyr:::mutate(
+              display_taxa = TRUE
+            )
+        } else {
+          data_rv$map <- data_rv$map %>%
+            dplyr:::mutate(
+              display_taxa = .__taxa == input$taxa
+            )
+        }
       })
 
 
