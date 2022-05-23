@@ -95,12 +95,14 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         esquisse::updateDragulaInput(
           session = session,
           inputId = "taxa_cols",
-          choices = names(imported)
+          choices = names(imported),
+          selected = auto_selection_cols_taxa(imported)
         )
         esquisse::updateDragulaInput(
           session = session,
           inputId = "other_cols",
-          choices = names(imported)
+          choices = names(imported),
+          selected = auto_selection_cols_other(imported)
         )
         esquisse::updateDragulaInput(
           session = session,
@@ -207,4 +209,34 @@ other_cols <- function(x = NULL) {
   if (!is.null(x))
     cols <- cols[[x]]
   return(cols)
+}
+
+
+auto_selection_cols_taxa <- function(.data) {
+  x <- list()
+  if (hasName(.data, "scientificName"))
+    x[[".__taxa"]] <- "scientificName"
+  if (hasName(.data, "genus"))
+    x[[".__genus"]] <- "genus"
+  if (hasName(.data, "specificEpiteth"))
+    x[[".__species_epiteth"]] <- "specificEpiteth"
+  if (hasName(.data, "taxonRank"))
+    x[[".__rank_infra_specific_level"]] <- "taxonRank"
+  if (hasName(.data, "infraspecificEpiteth"))
+    x[[".__name_infra_specific_level"]] <- "infraspecificEpiteth"
+  if (length(x) < 1)
+    return(NULL)
+  x
+}
+
+
+auto_selection_cols_other <- function(.data) {
+  x <- list()
+  if (hasName(.data, "decimalLongitude"))
+    x[[".__longitude"]] <- "decimalLongitude"
+  if (hasName(.data, "decimalLatitude"))
+    x[[".__latitude"]] <- "decimalLatitude"
+  if (length(x) < 1)
+    return(NULL)
+  x
 }
