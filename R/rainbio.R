@@ -3,6 +3,8 @@
 #'
 #' Extract from the rainbio database of all records from a species list
 #'
+#' @param species Names of species to search for.
+#' @param idtax Idtax
 #'
 #' @return A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
 #'
@@ -12,9 +14,10 @@
 #' @importFrom glue glue
 #' @importFrom dplyr as_tibble distinct
 #'
-#' @example
-#' query_rb_taxa(species = c("diospyros iturensis", "anthonotha macrophylla))
-
+#' @examples
+#' \dontrun{
+#' query_rb_taxa(species = c("diospyros iturensis", "anthonotha macrophylla"))
+#' }
 #' @export
 query_rb_taxa <- function(species = NULL, idtax = NULL) {
 
@@ -148,8 +151,6 @@ conn_mydb_rb <- function(pass = NULL, user = NULL) {
 #' @param genus string
 #' @param order string
 #' @param species string genus followed by species name separated by one space
-#' @param tax_nam01 string
-#' @param tax_nam02 string
 #' @param only_genus logical
 #' @param only_family logical
 #' @param only_class logical
@@ -530,7 +531,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                                                   ifelse(!is.na(tax_nam02), paste0(" ", tax_nam02), ""),
                                                   ifelse(!is.na(author3), paste0(" ", author3), "")),
                                            NA)) %>%
-      dplyr::mutate(introduced_status = stringr::str_trim(introduced_status)) %>%
+      dplyr::mutate(introduced_status = trimws(introduced_status)) %>%
       dplyr::mutate(tax_sp_level = as.character(tax_sp_level),
                     tax_infra_level = as.character(tax_infra_level),
                     tax_infra_level_auth = as.character(tax_infra_level_auth)) %>%

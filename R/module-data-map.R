@@ -1,6 +1,5 @@
 
-#' @title Map point selection Module
-#'
+#' Map point selection Module
 #'
 #' @param id Module's ID.
 #'
@@ -77,6 +76,7 @@ data_map_ui <- function(id) {
 #' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe
 #'  updateActionButton req outputOptions selectizeInput sliderInput
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
+#' @importFrom utils hasName
 data_map_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -181,15 +181,15 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       observeEvent(input$year, {
         years <- req(input$year)
         data_rv$map <- data_rv$map %>%
-          dplyr:::mutate(
-            display_year = between(.__year, years[1], years[2])
+          dplyr::mutate(
+            display_year = dplyr::between(.__year, years[1], years[2])
           )
       })
 
       observeEvent(input$coord_accuracy, {
         coords <- req(input$coord_accuracy)
         data_rv$map <- data_rv$map %>%
-          dplyr:::mutate(
+          dplyr::mutate(
             display_coord_accuracy = dplyr::between(calc_accuracy, coords[1], coords[2])
           )
       })
@@ -197,12 +197,12 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         req(input$taxa)
         if (identical(input$taxa, "All")) {
           data_rv$map <- data_rv$map %>%
-            dplyr:::mutate(
+            dplyr::mutate(
               display_taxa = TRUE
             )
         } else {
           data_rv$map <- data_rv$map %>%
-            dplyr:::mutate(
+            dplyr::mutate(
               display_taxa = .__taxa == input$taxa
             )
         }

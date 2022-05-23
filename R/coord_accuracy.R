@@ -8,12 +8,13 @@
 #' @param .data A `data.frame` with longitude and latitude in decimal degrees
 #' @param col_x Column name containing the longitude.
 #' @param col_y Column name containing the latitude.
+#' @param rounding Round or not secondes.
 #'
 #' @return tibble provided with an additional column `calc_accuracy`.
 #'
 #' @examples
-#' test <- tibble(x = c(8.8633, 6.2, 4), y = c(0.1321, 0.22, 1))
-#' coord_accuracy(xy = test, col_x = "x", col_y = "y")
+#' test <- dplyr::tibble(x = c(8.8633, 6.2, 4), y = c(0.1321, 0.22, 1))
+#' coord_accuracy(test, col_x = "x", col_y = "y")
 #'
 #'
 #' @importFrom dplyr mutate filter pull select
@@ -22,8 +23,8 @@
 coord_accuracy <- function(.data, col_x, col_y, rounding = TRUE) {
   .data %>%
     dplyr::mutate(
-      code_x = coord_accuracy_vec(!!dplyr::sym(col_x)),
-      code_y = coord_accuracy_vec(!!dplyr::sym(col_y)),
+      code_x = coord_accuracy_vec(!!dplyr::sym(col_x), rounding = rounding),
+      code_y = coord_accuracy_vec(!!dplyr::sym(col_y), rounding = rounding),
       calc_accuracy = pmax(code_x, code_y)
     ) %>%
     dplyr::select(-code_x, -code_y)

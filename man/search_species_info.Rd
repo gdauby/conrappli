@@ -7,7 +7,7 @@
 search_species_info(
   species_name,
   match_type = c("exact", "confidence"),
-  confidence_level = 0.95
+  confidence_level = 95
 )
 }
 \arguments{

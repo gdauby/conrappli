@@ -1,6 +1,5 @@
 
-#' @title Data Validation Module
-#'
+#' Criterion B analysis
 #'
 #' @param id Module's ID.
 #'
@@ -13,7 +12,7 @@
 #'
 #' @name module-analysis
 #'
-#' @importFrom shiny NS
+#' @importFrom shiny NS fluidRow column sliderInput actionButton radioButtons
 #' @importFrom htmltools tagList
 criterion_b_ui <- function(id) {
   ns <- NS(id)
@@ -103,6 +102,7 @@ criterion_b_ui <- function(id) {
 #' @rdname module-analysis
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
+#' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
 criterion_b_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,

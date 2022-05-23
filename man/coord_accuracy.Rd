@@ -12,6 +12,8 @@ coord_accuracy(.data, col_x, col_y, rounding = TRUE)
 \item{col_x}{Column name containing the longitude.}
 
 \item{col_y}{Column name containing the latitude.}
+
+\item{rounding}{Round or not secondes.}
 }
 \value{
 tibble provided with an additional column \code{calc_accuracy}.
@@ -20,8 +22,8 @@ tibble provided with an additional column \code{calc_accuracy}.
 convert into degrees minutes seconds and give code from 1 (low accuracy) to 8 (high accuracy) of accuracy
 }
 \examples{
-test <- tibble(x = c(8.8633, 6.2, 4), y = c(0.1321, 0.22, 1))
-coord_accuracy(xy = test, col_x = "x", col_y = "y")
+test <- dplyr::tibble(x = c(8.8633, 6.2, 4), y = c(0.1321, 0.22, 1))
+coord_accuracy(test, col_x = "x", col_y = "y")
 
 
 }

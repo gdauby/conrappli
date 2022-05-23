@@ -1,6 +1,5 @@
 
-#' @title Import data Module
-#'
+#' Import data Module
 #'
 #' @param id Module's ID.
 #'

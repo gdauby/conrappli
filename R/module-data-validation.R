@@ -1,6 +1,5 @@
 
-#' @title Data Validation Module
-#'
+#' Data Validation Module
 #'
 #' @param id Module's ID.
 #'
@@ -29,7 +28,7 @@ data_validation_ui <- function(id) {
 #'
 #' @rdname module-data-validation
 #'
-#' @importFrom shiny moduleServer observeEvent reactive req actionLink
+#' @importFrom shiny moduleServer observeEvent reactive req actionLink downloadLink
 data_validation_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,

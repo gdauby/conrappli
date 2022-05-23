@@ -9,6 +9,8 @@ data_import_gbif_ui(id, from = c("file", "copypaste"))
 }
 \arguments{
 \item{id}{Module's ID.}
+
+\item{from}{Type of data input.}
 }
 \value{
 \itemize{

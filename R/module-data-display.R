@@ -1,6 +1,5 @@
 
-#' @title Display data Module
-#'
+#' Display data Module
 #'
 #' @param id Module's ID.
 #'
@@ -13,7 +12,7 @@
 #'
 #' @name module-data-display
 #'
-#' @importFrom shiny NS
+#' @importFrom shiny NS downloadButton
 #' @importFrom htmltools tagList
 data_display_ui <- function(id) {
   ns <- NS(id)
@@ -31,7 +30,8 @@ data_display_ui <- function(id) {
 #'
 #' @rdname module-data-display
 #'
-#' @importFrom shiny moduleServer req
+#' @importFrom shiny moduleServer req downloadHandler
+#' @importFrom utils write.csv
 data_display_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,

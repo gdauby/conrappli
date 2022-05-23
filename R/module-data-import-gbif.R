@@ -1,8 +1,8 @@
 
-#' @title Import data from GBIF Module
-#'
+#' Import data from GBIF Module
 #'
 #' @param id Module's ID.
+#' @param from Type of data input.
 #'
 #' @export
 #'
@@ -13,7 +13,7 @@
 #'
 #' @name module-data-gbif
 #'
-#' @importFrom shiny NS fluidRow column
+#' @importFrom shiny NS fluidRow column checkboxInput
 #' @importFrom htmltools tagList
 #' @importFrom bslib navs_hidden nav_content
 data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
@@ -73,6 +73,7 @@ data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
 #' @rdname module-data-import
 #'
 #' @importFrom shiny moduleServer observeEvent reactive
+#' @importFrom utils read.csv
 data_import_gbif_server <- function(id) {
   moduleServer(
     id = id,
