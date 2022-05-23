@@ -19,17 +19,21 @@ Depends: R (>= 2.10)
 Imports:
     bdc,
     bslib,
+    cli,
     ConR (>= 2.0.1),
     crosstalk (>= 1.2.0.9000),
     datamods (>= 1.2.0.9320),
+    DBI,
     dplyr,
     esquisse,
+    glue,
     htmltools,
     leaflet,
     measurements,
     pkgload,
     reactable,
     rgbif,
+    RPostgres,
     sf,
     shiny,
     shinybusy,
@@ -41,3 +45,5 @@ Imports:
 Remotes: gdauby/ConR@devel,
     dreamRs/shinyWidgets,
     rstudio/crosstalk
+Suggests: 
+    mapedit
