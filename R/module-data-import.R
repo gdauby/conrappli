@@ -24,8 +24,16 @@ data_import_ui <- function(id) {
         shinyWidgets::radioGroupButtons(
           inputId = ns("type_import"),
           label = NULL,
-          choiceNames = c("GBIF from file", "GBIF from copy/paste", "Dataset from file", "Dataset from copy/paste"),
-          choiceValues = c("gbif_file", "gbif_copypaste", "data_file", "data_copypaste"),
+          choiceNames = c(
+            "GBIF (file)", "GBIF (copy/paste)",
+            "Rainbio (file)", "Rainbio (copy/paste)",
+            "Dataset (file)", "Dataset (copy/paste)"
+          ),
+          choiceValues = c(
+            "gbif_file", "gbif_copypaste",
+            "rainbio_file", "rainbio_copypaste",
+            "data_file", "data_copypaste"
+          ),
           direction = "vertical",
           width = "100%"
         )
@@ -41,6 +49,14 @@ data_import_ui <- function(id) {
           nav_content(
             value = "gbif_copypaste",
             data_import_gbif_ui(id = ns("gbif_copypaste"), from = "copypaste")
+          ),
+          nav_content(
+            value = "rainbio_file",
+            data_import_rainbio_ui(id = ns("rainbio_file"), from = "file")
+          ),
+          nav_content(
+            value = "rainbio_copypaste",
+            data_import_rainbio_ui(id = ns("rainbio_copypaste"), from = "copypaste")
           ),
           nav_content(
             value = "data_file",
@@ -82,6 +98,20 @@ data_import_server <- function(id) {
       )
       observeEvent(raw_data_gbif_copypaste(), {
         dataset_rv$value <- raw_data_gbif_copypaste()
+      })
+
+      raw_data_rainbio_file <- data_import_rainbio_server(
+        id = "rainbio_file"
+      )
+      observeEvent(raw_data_rainbio_file(), {
+        dataset_rv$value <- raw_data_rainbio_file()
+      })
+
+      raw_data_rainbio_copypaste <- data_import_rainbio_server(
+        id = "rainbio_copypaste"
+      )
+      observeEvent(raw_data_rainbio_copypaste(), {
+        dataset_rv$value <- raw_data_rainbio_copypaste()
       })
 
       raw_data_file <- datamods::import_file_server(

@@ -1,5 +1,5 @@
 
-#' Import data from GBIF Module
+#' Import data from Rainbio Module
 #'
 #' @param id Module's ID.
 #' @param from Type of data input.
@@ -11,12 +11,12 @@
 #'  * Server: a [shiny::reactive()] function returning a `data.frame`.
 
 #'
-#' @name module-data-gbif
+#' @name module-data-rainbio
 #'
 #' @importFrom shiny NS fluidRow column checkboxInput
 #' @importFrom htmltools tagList
 #' @importFrom bslib navs_hidden nav_content
-data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
+data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
   ns <- NS(id)
   from <- match.arg(from)
   tagList(
@@ -70,11 +70,11 @@ data_import_gbif_ui <- function(id, from = c("file", "copypaste")) {
 
 #' @export
 #'
-#' @rdname module-data-gbif
+#' @rdname module-data-rainbio
 #'
 #' @importFrom shiny moduleServer observeEvent reactive
 #' @importFrom utils read.csv
-data_import_gbif_server <- function(id) {
+data_import_rainbio_server <- function(id) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -113,26 +113,26 @@ data_import_gbif_server <- function(id) {
 
 
       # search species names
-      observeEvent(species_rv$data, {
+      observeEvent(list(species_rv$data, input$exact), {
+        req(species_rv$data)
         shinyWidgets::execute_safely({
-          species_rv$names <- search_species_info(species_rv$data[[1]])
+          species_rv$names <- query_taxa(
+            species = species_rv$data[[1]],
+            ids = NULL,
+            check_syn = TRUE,
+            class = NULL,
+            exact_match = input$exact
+          )
         })
       })
 
-      species_names_r <- reactive({
-        data <- req(species_rv$names, nrow(species_rv$names) > 0)
-        if (isTRUE(input$exact)) {
-          data <- dplyr::filter(data, matchtype == "EXACT" & status == "ACCEPTED")
-        }
-        data
-      })
-
       output$species <- reactable::renderReactable({
+        req(species_rv$names, nrow(species_rv$names) > 0)
         reactable::reactable(
-          data = species_names_r(),
+          data = species_rv$names,
           selection = "multiple",
           onClick = "select",
-          defaultSelected = seq_len(nrow(species_names_r())),
+          defaultSelected = seq_len(nrow(species_rv$names)),
           compact = TRUE,
           bordered = TRUE,
           defaultPageSize = 5,
@@ -141,7 +141,7 @@ data_import_gbif_server <- function(id) {
       })
 
       observeEvent(input$import, {
-        req(species_names_r())
+        req(species_rv$names)
         index <- reactable::getReactableState("species", "selected")
         if (length(index) < 1) {
           shinyWidgets::show_alert(
@@ -155,12 +155,12 @@ data_import_gbif_server <- function(id) {
             color = "#088A08",
             text = "Retrieving data, please wait..."
           )
-          keys <- species_names_r()$specieskey[index]
+          keys <- species_rv$names$tax_submitted[index]
           occdata <- shinyWidgets::execute_safely({
-            retrieve_occ_data(keys)
+            query_rb_taxa(species = keys)
           })
           shinybusy::remove_modal_spinner()
-          dataset_rv$value <- occdata
+          dataset_rv$value <- occdata$extract_all_tax
         }
       })
 
@@ -168,14 +168,14 @@ data_import_gbif_server <- function(id) {
         if (isTruthy(dataset_rv$value)) {
           shinyWidgets::alert(
             status = "success",
-            icon("check"), "Data successfully downloaded from GBIF.",
+            icon("check"), "Data successfully downloaded from Rainbio.",
             actionLink(inputId = session$ns("see_data"), label = tagList(icon("table")))
           )
         }
       })
       observeEvent(
         input$see_data,
-        datamods::show_data(dataset_rv$value, title = "GBIF data", show_classes = FALSE, type = "modal")
+        datamods::show_data(dataset_rv$value, title = "Rainbio data", show_classes = FALSE, type = "modal")
       )
 
 
