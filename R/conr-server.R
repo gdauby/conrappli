@@ -16,7 +16,10 @@ conr_server <- function() {
 
     data_r <- data_server("data")
 
-    criterion_b_server(id = "criterion_b", data_r = data_r)
+    criterion_b_server(id = "criterion_b", data_r = reactive({
+      data_r() %>%
+        filter(STATUS_CONR == "IN")
+    }))
 
   }
 }
