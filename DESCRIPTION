@@ -43,7 +43,6 @@ Imports:
     tidyr,
     validate
 Remotes: gdauby/ConR@devel,
-    dreamRs/shinyWidgets,
     rstudio/crosstalk
 Suggests: 
     mapedit
