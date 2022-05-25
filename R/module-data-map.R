@@ -244,10 +244,10 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(input$validate, {
         req(data_rv$map)
-        returned_rv$x <- data_rv$map %>%
-          dplyr::mutate(STATUS_CONR = ifelse(selected == TRUE, STATUS_CONR, FALSE)) %>%
-          dplyr::select(-dplyr::any_of(c("selected", "display"))) %>%
-          sf::st_drop_geometry()
+        selected <- data_rv$map %>%
+          dplyr::mutate(STATUS_CONR = ifelse(selected == TRUE, STATUS_CONR, "OUT"))
+        returned_rv$x <- data_r() %>%
+          dplyr::mutate(STATUS_CONR = selected$STATUS_CONR)
       })
 
       return(reactive(returned_rv$x))
