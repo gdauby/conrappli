@@ -95,11 +95,11 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         )
         datamap <- data_r() %>%
           dplyr::mutate(
-            id = seq_len(dplyr::n()),
-            display_year = TRUE,
-            display_coord_accuracy = TRUE,
-            display_taxa = TRUE,
-            selected = TRUE,
+            .__id = seq_len(dplyr::n()),
+            .__display_year = TRUE,
+            .__display_coord_accuracy = TRUE,
+            .__display_taxa = TRUE,
+            .__selected = TRUE,
             .__longitude = ifelse(is.na(.__longitude), 0, .__longitude),
             .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
           ) %>%
@@ -114,10 +114,10 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         req(data_rv$map) %>%
           dplyr::filter(
             STATUS_CONR == "IN",
-            display_year == TRUE,
-            display_coord_accuracy == TRUE,
-            display_taxa == TRUE,
-            selected == TRUE
+            .__display_year == TRUE,
+            .__display_coord_accuracy == TRUE,
+            .__display_taxa == TRUE,
+            .__selected == TRUE
           )
       }), key = ~id)
 
@@ -174,7 +174,14 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             options = leaflet::layersControlOptions(collapsed = FALSE)
           ) %>%
           leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
-          leaflet::addMarkers(clusterOptions = leaflet::markerClusterOptions())
+          leaflet::addMarkers(
+            popup = shared_map$data() %>%
+              sf::st_drop_geometry() %>%
+              unselect_internal_vars() %>%
+              create_popup() %>%
+              lapply(htmltools::HTML),
+            clusterOptions = leaflet::markerClusterOptions()
+          )
       })
 
 
@@ -182,7 +189,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         years <- req(input$year)
         data_rv$map <- data_rv$map %>%
           dplyr::mutate(
-            display_year = dplyr::between(.__year, years[1], years[2])
+            .__display_year = dplyr::between(.__year, years[1], years[2])
           )
       })
 
@@ -190,7 +197,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         coords <- req(input$coord_accuracy)
         data_rv$map <- data_rv$map %>%
           dplyr::mutate(
-            display_coord_accuracy = dplyr::between(calc_accuracy, coords[1], coords[2])
+            .__display_coord_accuracy = dplyr::between(calc_accuracy, coords[1], coords[2])
           )
       })
       observeEvent(input$taxa, {
@@ -198,12 +205,12 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         if (identical(input$taxa, "All")) {
           data_rv$map <- data_rv$map %>%
             dplyr::mutate(
-              display_taxa = TRUE
+              .__display_taxa = TRUE
             )
         } else {
           data_rv$map <- data_rv$map %>%
             dplyr::mutate(
-              display_taxa = .__taxa == input$taxa
+              .__display_taxa = .__taxa == input$taxa
             )
         }
       })
@@ -234,7 +241,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         id_selected <- data_sel %>% dplyr::filter(selected_ == TRUE) %>% pull(id)
 
         data_map <- data_rv$map
-        data_map$selected[data_map$id %in% id_selected] <- FALSE
+        data_map$.__selected[data_map$id %in% id_selected] <- FALSE
         data_rv$map <- data_map
 
       })
@@ -245,7 +252,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       observeEvent(input$validate, {
         req(data_rv$map)
         selected <- data_rv$map %>%
-          dplyr::mutate(STATUS_CONR = ifelse(selected == TRUE, STATUS_CONR, "OUT"))
+          dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
         returned_rv$x <- data_r() %>%
           dplyr::mutate(STATUS_CONR = selected$STATUS_CONR)
       })
