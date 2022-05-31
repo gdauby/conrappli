@@ -107,7 +107,8 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         esquisse::updateDragulaInput(
           session = session,
           inputId = "optionnal_cols",
-          choices = names(imported)
+          choices = names(imported),
+          selected = auto_selection_cols_optionnal(imported)
         )
       })
 
@@ -218,12 +219,12 @@ auto_selection_cols_taxa <- function(.data) {
     x[[".__taxa"]] <- "scientificName"
   if (hasName(.data, "genus"))
     x[[".__genus"]] <- "genus"
-  if (hasName(.data, "specificEpiteth"))
-    x[[".__species_epiteth"]] <- "specificEpiteth"
+  if (hasName(.data, "specificEpithet"))
+    x[[".__species_epiteth"]] <- "specificEpithet"
   if (hasName(.data, "taxonRank"))
     x[[".__rank_infra_specific_level"]] <- "taxonRank"
-  if (hasName(.data, "infraspecificEpiteth"))
-    x[[".__name_infra_specific_level"]] <- "infraspecificEpiteth"
+  if (hasName(.data, "infraspecificEpithet"))
+    x[[".__name_infra_specific_level"]] <- "infraspecificEpithet"
   if (length(x) < 1)
     return(NULL)
   x
@@ -236,6 +237,37 @@ auto_selection_cols_other <- function(.data) {
     x[[".__longitude"]] <- "decimalLongitude"
   if (hasName(.data, "decimalLatitude"))
     x[[".__latitude"]] <- "decimalLatitude"
+  if (hasName(.data, "elevation"))
+    x[[".__altitude"]] <- "elevation"
+  if (hasName(.data, "year"))
+    x[[".__year"]] <- "year"
+  if (length(x) < 1)
+    return(NULL)
+  x
+}
+
+
+auto_selection_cols_optionnal <- function(.data) {
+  x <- list()
+  vars <- c(
+    "recordedBy",
+    "recordNumber",
+    "locality",
+    "verbatimLocality",
+    "country",
+    "habitat",
+    "identifiedBy",
+    "dateIdentified",
+    "occurrenceRemarks",
+    "fieldNotes",
+    "eventRemarks",
+    "iucnRedListCategory"
+  )
+
+  for (variable in vars) {
+    if (hasName(.data, variable))
+      x[["keep"]] <- c(x[["keep"]], variable)
+  }
   if (length(x) < 1)
     return(NULL)
   x

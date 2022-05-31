@@ -65,6 +65,7 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
         reactable::reactable(
           data = data_r() %>%
             unselect_internal_vars(),
+          defaultColDef =  reactable::colDef(minWidth = 150),
           bordered = TRUE,
           compact = TRUE,
           columns = columns
