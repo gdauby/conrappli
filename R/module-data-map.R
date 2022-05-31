@@ -180,7 +180,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
               unselect_internal_vars() %>%
               create_popup() %>%
               lapply(htmltools::HTML),
-            clusterOptions = leaflet::markerClusterOptions()
+            clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 20)
           )
       })
 
