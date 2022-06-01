@@ -18,6 +18,7 @@ conr_ui <- function() {
       title = "ConR",
       header = tagList(
         shinyjs::useShinyjs(),
+        shinyWidgets::useSweetAlert(),
         tags$style(
           ".swal2-popup {font-size: 1rem !important;}",
           ".badge-dragula {font-size: 1rem !important;}",

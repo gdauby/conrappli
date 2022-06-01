@@ -255,6 +255,12 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
           dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
         returned_rv$x <- data_r() %>%
           dplyr::mutate(STATUS_CONR = selected$STATUS_CONR)
+        shinyWidgets::show_alert(
+          title = "Changes saved!",
+          text = "You can navigate to other tabs to launch analysis.",
+          type = "success",
+          closeOnClickOutside = TRUE
+        )
       })
 
       return(reactive(returned_rv$x))
