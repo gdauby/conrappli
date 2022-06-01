@@ -28,17 +28,18 @@ conr_ui <- function() {
       ),
       nav(
         title = "Data",
-        value = "data",
-        data_ui("data")
+        value = "data"
+        , data_ui("data")
       ),
       nav(
         title = "Mapping",
         value = "mapping"
+        , mapping_ui("mapping")
       ),
       nav(
         title = "Evaluation - Criterion B",
-        value = "evaluation",
-        criterion_b_ui("criterion_b")
+        value = "evaluation"
+        , criterion_b_ui("criterion_b")
       ),
       nav(
         title = "Habitat quality/population decline",
