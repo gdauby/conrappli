@@ -15,7 +15,8 @@ bs_theme_conr <- function() {
     theme = theme,
     c(
       ".label-primary { @extend .badge }",
-      ".label-primary { @extend .bg-primary }"
+      ".label-primary { @extend .bg-primary }",
+      ".nav-hidden {height: 0;}"
     )
   )
 }

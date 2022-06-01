@@ -25,14 +25,14 @@ data_import_ui <- function(id) {
           inputId = ns("type_import"),
           label = NULL,
           choiceNames = c(
-            "GBIF (file)", "GBIF (copy/paste)",
-            "Rainbio (file)", "Rainbio (copy/paste)",
-            "Dataset (file)", "Dataset (copy/paste)"
+            "GBIF",
+            "Rainbio",
+            "Dataset"
           ),
           choiceValues = c(
-            "gbif_file", "gbif_copypaste",
-            "rainbio_file", "rainbio_copypaste",
-            "data_file", "data_copypaste"
+            "gbif",
+            "rainbio",
+            "data"
           ),
           direction = "vertical",
           width = "100%"
@@ -40,31 +40,49 @@ data_import_ui <- function(id) {
       ),
       column(
         width = 10,
-        navs_hidden(
+        bslib::navs_hidden(
           id = ns("navs_type_import"),
-          nav_content(
-            value = "gbif_file",
-            data_import_gbif_ui(id = ns("gbif_file"), from = "file")
+          bslib::nav_content(
+            value = "gbif",
+            bslib::navs_pill(
+              header = tags$br(),
+              bslib::nav(
+                title = "From file",
+                data_import_gbif_ui(id = ns("gbif_file"), from = "file")
+              ),
+              bslib::nav(
+                title = "From copy/paste",
+                data_import_gbif_ui(id = ns("gbif_copypaste"), from = "copypaste")
+              )
+            )
           ),
-          nav_content(
-            value = "gbif_copypaste",
-            data_import_gbif_ui(id = ns("gbif_copypaste"), from = "copypaste")
+          bslib::nav_content(
+            value = "rainbio",
+            bslib::navs_pill(
+              header = tags$br(),
+              bslib::nav(
+                title = "From file",
+                data_import_rainbio_ui(id = ns("rainbio_file"), from = "file")
+              ),
+              bslib::nav(
+                title = "From copy/paste",
+                data_import_rainbio_ui(id = ns("rainbio_copypaste"), from = "copypaste")
+              )
+            )
           ),
-          nav_content(
-            value = "rainbio_file",
-            data_import_rainbio_ui(id = ns("rainbio_file"), from = "file")
-          ),
-          nav_content(
-            value = "rainbio_copypaste",
-            data_import_rainbio_ui(id = ns("rainbio_copypaste"), from = "copypaste")
-          ),
-          nav_content(
-            value = "data_file",
-            datamods::import_file_ui(id = ns("file"), title = NULL)
-          ),
-          nav_content(
-            value = "data_copypaste",
-            datamods::import_copypaste_ui(id = ns("copypaste"), title = NULL)
+          bslib::nav_content(
+            value = "data",
+            bslib::navs_pill(
+              header = tags$br(),
+              bslib::nav(
+                title = "From file",
+                datamods::import_file_ui(id = ns("file"), title = NULL)
+              ),
+              bslib::nav(
+                title = "From copy/paste",
+                datamods::import_copypaste_ui(id = ns("copypaste"), title = NULL)
+              )
+            )
           )
         )
       )
