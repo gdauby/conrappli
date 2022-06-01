@@ -89,7 +89,11 @@ criterion_b_ui <- function(id) {
           width = "100%",
           class = "btn-outline-primary"
         ),
-        reactable::reactableOutput(outputId = ns("results"))
+        tags$div(
+          downloadButton(outputId = ns("download"), label = "Download results", class = "float-end mb-3 disabled"),
+          tags$div(class = "clearfix"),
+          reactable::reactableOutput(outputId = ns("results"))
+        )
       )
     )
   )
@@ -154,6 +158,7 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
           issue_locations = locations$locations$issue_locations
         )
         shinybusy::remove_modal_spinner()
+        shinyjs::removeCssClass(id = "download", class = "disabled")
         rv$eoo_res <- eoo_res
         rv$aoo_res <- aoo_res
         rv$locations <- locations
@@ -161,6 +166,14 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
         rv$results <- results
       })
 
+      output$download <- downloadHandler(
+        filename = function() {
+          "conr-criterion_b.csv"
+        },
+        content = function(file) {
+          write.csv(x = rv$results, file = file, row.names = FALSE)
+        }
+      )
 
       output$results <- reactable::renderReactable({
         req(rv$results)
