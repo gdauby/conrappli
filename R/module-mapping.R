@@ -1,53 +1,58 @@
 
+#' Mapping module
+#'
+#' @param id Module's ID.
+#'
+#' @export
+#' @name module-mapping
 mapping_ui <- function(id) {
-  
   ns <- NS(id)
-  
-    tagList(
-      tags$div(
-        #style = "position: fixed;",
-        style = css(position = "fixed", top = "65px", left = "350px", right = 0, bottom = 0, overflow = "hidden", padding = 0),
-        #leafletOutput(outputId = "map", width = "100%", height = "100%")
-        leafletOutput(outputId = ns("map"), width = "100%", height = 600) 
-      )
+  tagList(
+    tags$div(
+      style = htmltools::css(
+        position = "fixed",
+        top = "65px",
+        left = 0,
+        right = 0,
+        bottom = 0,
+        overflow = "hidden",
+        padding = 0
+      ),
+      leafletOutput(outputId = ns("map"), width = "100%", height = "100%")
     )
+  )
 }
 
-
+#' @export
+#'
+#' @rdname module-mapping
 mapping_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
-      
+
       output$map <- renderLeaflet({
-        
-        # Colorier les points en fonction de la variable `.__valid` ----
-        pal <- colorFactor(
+        req(data_r())
+        pal <- leaflet::colorFactor(
           palette = c("navy", "red"),
-          domain = c("TRUE", "FALSE")
+          domain = c("IN", "OUT")
         )
-        
-        # Construction du popup ----
-        # Données avec variables ne commencant pas par ".__"
         donnees_popup <- data_r() %>%
           dplyr::select(!dplyr::starts_with(".__"))
-        
-        # Donnees avec les noms des variables
+
         labels_variables <- lapply(
           X = names(donnees_popup),
-          FUN = function(x) { 
+          FUN = function(x) {
             paste0(x, ": ", donnees_popup[[x]])
           })
         tableau_donnees_popup <- data.frame(labels_variables)
         colnames(tableau_donnees_popup) <- names(donnees_popup)
-        
-        # Vecteur popup
+
         resume_donnees_popup <- tidyr::unite(tableau_donnees_popup, col = resume, everything(), sep = "<br/>")
         popup <- resume_donnees_popup$resume
         popup <- lapply(popup, htmltools::HTML)
-        
-        # Carte ----
-        leaflet(data = data_r()) %>%
+
+        leaflet::leaflet(data = data_r()) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
           leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
@@ -55,23 +60,24 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             baseGroups = c("OSM", "Esri", "Open Topo Map"),
             options = leaflet::layersControlOptions(collapsed = FALSE)
           ) %>%
-          setView(lng = 11.5, lat = 2, zoom = 8) %>% 
-          addCircleMarkers(
+          leaflet::setView(lng = 11.5, lat = 2, zoom = 8) %>%
+          leaflet::addCircleMarkers(
             lng = ~.__longitude,
             lat = ~.__latitude,
-            radius = ~ifelse(.__valid == "TRUE", 6, 10),
-            color = ~pal(.__valid),
+            radius = ~ifelse(STATUS_CONR == "TRUE", 4, 6),
+            color = ~pal(STATUS_CONR),
             stroke = FALSE,
-            fillOpacity = 0.5,
+            opacity = 0.7,
+            fillOpacity = 0.7,
             popup = popup,
-          ) %>% 
-          addLegend(
+          ) %>%
+          leaflet::addLegend(
             pal = pal,
-            values = donnees$.__valid,
+            values = c("IN", "OUT"),
             opacity = 1,
-            title = "Légende",
+            title = "Status",
             position = "bottomright",
-            na.label = "N/A", 
+            na.label = "N/A",
           )
       })
     }
