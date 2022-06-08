@@ -23,6 +23,8 @@ query_rb_taxa <- function(species = NULL, idtax = NULL) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
+  
+  print(idtax)
 
   quer_sp <-
     query_taxa(
@@ -404,6 +406,14 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                          vals = ids, .con = mydb_rb)
 
     res <- func_try_fetch(con = mydb_rb, sql = sql)
+    
+    no_match <- FALSE
+    
+    if(nrow(res) == 0) {
+      res <- NULL
+      cli::cli_alert_danger("no matching names")
+      no_match <- TRUE
+    }
 
   }
 
