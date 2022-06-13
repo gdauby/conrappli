@@ -58,7 +58,7 @@ data_variable_ui <- function(id) {
     tags$h5(
       "Other columns of interest:",
       btn_help(
-        "Thos columns won't be used in analysis but they will be kept with the data, others columns will be dropped..",
+        "Those columns won't be used in analysis but they will be kept with the data, others columns will be dropped..",
         class = "float-right"
       )
     ),
@@ -217,6 +217,8 @@ auto_selection_cols_taxa <- function(.data) {
   x <- list()
   if (hasName(.data, "scientificName"))
     x[[".__taxa"]] <- "scientificName"
+  if (hasName(.data, "tax_sp_level"))
+    x[[".__taxa"]] <- "tax_sp_level"
   if (hasName(.data, "genus"))
     x[[".__genus"]] <- "genus"
   if (hasName(.data, "specificEpithet"))
@@ -235,12 +237,20 @@ auto_selection_cols_other <- function(.data) {
   x <- list()
   if (hasName(.data, "decimalLongitude"))
     x[[".__longitude"]] <- "decimalLongitude"
+  if (hasName(.data, "ddlon"))
+    x[[".__longitude"]] <- "ddlon"
   if (hasName(.data, "decimalLatitude"))
     x[[".__latitude"]] <- "decimalLatitude"
+  if (hasName(.data, "ddlat"))
+    x[[".__latitude"]] <- "ddlat"
   if (hasName(.data, "elevation"))
     x[[".__altitude"]] <- "elevation"
+  if (hasName(.data, "alt"))
+    x[[".__altitude"]] <- "alt"
   if (hasName(.data, "year"))
     x[[".__year"]] <- "year"
+  if (hasName(.data, "coly"))
+    x[[".__year"]] <- "coly"
   if (length(x) < 1)
     return(NULL)
   x
@@ -261,7 +271,12 @@ auto_selection_cols_optionnal <- function(.data) {
     "occurrenceRemarks",
     "fieldNotes",
     "eventRemarks",
-    "iucnRedListCategory"
+    "iucnRedListCategory",
+    "colnam",
+    "nbr",
+    "detnam",
+    "dety",
+    "loc_notes"
   )
 
   for (variable in vars) {
