@@ -5,7 +5,8 @@
 #'
 #' @param species Names of species to search for.
 #' @param idtax Idtax
-#'
+#' @param only_checked_georef logical
+#' 
 #' @return A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
 #'
 #' @author Gilles Dauby, \email{gilles.dauby@@ird.fr}
@@ -19,10 +20,12 @@
 #' query_rb_taxa(species = c("diospyros iturensis", "anthonotha macrophylla"))
 #' }
 #' @export
-query_rb_taxa <- function(species = NULL, idtax = NULL) {
+query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TRUE) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
+  
+  print(idtax)
 
   quer_sp <-
     query_taxa(
@@ -41,6 +44,14 @@ query_rb_taxa <- function(species = NULL, idtax = NULL) {
   res <- DBI::dbFetch(rs)
   DBI::dbClearResult(rs)
   res <- dplyr::as_tibble(res)
+  
+  if (only_checked_georef) {
+    
+    res <- 
+      res %>% 
+      dplyr::filter(georef_final == 1)
+    
+  }
 
   return(list(
     extract_all_tax = res,
@@ -158,7 +169,6 @@ conn_mydb_rb <- function(pass = NULL, user = NULL) {
 #' @param verbose logical
 #' @param exact_match logical
 #' @param check_syn logical
-#' @param extract_known_syn logical
 #'
 #' @return A tibble of plots or individuals if extract_individuals is TRUE
 #' @export
@@ -404,6 +414,14 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                          vals = ids, .con = mydb_rb)
 
     res <- func_try_fetch(con = mydb_rb, sql = sql)
+    
+    no_match <- FALSE
+    
+    if(nrow(res) == 0) {
+      res <- NULL
+      cli::cli_alert_danger("no matching names")
+      no_match <- TRUE
+    }
 
   }
 
@@ -549,6 +567,8 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       dplyr::relocate(tax_sp_level, .before = idtax_n) %>%
       dplyr::relocate(id_tax_famclass, .after = morpho_species) %>%
       dplyr::relocate(tax_submitted, .before = tax_sp_level)
+    
+
 
   }
 
@@ -643,7 +663,7 @@ query_fuzzy_match <- function(tbl, field, values_q, con) {
   if (length(field) == 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE SIMILARITY (lower({`field`}), {values_q}) > 0.4;",
                                                .con = con)
 
-  if (length(field) > 1)  sql <- glue::glue_sql("SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT 1;",
+  if (length(field) > 1)  sql <- glue::glue_sql("SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT 2;",
                                                 .con = con)
 
   res_q <- func_try_fetch(con = con, sql = sql)

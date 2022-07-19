@@ -155,9 +155,9 @@ data_import_rainbio_server <- function(id) {
             color = "#088A08",
             text = "Retrieving data, please wait..."
           )
-          keys <- species_rv$names$tax_submitted[index]
+          keys <- species_rv$names$idtax_n[index]
           occdata <- shinyWidgets::execute_safely({
-            query_rb_taxa(species = keys)
+            query_rb_taxa(idtax = keys)
           })
           shinybusy::remove_modal_spinner()
           dataset_rv$value <- occdata$extract_all_tax
