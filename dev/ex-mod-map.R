@@ -12,12 +12,16 @@ donnees <- rio::import("../exemple_homemade_data.xlsx") %>%
     .__longitude = long,
     .__latitude = lat,
     .__year = col_yr
+  ) %>% 
+  mutate(
+    STATUS_CONR = "IN"
   )
 
 
 library(shiny)
 
 ui <- fluidPage(
+  theme = bs_theme_conr(),
   shinyjs::useShinyjs(),
   tags$style(".selectize-dropdown, .selectize-dropdown.form-control {z-index: 1060 !important;}"),
   data_map_ui("map")

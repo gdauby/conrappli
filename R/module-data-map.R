@@ -18,50 +18,62 @@
 data_map_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    fluidRow(
-      column(
-        width = 4,
-        uiOutput(outputId = ns("filter_coord_accuracy"))
+    
+    tags$div(
+      style = htmltools::css(
+        position = "fixed",
+        top = "65px",
+        left = "0",
+        right = "0",
+        bottom = "0",
+        overflow = "hidden",
+        padding = "0"
       ),
-      column(
-        width = 4,
-        uiOutput(outputId = ns("filter_taxa"))
-      ),
-      column(
-        width = 4,
-        uiOutput(outputId = ns("filter_year"))
-      )
+      leafletOutput(outputId = ns("map"), height = "100%")
     ),
-    leafletOutput(outputId = ns("map"), height = "500px"),
-    fluidRow(
-      class = "mt-3 mb-3",
-      column(
-        width = 6,
-        actionButton(
-          inputId = ns("remove"),
-          label = "Remove selected points",
-          width = "100%",
-          icon = icon("ban"),
-          class = "btn-outline-danger"
+    
+    absolutePanel(
+      bottom = "20px", 
+      left = "20px",
+      style = htmltools::css(
+        background = "#FFF",
+        borderRadius = "5px",
+        padding = "10px"
+      ),
+      verbatimTextOutput(ns("test")),
+      uiOutput(outputId = ns("filter_coord_accuracy")),
+      uiOutput(outputId = ns("filter_taxa")),
+      uiOutput(outputId = ns("filter_year")),
+      fluidRow(
+        class = "mt-3 mb-3",
+        column(
+          width = 6,
+          actionButton(
+            inputId = ns("remove"),
+            label = "Remove selected points",
+            width = "100%",
+            icon = icon("ban"),
+            class = "btn-outline-danger"
+          )
+        ),
+        column(
+          width = 6,
+          actionButton(
+            inputId = ns("cancel"),
+            label = "Restore original data",
+            width = "100%",
+            icon = icon("undo"),
+            class = "btn-outline-primary"
+          )
         )
       ),
-      column(
-        width = 6,
-        actionButton(
-          inputId = ns("cancel"),
-          label = "Restore original data",
-          width = "100%",
-          icon = icon("undo"),
-          class = "btn-outline-primary"
-        )
+      actionButton(
+        inputId = ns("validate"),
+        label = "Validate selection",
+        width = "100%",
+        icon = icon("check"),
+        class = "btn-outline-primary"
       )
-    ),
-    actionButton(
-      inputId = ns("validate"),
-      label = "Validate selection",
-      width = "100%",
-      icon = icon("check"),
-      class = "btn-outline-primary"
     )
   )
 }
@@ -85,6 +97,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       ns <- session$ns
 
       data_rv <- reactiveValues()
+      rect_rv <- reactiveValues()
 
       observeEvent(list(data_r(), input$cancel), {
         req(
@@ -104,13 +117,13 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
           ) %>%
           coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
-        pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"))
+        pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"), crs = 4326)
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
 
 
-      shared_map <- crosstalk::SharedData$new(reactive({
+      data_map_r <- reactive({
         req(data_rv$map) %>%
           dplyr::filter(
             STATUS_CONR == "IN",
@@ -119,7 +132,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             .__display_taxa == TRUE,
             .__selected == TRUE
           )
-      }), key = ~id)
+      })
 
       output$filter_year <- renderUI({
         datamap <- req(data_r())
@@ -165,17 +178,39 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
 
       output$map <- renderLeaflet({
-        leaflet::leaflet(data = shared_map) %>%
+        leaflet::leaflet(data = data_map_r()) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
           leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
           leaflet::addLayersControl(
             baseGroups = c("OSM", "Esri", "Open Topo Map"),
             options = leaflet::layersControlOptions(collapsed = FALSE)
+          ) %>% 
+          leafpm::addPmToolbar(
+            toolbarOptions = leafpm::pmToolbarOptions(
+              drawMarker = FALSE, 
+              drawPolyline = FALSE,
+              drawPolygon = FALSE,
+              drawCircle = FALSE, 
+              drawRectangle = TRUE,
+              cutPolygon = FALSE,
+              position = "topright"
+            ),
+            drawOptions = leafpm::pmDrawOptions(
+              snappable = FALSE,
+              allowSelfIntersection = FALSE
+            ),
+            editOptions = leafpm::pmEditOptions(
+              preventVertexEdit = TRUE
+            ),
+            cutOptions = leafpm::pmCutOptions(
+              snappable = FALSE,
+              allowSelfIntersection = FALSE
+            )
           ) %>%
           leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
           leaflet::addMarkers(
-            popup = shared_map$data() %>%
+            popup = data_map_r() %>%
               sf::st_drop_geometry() %>%
               unselect_internal_vars() %>%
               create_popup() %>%
@@ -214,12 +249,33 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
             )
         }
       })
-
+      
+      
+      observeEvent(input$map_draw_new_feature, {
+        rect <- input$map_draw_new_feature
+        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- rect
+      })
+      observeEvent(input$map_draw_edited_features, {
+        rect <- input$map_draw_edited_features
+        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- rect
+      })
+      observeEvent(input$map_draw_deleted_features, {
+        rect <- input$map_draw_deleted_features
+        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- NULL
+      })
+      output$test <- renderPrint({
+        rectangles <<- reactiveValuesToList(rect_rv)
+        length(rectangles)
+      })
 
       observe({
-        req(shared_map)
-        data_sel <- shared_map$data(withSelection = TRUE)
-        n <- sum(data_sel$selected_)
+        req(data_map_r())
+        rect <- reactiveValuesToList(rect_rv)
+        req(length(rect) > 0)
+        rectangles <- geojson_to_sf(rect) %>% 
+          sf::st_combine()
+        selected <- pts_in_poly(data_map_r(), rectangles)
+        n <- sum(selected)
         if (is.na(n)) {
           label <- "No points selected"
           shinyjs::disable(id = "remove")
@@ -234,17 +290,17 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
         )
       })
 
-      # Remove points
-      observeEvent(input$remove, {
-        req(data_rv$map)
-        data_sel <- shared_map$data(withSelection = TRUE)
-        id_selected <- data_sel %>% dplyr::filter(selected_ == TRUE) %>% pull(id)
-
-        data_map <- data_rv$map
-        data_map$.__selected[data_map$id %in% id_selected] <- FALSE
-        data_rv$map <- data_map
-
-      })
+      # # Remove points
+      # observeEvent(input$remove, {
+      #   req(data_rv$map)
+      #   data_sel <- shared_map$data(withSelection = TRUE)
+      #   id_selected <- data_sel %>% dplyr::filter(selected_ == TRUE) %>% pull(id)
+      # 
+      #   data_map <- data_rv$map
+      #   data_map$.__selected[data_map$id %in% id_selected] <- FALSE
+      #   data_rv$map <- data_map
+      # 
+      # })
 
 
       returned_rv <- reactiveValues(x = NULL)

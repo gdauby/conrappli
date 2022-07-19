@@ -25,3 +25,24 @@ create_popup <- function(.data) {
   template <- paste(template, collapse = "")
   glue::glue_data(.data, template)
 }
+
+geojson_to_sf = function(x) {
+  do.call(
+    rbind,
+    lapply(x, function(x) {
+      # x <- lapply(x, fix_geojson_coords)
+      sf::read_sf(
+        jsonlite::toJSON(x, force=TRUE, auto_unbox=TRUE, digits = NA)
+      )
+    })
+  )
+}
+
+pts_in_poly <- function(points, poly) {
+  x <- sf::st_intersects(
+    y = poly,
+    x = points,
+    sparse = FALSE
+  )
+  return(x[,1])
+}
