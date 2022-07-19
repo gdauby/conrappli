@@ -24,12 +24,12 @@ ui <- fluidPage(
   theme = bs_theme_conr(),
   shinyjs::useShinyjs(),
   tags$style(".selectize-dropdown, .selectize-dropdown.form-control {z-index: 1060 !important;}"),
-  data_map_ui("map")
+  mapping_ui("map")
 )
 
 server <- function(input, output, session) {
 
-  data_map_server("map", data_r = reactive(donnees))
+  mapping_server("map", data_r = reactive(donnees))
 
 }
 

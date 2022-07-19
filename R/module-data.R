@@ -52,17 +52,6 @@ data_ui <- function(id) {
         data_validation_ui(ns("validation")),
         uiOutput(outputId = ns("btn_nav_data_validation"))
       ),
-      nav(
-        title = "Map",
-        value = "map",
-        icon = icon("map-marker"),
-        shinyWidgets::alert(
-          status = "info",
-          class = "alert-no-data-no-variables",
-          icon("info-circle"), "You need to import data and select variable."
-        ),
-        data_map_ui(ns("map"))
-      ),
       nav_spacer(),
       nav(
         title = "Data",
@@ -155,26 +144,16 @@ data_server <- function(id) {
         validated <- data_validated_r()
         if (nrow(validated) > 0) {
           actionButton(
-            inputId = ns("go_to_map"),
-            label = "Go to mapping",
+            inputId = ns("go_to_data"),
+            label = "See data",
             icon = icon("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
         }
       })
-      observeEvent(input$go_to_map, nav_select("navs", "map"))
+      observeEvent(input$go_to_data, nav_select("navs", "data"))
 
       observeEvent(data_validated_r(), rv$data <- data_validated_r())
-
-
-
-      # Map validation ----
-
-      data_map_r <- data_map_server(
-        id = "map",
-        data_r = reactive(rv$data)
-      )
-      observeEvent(data_map_r(), rv$data <- data_map_r())
 
 
       # Data display ----
