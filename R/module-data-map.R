@@ -40,7 +40,8 @@ data_map_ui <- function(id) {
         borderRadius = "5px",
         padding = "10px"
       ),
-      verbatimTextOutput(ns("test")),
+      # verbatimTextOutput(ns("test")),
+      uiOutput(outputId = ns("summary")),
       uiOutput(outputId = ns("filter_coord_accuracy")),
       uiOutput(outputId = ns("filter_taxa")),
       uiOutput(outputId = ns("filter_year")),
@@ -50,7 +51,7 @@ data_map_ui <- function(id) {
           width = 6,
           actionButton(
             inputId = ns("remove"),
-            label = "Remove selected points",
+            label = "Remove points",
             width = "100%",
             icon = icon("ban"),
             class = "btn-outline-danger"
@@ -60,19 +61,12 @@ data_map_ui <- function(id) {
           width = 6,
           actionButton(
             inputId = ns("cancel"),
-            label = "Restore original data",
+            label = "Restore data",
             width = "100%",
             icon = icon("undo"),
             class = "btn-outline-primary"
           )
         )
-      ),
-      actionButton(
-        inputId = ns("validate"),
-        label = "Validate selection",
-        width = "100%",
-        icon = icon("check"),
-        class = "btn-outline-primary"
       )
     )
   )
@@ -125,12 +119,12 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
       data_map_r <- reactive({
         req(data_rv$map) %>%
-          dplyr::filter(
-            STATUS_CONR == "IN",
-            .__display_year == TRUE,
-            .__display_coord_accuracy == TRUE,
-            .__display_taxa == TRUE,
-            .__selected == TRUE
+          dplyr::mutate(
+            .__selected = STATUS_CONR == "IN" &
+              .__display_year == TRUE &
+              .__display_coord_accuracy == TRUE &
+              .__display_taxa == TRUE &
+              .__selected == TRUE
           )
       })
 
@@ -178,6 +172,11 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
 
 
       output$map <- renderLeaflet({
+        pal <- leaflet::colorFactor(
+          palette = c("forestgreen", "firebrick"),
+          domain = c(TRUE, FALSE),
+          levels = c(TRUE, FALSE)
+        )
         leaflet::leaflet(data = data_map_r()) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
@@ -194,6 +193,7 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
               drawCircle = FALSE, 
               drawRectangle = TRUE,
               cutPolygon = FALSE,
+              removalMode = FALSE,
               position = "topright"
             ),
             drawOptions = leafpm::pmDrawOptions(
@@ -208,14 +208,19 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
               allowSelfIntersection = FALSE
             )
           ) %>%
-          leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
-          leaflet::addMarkers(
+          # leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
+          leaflet::addCircleMarkers(
             popup = data_map_r() %>%
               sf::st_drop_geometry() %>%
               unselect_internal_vars() %>%
               create_popup() %>%
               lapply(htmltools::HTML),
-            clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 20)
+            color = ~ pal(.__selected),
+            fillOpacity = 1,
+            clusterOptions = leaflet::markerClusterOptions(
+              maxClusterRadius = 20, 
+              zoomToBoundsOnClick = FALSE
+            )
           )
       })
 
@@ -253,30 +258,33 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
       
       observeEvent(input$map_draw_new_feature, {
         rect <- input$map_draw_new_feature
-        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- rect
+        rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- rect
       })
       observeEvent(input$map_draw_edited_features, {
         rect <- input$map_draw_edited_features
-        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- rect
+        rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- rect
       })
       observeEvent(input$map_draw_deleted_features, {
         rect <- input$map_draw_deleted_features
-        rect_rv[[paste0("rect", rect$properties$edit_id)]] <- NULL
+        rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- NULL
       })
       output$test <- renderPrint({
-        rectangles <<- reactiveValuesToList(rect_rv)
+        rectangles <<- reactiveValuesToList(rect_rv)$x
         length(rectangles)
       })
 
-      observe({
+      observeEvent(rect_rv$x, {
         req(data_map_r())
-        rect <- reactiveValuesToList(rect_rv)
-        req(length(rect) > 0)
-        rectangles <- geojson_to_sf(rect) %>% 
-          sf::st_combine()
-        selected <- pts_in_poly(data_map_r(), rectangles)
-        n <- sum(selected)
-        if (is.na(n)) {
+        rect <- reactiveValuesToList(rect_rv)$x
+        if (length(rect) > 0) {
+          rectangles <- geojson_to_sf(rect) %>% 
+            sf::st_combine()
+          selected <- pts_in_poly(data_map_r(), rectangles)
+          n <- sum(selected)
+        } else {
+          n <- 0
+        }
+        if (n < 1) {
           label <- "No points selected"
           shinyjs::disable(id = "remove")
         } else {
@@ -288,35 +296,43 @@ data_map_server <- function(id, data_r = reactive(NULL)) {
           inputId = "remove",
           label = label
         )
+      }, ignoreNULL = FALSE)
+
+      # Remove points
+      observeEvent(input$remove, {
+        data_map <- req(data_map_r())
+        rect <- reactiveValuesToList(rect_rv)$x
+        req(length(rect) > 0)
+        rectangles <- geojson_to_sf(rect) %>% 
+          sf::st_combine()
+        selected <- pts_in_poly(data_map_r(), rectangles)
+        data_map$.__selected[selected] <- FALSE
+        data_rv$map <- data_map
+        rect_rv$x <- NULL
       })
 
-      # # Remove points
-      # observeEvent(input$remove, {
-      #   req(data_rv$map)
-      #   data_sel <- shared_map$data(withSelection = TRUE)
-      #   id_selected <- data_sel %>% dplyr::filter(selected_ == TRUE) %>% pull(id)
-      # 
-      #   data_map <- data_rv$map
-      #   data_map$.__selected[data_map$id %in% id_selected] <- FALSE
-      #   data_rv$map <- data_map
-      # 
-      # })
-
+      
+      output$summary <- renderUI({
+        data_map <- req(data_map_r())
+        tagList(
+          tags$span(
+            "Points IN:", sum(data_map[[".__selected"]]),
+            style = htmltools::css(color = "forestgreen", fontWeight = "bold")
+          ),
+          "|",
+          tags$span(
+            "Points OUT:", sum(!data_map[[".__selected"]]),
+            style = htmltools::css(color = "firebrick", fontWeight = "bold")
+          )
+        )
+      })
 
       returned_rv <- reactiveValues(x = NULL)
 
-      observeEvent(input$validate, {
-        req(data_rv$map)
-        selected <- data_rv$map %>%
+      observeEvent(data_map_r(), {
+        req(data_map_r())
+        returned_rv$x <- data_map_r() %>%
           dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
-        returned_rv$x <- data_r() %>%
-          dplyr::mutate(STATUS_CONR = selected$STATUS_CONR)
-        shinyWidgets::show_alert(
-          title = "Changes saved!",
-          text = "You can navigate to other tabs to launch analysis.",
-          type = "success",
-          closeOnClickOutside = TRUE
-        )
       })
 
       return(reactive(returned_rv$x))
