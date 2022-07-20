@@ -33,7 +33,7 @@ mapping_ui <- function(id) {
     ),
 
     absolutePanel(
-      bottom = "20px",
+      top = "80px",
       left = "20px",
       style = htmltools::css(
         background = "#FFF",
@@ -42,6 +42,11 @@ mapping_ui <- function(id) {
       ),
       # verbatimTextOutput(ns("test")),
       uiOutput(outputId = ns("summary")),
+      shinyWidgets::materialSwitch(
+        inputId = ns("show_in"),
+        label = "Show only points IN",
+        value = FALSE
+      ),
       uiOutput(outputId = ns("filter_coord_accuracy")),
       uiOutput(outputId = ns("filter_taxa")),
       uiOutput(outputId = ns("filter_year")),
@@ -179,7 +184,12 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           domain = c(TRUE, FALSE),
           levels = c(TRUE, FALSE)
         )
-        leaflet::leaflet(data = data_map_r()) %>%
+        data_map <- data_map_r()
+        if (input$show_in) {
+          data_map <- dplyr::filter(data_map, .__selected == TRUE)
+        }
+        leaflet::leaflet(data = data_map, options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+          leaflet::invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
           leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
@@ -212,7 +222,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           ) %>%
           # leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
           leaflet::addCircleMarkers(
-            popup = data_map_r() %>%
+            popup = data_map %>%
               sf::st_drop_geometry() %>%
               unselect_internal_vars() %>%
               create_popup() %>%

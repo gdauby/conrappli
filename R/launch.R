@@ -17,6 +17,6 @@ launch <- function() {
   shiny::shinyApp(
     ui = conr_ui(),
     server = conr_server(),
-    options = list(port = 5789)
+    options = list(port = 5791)
   )
 }
