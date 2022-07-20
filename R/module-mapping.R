@@ -18,11 +18,11 @@
 mapping_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    
+
     tags$div(
       style = htmltools::css(
         position = "fixed",
-        top = "65px",
+        top = "56px",
         left = "0",
         right = "0",
         bottom = "0",
@@ -31,9 +31,9 @@ mapping_ui <- function(id) {
       ),
       leafletOutput(outputId = ns("map"), height = "100%")
     ),
-    
+
     absolutePanel(
-      bottom = "20px", 
+      bottom = "20px",
       left = "20px",
       style = htmltools::css(
         background = "#FFF",
@@ -186,13 +186,13 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           leaflet::addLayersControl(
             baseGroups = c("OSM", "Esri", "Open Topo Map"),
             options = leaflet::layersControlOptions(collapsed = FALSE)
-          ) %>% 
+          ) %>%
           leafpm::addPmToolbar(
             toolbarOptions = leafpm::pmToolbarOptions(
-              drawMarker = FALSE, 
+              drawMarker = FALSE,
               drawPolyline = FALSE,
               drawPolygon = FALSE,
-              drawCircle = FALSE, 
+              drawCircle = FALSE,
               drawRectangle = TRUE,
               cutPolygon = FALSE,
               removalMode = FALSE,
@@ -220,7 +220,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             color = ~ pal(.__selected),
             fillOpacity = 1,
             clusterOptions = leaflet::markerClusterOptions(
-              maxClusterRadius = 20, 
+              maxClusterRadius = 20,
               zoomToBoundsOnClick = FALSE
             )
           )
@@ -256,8 +256,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             )
         }
       })
-      
-      
+
+
       observeEvent(input$map_draw_new_feature, {
         rect <- input$map_draw_new_feature
         rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- rect
@@ -279,7 +279,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         req(data_map_r())
         rect <- reactiveValuesToList(rect_rv)$x
         if (length(rect) > 0) {
-          rectangles <- geojson_to_sf(rect) %>% 
+          rectangles <- geojson_to_sf(rect) %>%
             sf::st_combine()
           selected <- pts_in_poly(data_map_r(), rectangles)
           n <- sum(selected)
@@ -305,7 +305,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         data_map <- req(data_map_r())
         rect <- reactiveValuesToList(rect_rv)$x
         req(length(rect) > 0)
-        rectangles <- geojson_to_sf(rect) %>% 
+        rectangles <- geojson_to_sf(rect) %>%
           sf::st_combine()
         selected <- pts_in_poly(data_map_r(), rectangles)
         data_map$.__selected[selected] <- FALSE
@@ -313,7 +313,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         rect_rv$x <- NULL
       })
 
-      
+
       output$summary <- renderUI({
         data_map <- req(data_map_r())
         tagList(

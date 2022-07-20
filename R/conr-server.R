@@ -16,11 +16,14 @@ conr_server <- function() {
 
     data_r <- data_server("data")
 
-    mapping_server(id = "mapping", data_r = data_r)
+    mapping_server(id = "mapping", data_r = reactive({
+      req(data_r(), hasName(data_r(), "STATUS_CONR")) %>%
+        dplyr::filter(STATUS_CONR == "IN")
+    }))
 
     criterion_b_server(id = "criterion_b", data_r = reactive({
-      data_r() %>%
-        filter(STATUS_CONR == "IN")
+      req(data_r(), hasName(data_r(), "STATUS_CONR")) %>%
+        dplyr::filter(STATUS_CONR == "IN")
     }))
 
   }
