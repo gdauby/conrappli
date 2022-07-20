@@ -21,14 +21,15 @@ Imports:
     bslib,
     cli,
     ConR (>= 2.0.1),
-    crosstalk (>= 1.2.0.9000),
     datamods (>= 1.2.0.9320),
     DBI,
     dplyr,
     esquisse,
     glue,
     htmltools,
+    jsonlite,
     leaflet,
+    leafpm,
     measurements,
     pkgload,
     reactable,
@@ -42,7 +43,6 @@ Imports:
     taxize,
     tidyr,
     validate
-Remotes: gdauby/ConR@devel,
-    rstudio/crosstalk
+Remotes: gdauby/ConR@devel
 Suggests: 
     mapedit
