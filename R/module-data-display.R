@@ -57,7 +57,8 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
               cell = function(value, index) {
                 if (value == "OUT") "\u274c Out" else "\u2714\ufe0f In"
               }
-            )
+            ),
+            STATUS_DESC = reactable::colDef(name = "Status description")
           )
         } else {
           columns <- NULL
@@ -68,7 +69,11 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
           defaultColDef =  reactable::colDef(minWidth = 150),
           bordered = TRUE,
           compact = TRUE,
-          columns = columns
+          columns = columns,
+          searchable = TRUE,
+          theme = reactable::reactableTheme(
+            searchInputStyle = list(width = "100%")
+          )
         )
       })
 

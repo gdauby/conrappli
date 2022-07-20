@@ -72,12 +72,36 @@ exclude_violating_records <- function(data) {
 #'
 #' @importFrom dplyr mutate if_all all_of select any_of
 identify_violating_records <- function(data) {
-  dplyr::mutate(
-    data,
-    STATUS_CONR = dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE),
-    STATUS_CONR = ifelse(STATUS_CONR == TRUE, "IN", "OUT")
-  ) %>%
-    dplyr::select(!dplyr::any_of(validation_cols()))
+  # dplyr::mutate(
+  #   data,
+  #   STATUS_CONR = dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE),
+  #   STATUS_CONR = ifelse(STATUS_CONR == TRUE, "IN", "OUT")
+  # ) %>%
+  #   dplyr::select(!dplyr::any_of(validation_cols()))
+  data %>%
+    dplyr::mutate(
+      .id = seq_len(dplyr::n()),
+      STATUS_CONR = dplyr::if_all(dplyr::all_of(validation_cols()), ~ . == TRUE),
+      STATUS_CONR = ifelse(STATUS_CONR == TRUE, "IN", "OUT")
+    ) %>%
+    tidyr::pivot_longer(
+      cols = validation_cols(),
+      names_to = "STATUS_DESC",
+      values_to = "validation_result"
+    ) %>%
+    dplyr::mutate(
+      STATUS_DESC = dplyr::case_when(
+        validation_result == FALSE & STATUS_DESC == ".coordinates_outOfRange" ~ "out-of-range geographic coordinates",
+        validation_result == FALSE & STATUS_DESC == ".coordinates_empty" ~ "empty geographic coordinates",
+        validation_result == FALSE & STATUS_DESC == ".scientificName_empty" ~ "empty scientific names",
+        TRUE ~ NA_character_
+      )
+    ) %>%
+    # dplyr::filter(validation_result == FALSE) %>%
+    dplyr::group_by(dplyr::across(setdiff(names(.), c("STATUS_DESC", "validation_result")))) %>%
+    dplyr::summarise(STATUS_DESC = paste(STATUS_DESC[!is.na(STATUS_DESC)], collapse = ", ")) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-.id)
 }
 
 #' @export
