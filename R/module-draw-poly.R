@@ -1,26 +1,20 @@
 
 #' @importFrom leaflet leafletOutput
-#' @importFrom shiny NS modalDialog actionButton
+#' @importFrom shiny NS actionButton
 draw_poly_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::modalDialog(
-    title = "Draw polygon",
-    easyClose = TRUE,
-    size = "l",
-    footer = tags$div(
-      tags$button(
-        "Annuler",
-        class = "btn btn-outline-secondary",
-        `data-bs-dismiss` = "modal"
-      ),
+  tagList(
+    tags$h4("Draw polygon"),
+    leaflet::leafletOutput(outputId = ns("map"), height = "500px"),
+    tags$div(
+      class = "mb-3 mt-3",
       actionButton(
         inputId = ns("confirm"),
         label = "Confirm",
         class = "btn-outline-primary",
-        `data-bs-dismiss` = "modal"
+        width = "100%"
       )
-    ),
-    leaflet::leafletOutput(outputId = ns("map"), height = "500px")
+    )
   )
 }
 
@@ -54,7 +48,7 @@ draw_poly_server <- function(id) {
               drawCircle = FALSE,
               drawRectangle = TRUE,
               cutPolygon = FALSE,
-              removalMode = FALSE,
+              removalMode = TRUE,
               position = "topright"
             ),
             drawOptions = leafpm::pmDrawOptions(
@@ -88,7 +82,8 @@ draw_poly_server <- function(id) {
         polys <- shiny::reactiveValuesToList(polys_rv)$x
         if (length(polys) > 0) {
           geojson_to_sf(polys) %>%
-            sf::st_combine()
+            sf::st_combine() %>%
+            sf::st_cast(to = "POLYGON")
         } else {
           NULL
         }

@@ -9,7 +9,7 @@ ui <- fluidPage(
   shinyjs::useShinyjs(),
   tags$script(src = "conrappli/js/script.js"),
   tags$style(".selectize-dropdown, .selectize-dropdown.form-control {z-index: 1060 !important;}"),
-  actionButton("go", "Draw poly"),
+  draw_poly_ui("ID"),
   plotOutput(outputId = "draw_poly")
 )
 
@@ -17,11 +17,11 @@ server <- function(input, output, session) {
 
   ns <- session$ns
 
-  observeEvent(input$go, showModal(draw_poly_ui(ns("ID"))))
   result <- draw_poly_server("ID")
 
   output$draw_poly <- renderPlot({
     req(result())
+    polygone <<- result()
     plot((st_geometry(result())))
   })
 
