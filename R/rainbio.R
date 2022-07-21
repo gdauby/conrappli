@@ -87,7 +87,13 @@ query_rb_poly <- function(poly) {
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
 
-  sss_txt <- sf::st_as_text(poly$geometry)
+  if (inherits(poly, "sf")) {
+    sss_txt <- sf::st_as_text(poly$geometry)
+  } else if (inherits(poly, "sfc")) {
+    sss_txt <- sf::st_as_text(poly)
+  } else {
+    stop("'poly' must be an 'sf' or 'sfc' object.")
+  }
 
   tbl <- "table_rec_sf"
   query_g <-
