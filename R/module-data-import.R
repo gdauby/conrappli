@@ -27,11 +27,13 @@ data_import_ui <- function(id) {
           choiceNames = c(
             "GBIF",
             "Rainbio",
+            "Polygon",
             "Dataset"
           ),
           choiceValues = c(
             "gbif",
             "rainbio",
+            "polygon",
             "data"
           ),
           direction = "vertical",
@@ -69,6 +71,10 @@ data_import_ui <- function(id) {
                 data_import_rainbio_ui(id = ns("rainbio_copypaste"), from = "copypaste")
               )
             )
+          ),
+          bslib::nav_content(
+            value = "polygon",
+            data_import_polygon_ui(id = ns("polygon"))
           ),
           bslib::nav_content(
             value = "data",
@@ -130,6 +136,13 @@ data_import_server <- function(id) {
       )
       observeEvent(raw_data_rainbio_copypaste(), {
         dataset_rv$value <- raw_data_rainbio_copypaste()
+      })
+
+      raw_data_polygon <- data_import_polygon_server(
+        id = "polygon"
+      )
+      observeEvent(raw_data_polygon(), {
+        dataset_rv$value <- raw_data_polygon()
       })
 
       raw_data_file <- datamods::import_file_server(
