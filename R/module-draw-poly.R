@@ -81,9 +81,11 @@ draw_poly_server <- function(id) {
       poly_r <- shiny::eventReactive(input$confirm, {
         polys <- shiny::reactiveValuesToList(polys_rv)$x
         if (length(polys) > 0) {
-          geojson_to_sf(polys) %>%
-            sf::st_combine() %>%
-            sf::st_cast(to = "POLYGON")
+          shinyWidgets::execute_safely(
+            geojson_to_sf(polys) %>%
+              sf::st_combine() %>%
+              sf::st_cast(to = "POLYGON")
+          )
         } else {
           NULL
         }
