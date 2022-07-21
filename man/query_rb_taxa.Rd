@@ -4,12 +4,14 @@
 \alias{query_rb_taxa}
 \title{Extract the rainbio database from a species list}
 \usage{
-query_rb_taxa(species = NULL, idtax = NULL)
+query_rb_taxa(species = NULL, idtax = NULL, only_checked_georef = TRUE)
 }
 \arguments{
 \item{species}{Names of species to search for.}
 
 \item{idtax}{Idtax}
+
+\item{only_checked_georef}{logical}
 }
 \value{
 A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax

@@ -12,7 +12,7 @@
 #'
 #' @name module-mapping
 #'
-#' @importFrom shiny NS uiOutput fluidRow column actionButton
+#' @importFrom shiny NS uiOutput fluidRow column actionButton absolutePanel
 #' @importFrom htmltools tagList tags
 #' @importFrom leaflet leafletOutput
 mapping_ui <- function(id) {
@@ -280,7 +280,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         rect <- input$map_draw_deleted_features
         rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- NULL
       })
-      output$test <- renderPrint({
+      output$test <- shiny::renderPrint({
         rectangles <<- reactiveValuesToList(rect_rv)$x
         length(rectangles)
       })

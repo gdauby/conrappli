@@ -6,7 +6,7 @@
 #' @param species Names of species to search for.
 #' @param idtax Idtax
 #' @param only_checked_georef logical
-#' 
+#'
 #' @return A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
 #'
 #' @author Gilles Dauby, \email{gilles.dauby@@ird.fr}
@@ -24,7 +24,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
-  
+
   print(idtax)
 
   quer_sp <-
@@ -44,13 +44,13 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
   res <- DBI::dbFetch(rs)
   DBI::dbClearResult(rs)
   res <- dplyr::as_tibble(res)
-  
+
   if (only_checked_georef) {
-    
-    res <- 
-      res %>% 
+
+    res <-
+      res %>%
       dplyr::filter(georef_final == 1)
-    
+
   }
 
   return(list(
@@ -169,6 +169,7 @@ conn_mydb_rb <- function(pass = NULL, user = NULL) {
 #' @param verbose logical
 #' @param exact_match logical
 #' @param check_syn logical
+#' @param extract_known_syn logical
 #'
 #' @return A tibble of plots or individuals if extract_individuals is TRUE
 #' @export
@@ -183,7 +184,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                        ids = NULL,
                        verbose = TRUE,
                        exact_match = FALSE,
-                       check_syn =TRUE,
+                       check_syn = TRUE,
                        extract_known_syn = FALSE) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
@@ -200,9 +201,9 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
     res_class <-
       tbl(mydb_rb, "table_taxa") %>%
-      filter(id_tax_famclass %in% !!res_q$res_q$id_tax_famclass) %>%
+      dplyr::filter(id_tax_famclass %in% !!res_q$res_q$id_tax_famclass) %>%
       dplyr::select(idtax_n, idtax_good_n) %>%
-      collect()
+      dplyr::collect()
 
   }
 
@@ -414,9 +415,9 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                          vals = ids, .con = mydb_rb)
 
     res <- func_try_fetch(con = mydb_rb, sql = sql)
-    
+
     no_match <- FALSE
-    
+
     if(nrow(res) == 0) {
       res <- NULL
       cli::cli_alert_danger("no matching names")
@@ -500,10 +501,10 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
     ## retrieving all synonyms from selected taxa
     id_synonyms <-
       tbl(mydb_rb, "table_taxa") %>%
-      filter(idtax_good_n %in% !!res$idtax_n) %>% ## all taxa synonyms of selected taxa
+      dplyr::filter(idtax_good_n %in% !!res$idtax_n) %>% ## all taxa synonyms of selected taxa
       # filter(idtax_n %in% !!res$idtax_n) %>% ## excluding taxa already in extract
       dplyr::select(idtax_n, idtax_good_n) %>%
-      collect()
+      dplyr::collect()
 
     if (nrow(id_synonyms) > 0) {
       if (verbose) {
@@ -567,7 +568,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       dplyr::relocate(tax_sp_level, .before = idtax_n) %>%
       dplyr::relocate(id_tax_famclass, .after = morpho_species) %>%
       dplyr::relocate(tax_submitted, .before = tax_sp_level)
-    
+
 
 
   }
