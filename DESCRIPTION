@@ -21,7 +21,7 @@ Imports:
     bslib,
     cli,
     ConR (>= 2.0.1),
-    datamods (>= 1.2.0.9320),
+    datamods (>= 1.3.0),
     DBI,
     dplyr,
     esquisse,
@@ -39,7 +39,7 @@ Imports:
     shiny,
     shinybusy,
     shinyjs,
-    shinyWidgets (>= 0.6.4.9000),
+    shinyWidgets (>= 0.7.0),
     taxize,
     tidyr,
     validate
