@@ -347,8 +347,14 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(data_map_r(), {
         req(data_map_r())
-        returned_rv$x <- data_map_r() %>%
-          dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
+        points <- data_map_r()
+        returned_rv$x <- dplyr::bind_cols(
+          sf::st_coordinates(points) %>% 
+            as_tibble() %>% 
+            setNames(c(".__longitude", ".__latitude")),
+          sf::st_drop_geometry(points) %>%
+            dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
+        )
       })
 
       return(reactive(returned_rv$x))

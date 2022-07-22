@@ -57,10 +57,11 @@ data_import_polygon_server <- function(id) {
 
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
+          n <- nrow(dataset_rv$value)
           shinyWidgets::alert(
             status = "success",
             icon("check"),
-            "Data successfully downloaded from Rainbio. See below, max first 100 lines displayed."
+            format(n, big.mark = ","), "successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
         }
       })
