@@ -201,7 +201,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             toolbarOptions = leafpm::pmToolbarOptions(
               drawMarker = FALSE,
               drawPolyline = FALSE,
-              drawPolygon = FALSE,
+              drawPolygon = TRUE,
               drawCircle = FALSE,
               drawRectangle = TRUE,
               cutPolygon = FALSE,
@@ -291,7 +291,9 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         if (length(rect) > 0) {
           rectangles <- geojson_to_sf(rect) %>%
             sf::st_combine()
-          selected <- pts_in_poly(data_map_r(), rectangles)
+          selected <- data_map_r() %>% 
+            dplyr::filter(.__selected == TRUE) %>%
+            pts_in_poly(rectangles)
           n <- sum(selected)
         } else {
           n <- 0
@@ -317,8 +319,10 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         req(length(rect) > 0)
         rectangles <- geojson_to_sf(rect) %>%
           sf::st_combine()
-        selected <- pts_in_poly(data_map_r(), rectangles)
-        data_map$.__selected[selected] <- FALSE
+        selected <- data_map_r() %>% 
+          dplyr::filter(.__selected == TRUE) %>%
+          sf::st_intersection(rectangles)
+        data_map$.__selected[data_map$.__id %in% selected$.__id] <- FALSE
         data_rv$map <- data_map
         rect_rv$x <- NULL
       })
