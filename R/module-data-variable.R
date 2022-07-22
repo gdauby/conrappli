@@ -215,6 +215,8 @@ other_cols <- function(x = NULL) {
 
 auto_selection_cols_taxa <- function(.data) {
   x <- list()
+  if (hasName(.data, "family"))
+    x[[".__taxa"]] <- "family"
   if (hasName(.data, "scientificName"))
     x[[".__taxa"]] <- "scientificName"
   if (hasName(.data, "tax_sp_level"))
@@ -235,10 +237,14 @@ auto_selection_cols_taxa <- function(.data) {
 
 auto_selection_cols_other <- function(.data) {
   x <- list()
+  if (hasName(.data, "long"))
+    x[[".__longitude"]] <- "long"
   if (hasName(.data, "decimalLongitude"))
     x[[".__longitude"]] <- "decimalLongitude"
   if (hasName(.data, "ddlon"))
     x[[".__longitude"]] <- "ddlon"
+  if (hasName(.data, "lat"))
+    x[[".__latitude"]] <- "lat"
   if (hasName(.data, "decimalLatitude"))
     x[[".__latitude"]] <- "decimalLatitude"
   if (hasName(.data, "ddlat"))
