@@ -27,7 +27,13 @@ criterion_b_ui <- function(id) {
           status = "primary",
           radioButtons(
             inputId = ns("mode_eoo"),
-            label = "EOO mode:",
+            label = tagList(
+              "EOO mode:",
+              btn_help(
+                "When spheroid, geodetic coordinates are used and EOO is calculated following great circle distances.
+                When planar, projected coordinates are used and euclidian distances are used."
+              )
+            ) ,
             choices = c("spheroid", "planar"),
             inline = TRUE
           ),

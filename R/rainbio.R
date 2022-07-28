@@ -1,13 +1,13 @@
 
-#' Extract the rainbio database from a species list
+#' Extract the Rainbio database from a species list
 #'
-#' Extract from the rainbio database of all records from a species list
+#' Extract from the Rainbio database of all records from a species list
 #'
 #' @param species Names of species to search for.
-#' @param idtax Idtax
-#' @param only_checked_georef logical
+#' @param idtax idtax.
+#' @param only_checked_georef logical, whether filtering out occurrences with non validated georeferencing.
 #'
-#' @return A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
+#' @return A list with the sf of the Rainbio database extracted, the polygon used to extract, a tibble with idtax
 #'
 #' @author Gilles Dauby, \email{gilles.dauby@@ird.fr}
 #'
@@ -65,6 +65,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 #' Extract all records of all taxa identified to species level into a dranw polygon from the rainbio database
 #'
 #' @param poly An `sf` object, typically a polygon obtained with `mapedit::drawFeatures()`.
+#' @param only_checked_georef logical, whether filtering out occurrences with non validated georeferencing.
 #'
 #' @return A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
 #'
@@ -82,7 +83,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 #' poly <- mapedit::drawFeatures()
 #' query_rb_poly(poly)
 #' }
-query_rb_poly <- function(poly) {
+query_rb_poly <- function(poly, only_checked_georef = TRUE) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
@@ -116,6 +117,14 @@ query_rb_poly <- function(poly) {
   sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE idtax_f IN ({vals*})",
                        vals = idtax_sel$idtax_f, .con = mydb_rb)
   res <- func_try_fetch(con = mydb_rb, sql = sql)
+  
+  if (only_checked_georef) {
+    
+    res <-
+      res %>%
+      dplyr::filter(georef_final == 1)
+    
+  }
 
   cli::cli_alert_success("Extract from rainbio record done")
 
