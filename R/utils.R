@@ -46,3 +46,7 @@ pts_in_poly <- function(points, poly) {
   )
   return(x[,1])
 }
+
+get_max_obs <- function() {
+  getOption("conrappli.max_obs", default = 5000)
+}

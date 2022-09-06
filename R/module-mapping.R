@@ -42,10 +42,15 @@ mapping_ui <- function(id) {
       ),
       # verbatimTextOutput(ns("test")),
       uiOutput(outputId = ns("summary")),
-      shinyWidgets::materialSwitch(
-        inputId = ns("show_in"),
-        label = "Show only points IN",
-        value = FALSE
+      tags$br(),
+      tags$div(
+        id = ns("container-show_in"),
+        shinyWidgets::materialSwitch(
+          inputId = ns("show_in"),
+          label = "Show only selected points (IN)",
+          value = FALSE,
+          status = "primary"
+        )
       ),
       uiOutput(outputId = ns("filter_coord_accuracy")),
       uiOutput(outputId = ns("filter_taxa")),
@@ -96,9 +101,21 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
     module = function(input, output, session) {
 
       ns <- session$ns
+      jns <- function(x) paste0("#", ns(x))
 
+      rv <- reactiveValues()
       data_rv <- reactiveValues()
       rect_rv <- reactiveValues()
+      
+      observeEvent(input$show_in, {
+        datamap <- req(data_r())
+        limit <- get_max_obs()
+        if (isTruthy(limit) && is.numeric(limit)) {
+          if (isTRUE(nrow(datamap) <= limit)) {
+            rv$show_in <- input$show_in
+          }
+        }
+      }, ignoreInit = TRUE)
 
       observeEvent(list(data_r(), input$cancel), {
         req(
@@ -118,6 +135,19 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
           ) %>%
           coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
+        
+        limit <- get_max_obs()
+        if (isTruthy(limit) && is.numeric(limit)) {
+          if (isTRUE(nrow(datamap) > limit)) {
+            removeUI(selector = jns("container-show_in"), immediate = TRUE)
+            rv$show_in <- TRUE
+            datamap <- dplyr::mutate(
+              datamap,
+              .__display_taxa = .__taxa == dplyr::first(.__taxa)
+            )
+          }
+        }
+        # check_datamap <<- datamap
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"), crs = 4326)
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
@@ -153,13 +183,22 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
       output$filter_taxa <- renderUI({
         datamap <- req(data_r())
-        selectizeInput(
+        taxas <- unique(datamap$.__taxa)
+        limit <- get_max_obs()
+        choices <- list(
+          " " = list("All"),
+          "Species" = as.list(taxas)
+        )
+        if (isTruthy(limit) && is.numeric(limit)) {
+          if (isTRUE(nrow(datamap) > limit)) {
+            choices <- as.list(taxas)
+          }
+        }
+        shinyWidgets::virtualSelectInput(
           inputId = ns("taxa"),
           label = "Taxa:",
-          choices = list(
-            " " = list("All"),
-            "Species" = as.list(unique(datamap$.__taxa))
-          ),
+          choices = choices,
+          search = TRUE,
           width = "100%"
         )
       })
@@ -185,7 +224,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           levels = c(TRUE, FALSE)
         )
         data_map <- data_map_r()
-        if (input$show_in) {
+        if (isTRUE(rv$show_in)) {
           data_map <- dplyr::filter(data_map, .__selected == TRUE)
         }
         leaflet::leaflet(data = data_map, options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
@@ -241,7 +280,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         years <- req(input$year)
         data_rv$map <- data_rv$map %>%
           dplyr::mutate(
-            .__display_year = dplyr::between(.__year, years[1], years[2])
+            .__display_year = dplyr::between(.__year, years[1], years[2]) | is.na(.__year)
           )
       })
 
@@ -330,6 +369,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
       output$summary <- renderUI({
         data_map <- req(data_map_r())
+        # check_summary <<- data_map
         tagList(
           tags$span(
             "Points IN:", sum(data_map[[".__selected"]]),

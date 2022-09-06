@@ -4,7 +4,6 @@
 draw_poly_ui <- function(id) {
   ns <- shiny::NS(id)
   tagList(
-    tags$h4("Draw polygon"),
     leaflet::leafletOutput(outputId = ns("map"), height = "500px"),
     tags$div(
       class = "mb-3 mt-3",

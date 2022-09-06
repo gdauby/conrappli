@@ -18,8 +18,15 @@
 data_import_polygon_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    tags$h3("Draw polygon", class = "mt-0"),
+    tags$p(
+      "Click buttons representing a rectangle or a polygon",
+      "on the right of the map to draw a shape on the map,",
+      "then click the confirm button to import data about the concerned area."
+    ),
     draw_poly_ui(id = ns("polygon")),
     uiOutput(outputId = ns("feedback")),
+    uiOutput(outputId = ns("alert_max_obs")),
     reactable::reactableOutput(outputId = ns("table")),
     tags$br(),
     tags$br()
@@ -63,6 +70,23 @@ data_import_polygon_server <- function(id) {
             ph("check"),
             format(n, big.mark = ","), "successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
+        }
+      })
+      
+      output$alert_max_obs <- renderUI({
+        if (isTruthy(dataset_rv$value)) {
+          n <- nrow(dataset_rv$value)
+          limit <- get_max_obs()
+          if (isTruthy(limit) && is.numeric(limit)) {
+            if (isTRUE(n > limit)) {
+              shinyWidgets::alert(
+                status = "warning",
+                ph("warning"),
+                "The volume of imported data is large, which may slow down the",
+                "operations performed in the other parts of the application"
+              )
+            }
+          }
         }
       })
 
