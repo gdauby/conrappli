@@ -8,7 +8,7 @@ home_ui <- function(id) {
       column(
         width = 8, offset = 2,
         tags$p(
-          class = "text-center fs-5 text",
+          class = "text-center fs-5 text mt-5",
           "This explication is designed to perform multi-species estimation of geographical",
           "range parameters for preliminary assessment of conservation status following Criterion B of the", 
           "International Union for Conservation of Nature (IUCN, see <http://www.iucnredlist.org>)",
@@ -29,7 +29,7 @@ home_ui <- function(id) {
           ),
           class = "btn-outline-primary text-center fs-4 my-5 d-block",
           width = "100%",
-          onclick = "$('a[data-value=\"data\"]').click();"
+          onclick = "$('.navbar').find('a[data-value=\"data\"]').click();"
         ),
         
         tags$br(),
