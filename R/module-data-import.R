@@ -46,6 +46,7 @@ data_import_ui <- function(id) {
           id = ns("navs_type_import"),
           bslib::nav_content(
             value = "gbif",
+            tags$h3("Import data from GBIF", class = "mt-0"),
             bslib::navs_pill(
               header = tags$br(),
               bslib::nav(
@@ -60,6 +61,7 @@ data_import_ui <- function(id) {
           ),
           bslib::nav_content(
             value = "rainbio",
+            tags$h3("Import data from Rainbio database", class = "mt-0"),
             bslib::navs_pill(
               header = tags$br(),
               bslib::nav(
@@ -78,6 +80,7 @@ data_import_ui <- function(id) {
           ),
           bslib::nav_content(
             value = "data",
+            tags$h3("Import data from a local file", class = "mt-0"),
             bslib::navs_pill(
               header = tags$br(),
               bslib::nav(

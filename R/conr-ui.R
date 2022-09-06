@@ -28,6 +28,12 @@ conr_ui <- function() {
         tags$script(src = "conrappli/js/script.js")
       ),
       nav(
+        title = "",
+        value = "home", 
+        icon = ph_i("house"),
+        home_ui("home")
+      ),
+      nav(
         title = "Data",
         value = "data"
         , data_ui("data")
