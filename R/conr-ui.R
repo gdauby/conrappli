@@ -5,7 +5,7 @@
 #' @return An UI definition.
 #' @export
 #'
-#' @importFrom bslib page_navbar nav
+#' @importFrom bslib page_navbar nav nav_spacer
 #'
 #' @seealso
 #'  * [conr_server()] for server part.
@@ -19,6 +19,7 @@ conr_ui <- function() {
       header = tagList(
         shinyjs::useShinyjs(),
         shinyWidgets::useSweetAlert(),
+        shinybusy::add_busy_bar(color = "#088A08", height = "5px"),
         tags$style(
           ".swal2-popup {font-size: 1rem !important;}",
           ".badge-dragula {font-size: 1rem !important;}",
@@ -27,6 +28,7 @@ conr_ui <- function() {
         ),
         tags$script(src = "conrappli/js/script.js")
       ),
+      nav_spacer(),
       nav(
         title = "",
         value = "home", 
@@ -55,7 +57,8 @@ conr_ui <- function() {
       nav(
         title = "Summary report",
         value = "summary"
-      )
+      ),
+      nav_spacer()
     )
   }
 }
