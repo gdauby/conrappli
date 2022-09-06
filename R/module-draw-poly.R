@@ -29,16 +29,7 @@ draw_poly_server <- function(id) {
       polys_rv <- shiny::reactiveValues()
 
       output$map <- leaflet::renderLeaflet({
-        leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
-          leaflet::setView(0, 0, 2) %>%
-          leaflet::invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>%
-          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
-          leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
-          leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-          leaflet::addLayersControl(
-            baseGroups = c("OSM", "Esri", "Open Topo Map"),
-            options = leaflet::layersControlOptions(collapsed = FALSE)
-          ) %>%
+        base_map() %>%
           leafpm::addPmToolbar(
             toolbarOptions = leafpm::pmToolbarOptions(
               drawMarker = FALSE,

@@ -18,13 +18,23 @@
 data_import_polygon_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    tags$h3("Draw polygon", class = "mt-0"),
-    tags$p(
-      "Click buttons representing a rectangle or a polygon",
-      "on the right of the map to draw a shape on the map,",
-      "then click the confirm button to import data about the concerned area."
+    bslib::navs_pill(
+      header = tags$br(),
+      bslib::nav(
+        title = "Draw on map",
+        tags$h5("Draw polygon", class = "mt-0"),
+        tags$p(
+          "Click buttons representing a rectangle or a polygon",
+          "on the right of the map to draw a shape on the map,",
+          "then click the confirm button to import data about the concerned area."
+        ),
+        draw_poly_ui(id = ns("draw"))
+      ),
+      bslib::nav(
+        title = "Read a file",
+        read_poly_ui(id = ns("read"))
+      )
     ),
-    draw_poly_ui(id = ns("polygon")),
     uiOutput(outputId = ns("feedback")),
     uiOutput(outputId = ns("alert_max_obs")),
     reactable::reactableOutput(outputId = ns("table")),
@@ -44,19 +54,24 @@ data_import_polygon_server <- function(id) {
     id = id,
     module = function(input, output, session) {
 
+      polygon_rv <- reactiveValues()
       dataset_rv <- reactiveValues(value = NULL)
 
-      polygon_r <- draw_poly_server(id = "polygon")
+      polygon_draw_r <- draw_poly_server(id = "draw")
+      observeEvent(polygon_draw_r(), polygon_rv$x <- polygon_draw_r())
+      
+      polygon_read_r <- read_poly_server(id = "read")
+      observeEvent(polygon_read_r(), polygon_rv$x <- polygon_read_r())
 
-      observeEvent(polygon_r(), {
-        req(polygon_r())
+      observeEvent(polygon_rv$x, {
+        req(polygon_rv$x)
         shinybusy::show_modal_spinner(
           spin = "fulfilling-bouncing-circle",
           color = "#088A08",
           text = "Retrieving data, please wait..."
         )
         occdata <- shinyWidgets::execute_safely({
-          query_rb_poly(poly = polygon_r())
+          query_rb_poly(poly = polygon_rv$x)
         })
         shinybusy::remove_modal_spinner()
         dataset_rv$value <- occdata$extract_all_tax

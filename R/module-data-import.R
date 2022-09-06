@@ -76,6 +76,7 @@ data_import_ui <- function(id) {
           ),
           bslib::nav_content(
             value = "polygon",
+            tags$h3("Import data from polygon", class = "mt-0"),
             data_import_polygon_ui(id = ns("polygon"))
           ),
           bslib::nav_content(
