@@ -12,7 +12,7 @@
 #'
 #' @name module-mapping
 #'
-#' @importFrom shiny NS uiOutput fluidRow column actionButton absolutePanel
+#' @importFrom shiny NS uiOutput fluidRow column actionButton absolutePanel checkboxInput
 #' @importFrom htmltools tagList tags
 #' @importFrom leaflet leafletOutput
 mapping_ui <- function(id) {
@@ -45,11 +45,10 @@ mapping_ui <- function(id) {
       tags$br(),
       tags$div(
         id = ns("container-show_in"),
-        shinyWidgets::materialSwitch(
+        checkboxInput(
           inputId = ns("show_in"),
           label = "Show only selected points (IN)",
-          value = FALSE,
-          status = "primary"
+          value = FALSE
         )
       ),
       uiOutput(outputId = ns("filter_coord_accuracy")),
