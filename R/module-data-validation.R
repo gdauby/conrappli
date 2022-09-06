@@ -63,12 +63,12 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
         if (nrow(validated) < 1) {
           shinyWidgets::alert(
             status = "danger",
-            icon("exclamation-triangle"), "There are not enough rows to proceed."
+            ph("warning"), "There are not enough rows to proceed."
           )
         } else if (nrow(validated) < nrow(to_validate)) {
           shinyWidgets::alert(
             status = "warning",
-            icon("exclamation-triangle"),
+            ph("warning"),
             nrow(to_validate) - nrow(validated),
             "rows will be discarded in order to proceed.",
             tags$br(),
@@ -79,7 +79,7 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
         } else {
           shinyWidgets::alert(
             status = "success",
-            icon("check"),
+            ph("check"),
             "All rows are OK."
           )
         }

@@ -58,7 +58,7 @@ mapping_ui <- function(id) {
             inputId = ns("remove"),
             label = "Remove points",
             width = "100%",
-            icon = icon("ban"),
+            icon = ph_i("prohibit"),
             class = "btn-outline-danger",
             style = "height: 65px;"
           )
@@ -69,7 +69,7 @@ mapping_ui <- function(id) {
             inputId = ns("cancel"),
             label = "Restore original data",
             width = "100%",
-            icon = icon("undo"),
+            icon = ph_i("arrow-counter-clockwise"),
             class = "btn-outline-primary",
             style = "height: 65px;"
           )

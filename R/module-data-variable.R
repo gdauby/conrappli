@@ -130,7 +130,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         } else {
           shinyWidgets::alert(
             status = "info",
-            icon("info-circle"), "Select either taxa OR others columns."
+            ph("info"), "Select either taxa OR others columns."
           )
         }
       })
@@ -146,7 +146,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         } else {
           shinyWidgets::alert(
             status = "info",
-            icon("info-circle"), "Longitude and latitude are required."
+            ph("info"), "Longitude and latitude are required."
           )
         }
       })

@@ -15,39 +15,42 @@
 #'
 #' @name module-data
 #'
-#' @importFrom shiny NS uiOutput icon
+#' @importFrom shiny NS uiOutput
 #' @importFrom htmltools tagList tags
 #' @importFrom bslib navs_pill nav nav_spacer
+#' @importFrom phosphoricons ph_i html_dependency_phosphor
 data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import & validate data",
-
+    
+    html_dependency_phosphor(),
+    
     navs_pill(
       id = ns("navs"),
       header = tags$hr(),
       nav(
         title = "Import dataset",
         value = "import_dataset",
-        icon = icon("file-import"),
+        icon = ph_i("file-arrow-up", style = "vertical-align: -0.3em;"),
         data_import_ui(ns("import")),
         uiOutput(outputId = ns("btn_nav_import_dataset"))
       ),
       nav(
         title = "Variable selection",
         value = "variable_selection",
-        icon = icon("table"),
+        icon = ph_i("table", style = "vertical-align: -0.3em;"),
         data_variable_ui(ns("variable")),
         uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
       nav(
         title = "Data validation",
         value = "data_validation",
-        icon = icon("check"),
+        icon = ph_i("check", style = "vertical-align: -0.3em;"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
-          icon("info-circle"), "You need to import data and select variable."
+          ph("info"), "You need to import data and select variable."
         ),
         data_validation_ui(ns("validation")),
         uiOutput(outputId = ns("btn_nav_data_validation"))
@@ -56,11 +59,11 @@ data_ui <- function(id) {
       nav(
         title = "Data",
         value = "data",
-        icon = icon("database"),
+        icon = ph_i("database", style = "vertical-align: -0.3em;"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
-          icon("info-circle"), "You need to import data and select variable."
+          ph("info"), "You need to import data and select variable."
         ),
         data_display_ui(ns("display"))
       )
@@ -98,7 +101,7 @@ data_server <- function(id) {
           actionButton(
             inputId = ns("go_to_variable_selection"),
             label = "Go to variable selection",
-            icon = icon("arrow-circle-right"),
+            icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
         }
@@ -120,7 +123,7 @@ data_server <- function(id) {
           actionButton(
             inputId = ns("go_to_data_validation"),
             label = "Go to data validation",
-            icon = icon("arrow-circle-right"),
+            icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
         }
@@ -146,7 +149,7 @@ data_server <- function(id) {
           actionButton(
             inputId = ns("go_to_data"),
             label = "See data",
-            icon = icon("arrow-circle-right"),
+            icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
         }

@@ -2,22 +2,22 @@
 % Please edit documentation in R/rainbio.R
 \name{query_rb_taxa}
 \alias{query_rb_taxa}
-\title{Extract the rainbio database from a species list}
+\title{Extract the Rainbio database from a species list}
 \usage{
 query_rb_taxa(species = NULL, idtax = NULL, only_checked_georef = TRUE)
 }
 \arguments{
 \item{species}{Names of species to search for.}
 
-\item{idtax}{Idtax}
+\item{idtax}{idtax.}
 
-\item{only_checked_georef}{logical}
+\item{only_checked_georef}{logical, whether filtering out occurrences with non validated georeferencing.}
 }
 \value{
-A list with the sf of the rainbio database extracted, the polygon used to extract, a tibble with idtax
+A list with the sf of the Rainbio database extracted, the polygon used to extract, a tibble with idtax
 }
 \description{
-Extract from the rainbio database of all records from a species list
+Extract from the Rainbio database of all records from a species list
 }
 \examples{
 \dontrun{

@@ -60,7 +60,7 @@ data_import_polygon_server <- function(id) {
           n <- nrow(dataset_rv$value)
           shinyWidgets::alert(
             status = "success",
-            icon("check"),
+            ph("check"),
             format(n, big.mark = ","), "successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
         }

@@ -22,7 +22,7 @@ conr_server <- function() {
     }))
 
     criterion_b_server(id = "criterion_b", data_r = reactive({
-      check_data <<- req(data_mapped_r(), hasName(data_r(), "STATUS_CONR")) %>%
+      req(data_mapped_r(), hasName(data_r(), "STATUS_CONR")) %>%
         dplyr::filter(STATUS_CONR == "IN")
     }))
 

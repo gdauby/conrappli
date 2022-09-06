@@ -168,8 +168,8 @@ data_import_rainbio_server <- function(id) {
         if (isTruthy(dataset_rv$value)) {
           shinyWidgets::alert(
             status = "success",
-            icon("check"), "Data successfully downloaded from Rainbio.",
-            actionLink(inputId = session$ns("see_data"), label = tagList(icon("table")))
+            ph("check"), "Data successfully downloaded from Rainbio.",
+            actionLink(inputId = session$ns("see_data"), label = tagList(ph("table")))
           )
         }
       })

@@ -89,8 +89,10 @@ criterion_b_ui <- function(id) {
         width = 8,
         actionButton(
           inputId = ns("launch"),
-          label = "Launch analysis",
-          icon = icon("play"),
+          label = tagList(
+            ph("play"),
+            "Launch analysis"
+          ),
           class = "mb-4",
           width = "100%",
           class = "btn-outline-primary"
