@@ -87,18 +87,39 @@ criterion_b_ui <- function(id) {
 
       column(
         width = 8,
+
+        tags$div(
+          id = ns("container-spatial-data"),
+          class = "d-none",
+          reactable::reactableOutput(outputId = ns("spatial_data")),
+          shinyWidgets::virtualSelectInput(
+            inputId = ns("spatial_data_select"),
+            label = "Spatial data to use (select in order):",
+            choices = NULL,
+            multiple = TRUE,
+            hasOptionDescription = TRUE,
+            showValueAsTags = TRUE,
+            disableSelectAll = TRUE
+          )
+        ),
+
         actionButton(
           inputId = ns("launch"),
           label = tagList(
             ph("play"),
-            "Launch analysis"
+            "Launch Criterion B analysis"
           ),
           class = "mb-4",
           width = "100%",
           class = "btn-outline-primary"
         ),
+
         tags$div(
-          downloadButton(outputId = ns("download"), label = "Download results", class = "float-end mb-3 disabled"),
+          downloadButton(
+            outputId = ns("download"),
+            label = "Download results",
+            class = "float-end mb-3 disabled"
+          ),
           tags$div(class = "clearfix"),
           reactable::reactableOutput(outputId = ns("results"))
         )
@@ -122,10 +143,42 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
 
       rv <- reactiveValues()
 
+      observeEvent(data_r(), {
+        data <- req(data_r())
+        check_overlap <- extract_overlap_shp(XY = test_data)
+        rv$check_overlap <- check_overlap
+        if (!(all(check_overlap$shp_tables$overlap))) {
+          rv$all_shp <- NULL
+        } else {
+          shinyWidgets::updateVirtualSelect(
+            inputId = "spatial_data_select",
+            choices = check_overlap$shp_tables %>%
+              dplyr::select(id, table_name, type, description, reference) %>%
+              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
+          )
+        }
+      })
+
+      observeEvent(input$spatial_data_select, {
+        shp_tbls <- rv$check_overlap$shp_tables
+        if (is.null(input$spatial_data_select)) {
+          rv$all_shp <- NULL
+        } else {
+          tbls_nms <- shp_tbls[match(x = x, table = shp_tbls$table_name), ]
+          rv$all_shp <- collect_shp(
+            table_names = tbls_nms,
+            XY_sf = rv$check_overlap$XY_sf
+          )
+        }
+      }, ignoreNULL = FALSE)
+
+
+
       observeEvent(input$launch, {
         data <- req(data_r())
         data <- data %>%
           dplyr::select(.__latitude, .__longitude, .__taxa)
+
         shinybusy::show_modal_spinner(
           spin = "half-circle",
           color = "#2472b5",
@@ -136,6 +189,7 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
           mode = input$mode_eoo,
           export_shp = TRUE
         )
+
         shinybusy::update_modal_spinner("Area of occupancy computation")
         aoo_res <- AOO.computing(
           XY = data,
@@ -143,17 +197,21 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
           nbe.rep.rast.AOO = input$rep_rast,
           export_shp = TRUE
         )
+
         shinybusy::update_modal_spinner("Number of locations computation")
         locations <- locations.comp(
           XY = data,
-          Cell_size_locations = input$locations_size
+          Cell_size_locations = input$locations_size,
+          threat_list = rv$all_shp
         )
+
         shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
         categories <- cat_criterion_b(
           EOO = eoo_res$results$eoo,
           AOO = aoo_res$AOO$aoo,
           locations = locations$locations$locations
         )
+
         results <- data.frame(
           taxa = row.names(aoo_res$AOO),
           EOO = eoo_res$results$eoo,
