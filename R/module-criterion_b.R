@@ -90,7 +90,8 @@ criterion_b_ui <- function(id) {
 
         tags$div(
           id = ns("container-spatial-data"),
-          class = "d-none",
+          # class = "d-none",
+          tags$p("Overlaping spatial data available:"),
           reactable::reactableOutput(outputId = ns("spatial_data")),
           shinyWidgets::virtualSelectInput(
             inputId = ns("spatial_data_select"),
@@ -99,7 +100,9 @@ criterion_b_ui <- function(id) {
             multiple = TRUE,
             hasOptionDescription = TRUE,
             showValueAsTags = TRUE,
-            disableSelectAll = TRUE
+            disableSelectAll = TRUE,
+            zIndex = 10,
+            width = "100%"
           )
         ),
 
@@ -111,7 +114,7 @@ criterion_b_ui <- function(id) {
           ),
           class = "mb-4",
           width = "100%",
-          class = "btn-outline-primary"
+          class = "btn-outline-primary d-block"
         ),
 
         tags$div(
@@ -141,6 +144,11 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
     id = id,
     module = function(input, output, session) {
 
+      ns <- session$ns
+      jns <- function(x) {
+        paste0("#", ns(x))
+      }
+
       rv <- reactiveValues()
 
       observeEvent(data_r(), {
@@ -148,42 +156,66 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
         check_overlap <- extract_overlap_shp(XY = test_data)
         rv$check_overlap <- check_overlap
         if (!(all(check_overlap$shp_tables$overlap))) {
+          rv$spatial_data <- NULL
           rv$all_shp <- NULL
+          shinyjs::addClass(id = "container-spatial-data", class = "d-none")
         } else {
+          rv$spatial_data <- check_overlap$shp_tables %>%
+            dplyr::select(table_name, type, description, reference)
           shinyWidgets::updateVirtualSelect(
             inputId = "spatial_data_select",
-            choices = check_overlap$shp_tables %>%
-              dplyr::select(id, table_name, type, description, reference) %>%
+            choices = rv$spatial_data %>%
               shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
           )
+          shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
         }
       })
 
-      observeEvent(input$spatial_data_select, {
-        shp_tbls <- rv$check_overlap$shp_tables
-        if (is.null(input$spatial_data_select)) {
-          rv$all_shp <- NULL
-        } else {
-          tbls_nms <- shp_tbls[match(x = x, table = shp_tbls$table_name), ]
-          rv$all_shp <- collect_shp(
-            table_names = tbls_nms,
-            XY_sf = rv$check_overlap$XY_sf
+      output$spatial_data <- reactable:::renderReactable({
+        req(rv$spatial_data) %>%
+          reactable::reactable(
+            compact = TRUE,
+            columns = list(
+              table_name = reactable::colDef(name = "Name", minWidth = 100),
+              type = reactable::colDef(name = "Type", minWidth = 50),
+              description = reactable::colDef(name = "Description", minWidth = 200),
+              reference = reactable::colDef(
+                name = "Reference", minWidth = 100,
+                cell = function(value, index) {
+                  htmltools::tags$a(href = value, target = "_blank", as.character(value))
+                }
+              )
+            )
           )
-        }
-      }, ignoreNULL = FALSE)
-
+      })
 
 
       observeEvent(input$launch, {
         data <- req(data_r())
-        data <- data %>%
-          dplyr::select(.__latitude, .__longitude, .__taxa)
 
         shinybusy::show_modal_spinner(
           spin = "half-circle",
           color = "#2472b5",
-          text = "Extent of Occurrences multi-taxa computation"
+          text = "Launching calculation"
         )
+
+        data <- data %>%
+          dplyr::select(.__latitude, .__longitude, .__taxa)
+
+
+        shp_tbls <- rv$check_overlap$shp_tables
+        if (is.null(input$spatial_data_select)) {
+          all_shp <- NULL
+        } else {
+          shinybusy::update_modal_spinner("Collecting spatial data")
+          tbls_nms <- shp_tbls[match(x = input$spatial_data_select, table = shp_tbls$table_name), ]
+          all_shp <- collect_shp(
+            table_names = tbls_nms,
+            XY_sf = rv$check_overlap$XY_sf
+          )
+        }
+
+        shinybusy::update_modal_spinner("Extent of Occurrences multi-taxa computation")
         eoo_res <- EOO.computing(
           XY = data,
           mode = input$mode_eoo,
@@ -202,7 +234,8 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
         locations <- locations.comp(
           XY = data,
           Cell_size_locations = input$locations_size,
-          threat_list = rv$all_shp
+          threat_list = all_shp,
+          method_polygons = "no_more_than_one"
         )
 
         shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
