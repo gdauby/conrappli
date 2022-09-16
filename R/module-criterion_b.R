@@ -153,7 +153,7 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
 
       observeEvent(data_r(), {
         data <- req(data_r())
-        check_overlap <- extract_overlap_shp(XY = test_data)
+        check_overlap <- extract_overlap_shp(XY = data, col_x = ".__longitude", col_y = ".__latitude")
         rv$check_overlap <- check_overlap
         if (!(all(check_overlap$shp_tables$overlap))) {
           rv$spatial_data <- NULL
