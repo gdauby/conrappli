@@ -48,7 +48,7 @@ data_import_polygon_ui <- function(id) {
 #' @rdname module-data-polygon
 #'
 #' @importFrom shiny moduleServer observeEvent reactive
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv head
 data_import_polygon_server <- function(id) {
   moduleServer(
     id = id,
@@ -59,7 +59,7 @@ data_import_polygon_server <- function(id) {
 
       polygon_draw_r <- draw_poly_server(id = "draw")
       observeEvent(polygon_draw_r(), polygon_rv$x <- polygon_draw_r())
-      
+
       polygon_read_r <- read_poly_server(id = "read")
       observeEvent(polygon_read_r(), polygon_rv$x <- polygon_read_r())
 
@@ -87,7 +87,7 @@ data_import_polygon_server <- function(id) {
           )
         }
       })
-      
+
       output$alert_max_obs <- renderUI({
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)

@@ -1,6 +1,6 @@
 
 #' @importFrom leaflet leafletOutput
-#' @importFrom shiny NS actionButton
+#' @importFrom shiny NS actionButton fileInput
 read_poly_ui <- function(id) {
   ns <- shiny::NS(id)
   tagList(
@@ -8,7 +8,7 @@ read_poly_ui <- function(id) {
       inputId = ns("file"),
       label = "Import a shapefile:",
       multiple = TRUE,
-      accept = c(".shp",".dbf",".sbn",".sbx",".shx",".prj"), 
+      accept = c(".shp",".dbf",".sbn",".sbx",".shx",".prj"),
       width = "100%"
     ),
     uiOutput(outputId = ns("error")),
@@ -25,11 +25,11 @@ read_poly_server <- function(id) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
-      
+
       # output$dev <- renderPrint(str(rv$polygon))
-      
+
       rv <- reactiveValues()
-      
+
       observeEvent(input$file, {
         rv$error <- rv$polygon <- NULL
         file <- input$file
@@ -44,7 +44,7 @@ read_poly_server <- function(id) {
           rv$error <- "File read does not return any geometry."
         }
       })
-      
+
       output$error <- renderUI({
         if (!is.null(rv$error)) {
           shinyWidgets::alert(
@@ -54,14 +54,14 @@ read_poly_server <- function(id) {
           )
         }
       })
-      
+
       output$map <- renderLeaflet(base_map())
-      
+
       observeEvent(rv$polygon, {
         leaflet::leafletProxy(mapId = "map") %>%
           leaflet::addPolygons(data = rv$polygon)
       })
-      
+
       return(reactive(rv$polygon))
     }
   )
