@@ -27,6 +27,26 @@ mapping_ui <- function(id) {
         right = "0",
         bottom = "0",
         overflow = "hidden",
+        padding = "0",
+        zIndex = 9999,
+        background = "#FFF"
+      ),
+      id = ns("no-data"),
+      shinyWidgets::alert(
+        status = "info",
+        class = "mt-5",
+        ph("info"), "You need to import data and select variable before using this tab."
+      )
+    ),
+
+    tags$div(
+      style = htmltools::css(
+        position = "fixed",
+        top = "56px",
+        left = "0",
+        right = "0",
+        bottom = "0",
+        overflow = "hidden",
         padding = "0"
       ),
       leafletOutput(outputId = ns("map"), height = "100%")
@@ -35,6 +55,7 @@ mapping_ui <- function(id) {
     absolutePanel(
       top = "80px",
       left = "20px",
+      width = "250px",
       style = htmltools::css(
         background = "#FFF",
         borderRadius = "5px",
@@ -64,7 +85,7 @@ mapping_ui <- function(id) {
             width = "100%",
             icon = ph_i("prohibit"),
             class = "btn-outline-danger",
-            style = "height: 65px;"
+            style = "height: 80px; padding: 3px;"
           )
         ),
         column(
@@ -75,9 +96,32 @@ mapping_ui <- function(id) {
             width = "100%",
             icon = ph_i("arrow-counter-clockwise"),
             class = "btn-outline-primary",
-            style = "height: 65px;"
+            style = "height: 80px; padding: 3px;"
           )
         )
+      )
+    ),
+
+    absolutePanel(
+      id = ns("container-spatial-overlap"),
+      bottom = "20px",
+      left = "20px",
+      width = "250px",
+      style = htmltools::css(
+        background = "#FFF",
+        borderRadius = "5px",
+        padding = "10px"
+      ),
+      shinyWidgets::virtualSelectInput(
+        inputId = ns("spatial_data_select"),
+        label = "Spatial data to use :",
+        choices = NULL,
+        multiple = TRUE,
+        hasOptionDescription = TRUE,
+        showValueAsTags = TRUE,
+        disableSelectAll = TRUE,
+        zIndex = 10,
+        width = "100%"
       )
     )
   )
@@ -91,9 +135,10 @@ mapping_ui <- function(id) {
 #' @rdname module-mapping
 #'
 #' @importFrom shiny moduleServer reactive observeEvent reactiveValues observe
-#'  updateActionButton req outputOptions selectizeInput sliderInput
+#'  updateActionButton req outputOptions selectizeInput sliderInput removeUI
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
+#' @importFrom stats setNames
 mapping_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -105,7 +150,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       rv <- reactiveValues()
       data_rv <- reactiveValues()
       rect_rv <- reactiveValues()
-      
+
       observeEvent(input$show_in, {
         datamap <- req(data_r())
         limit <- get_max_obs()
@@ -116,6 +161,48 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         }
       }, ignoreInit = TRUE)
 
+
+       # Overlaping spatial data ----------------
+      observeEvent(data_r(), {
+        data <- req(data_r())
+        check_overlap <- extract_overlap_shp(XY = data, col_x = ".__longitude", col_y = ".__latitude")
+        rv$check_overlap <- check_overlap
+        if (!(all(check_overlap$shp_tables$overlap))) {
+          rv$spatial_data <- NULL
+          rv$all_shp <- NULL
+          shinyjs::addClass(id = "container-spatial-overlap", class = "d-none")
+        } else {
+          rv$spatial_data <- check_overlap$shp_tables %>%
+            dplyr::select(table_name, type, description, reference)
+          shinyWidgets::updateVirtualSelect(
+            inputId = "spatial_data_select",
+            choices = rv$spatial_data %>%
+              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
+          )
+          shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
+          rv$all_shp <- collect_shp(
+            table_names = check_overlap$shp_tables,
+            XY_sf = check_overlap$XY_sf
+          )
+        }
+      })
+      observeEvent(input$spatial_data_select, {
+        proxy <- leaflet::leafletProxy(mapId = "map") %>%
+          leaflet::clearShapes()
+        if (isTruthy(input$spatial_data_select)) {
+          overlaps <- rv$all_shp[input$spatial_data_select]
+          lapply(
+            X = overlaps,
+            FUN = function(x) {
+              if (inherits(x, "sf")) {
+                proxy %>% leaflet::addPolygons(data = x, weight = 1, color = "#088A08")
+              }
+            }
+          )
+        }
+      }, ignoreNULL = FALSE)
+
+
       observeEvent(list(data_r(), input$cancel), {
         req(
           data_r(),
@@ -123,6 +210,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           hasName(data_r(), ".__longitude"),
           hasName(data_r(), "STATUS_CONR")
         )
+        shinyjs::addClass(id = "no-data", class = "d-none")
         datamap <- data_r() %>%
           dplyr::mutate(
             .__id = seq_len(dplyr::n()),
@@ -134,7 +222,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             .__latitude = ifelse(is.na(.__latitude), 0, .__latitude)
           ) %>%
           coord_accuracy(col_x = ".__longitude", col_y = ".__latitude")
-        
+
         limit <- get_max_obs()
         if (isTruthy(limit) && is.numeric(limit)) {
           if (isTRUE(nrow(datamap) > limit)) {
@@ -329,7 +417,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         if (length(rect) > 0) {
           rectangles <- geojson_to_sf(rect) %>%
             sf::st_combine()
-          selected <- data_map_r() %>% 
+          selected <- data_map_r() %>%
             dplyr::filter(.__selected == TRUE) %>%
             pts_in_poly(rectangles)
           n <- sum(selected)
@@ -357,7 +445,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         req(length(rect) > 0)
         rectangles <- geojson_to_sf(rect) %>%
           sf::st_combine()
-        selected <- data_map_r() %>% 
+        selected <- data_map_r() %>%
           dplyr::filter(.__selected == TRUE) %>%
           sf::st_intersection(rectangles)
         data_map$.__selected[data_map$.__id %in% selected$.__id] <- FALSE
@@ -388,8 +476,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         req(data_map_r())
         points <- data_map_r()
         returned_rv$x <- dplyr::bind_cols(
-          sf::st_coordinates(points) %>% 
-            as_tibble() %>% 
+          sf::st_coordinates(points) %>%
+            as_tibble() %>%
             setNames(c(".__longitude", ".__latitude")),
           sf::st_drop_geometry(points) %>%
             dplyr::mutate(STATUS_CONR = ifelse(.__selected == TRUE, STATUS_CONR, "OUT"))
