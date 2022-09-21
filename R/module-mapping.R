@@ -189,13 +189,15 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       observeEvent(input$spatial_data_select, {
         proxy <- leaflet::leafletProxy(mapId = "map") %>%
           leaflet::clearShapes()
+        rv$spatial_data <- NULL
         if (isTruthy(input$spatial_data_select)) {
-          overlaps <- rv$all_shp[input$spatial_data_select]
+          rv$spatial_data <- rv$all_shp[input$spatial_data_select]
           lapply(
-            X = overlaps,
+            X = rv$spatial_data,
             FUN = function(x) {
               if (inherits(x, "sf")) {
-                proxy %>% leaflet::addPolygons(data = x, weight = 1, color = "#088A08")
+                proxy %>%
+                  leaflet::addPolygons(data = x, weight = 1, color = "#088A08")
               }
             }
           )
@@ -484,7 +486,11 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         )
       })
 
-      return(reactive(returned_rv$x))
+      return(list(
+        data = reactive(returned_rv$x),
+        spatial_data = reactive(rv$spatial_data),
+        taxa = reactive(input$taxa)
+      ))
     }
   )
 }

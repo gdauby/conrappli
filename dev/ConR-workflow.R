@@ -24,12 +24,37 @@ aoo_res <- AOO.computing(XY = test_data,
                          nbe.rep.rast.AOO = 0,  # input$rep_rast min = 0, max = 30, value = 10, round=TRUE, step=1
                          export_shp = T)
 
+
+
+check_overlap <- extract_overlap_shp(XY = test_data)
+
+check_overlap$shp_tables %>%
+  dplyr::select(id, table_name, type, description, reference)
+
+
+
+if (any(check_overlap$shp_tables$overlap)) {
+  all_shp <-
+    collect_shp(table_names = check_overlap$shp_tables[which(check_overlap$shp_tables$overlap),],
+                XY_sf = check_overlap$XY_sf)
+} else {
+  all_shp <-
+    NULL
+}
+
+
+
 locations <- locations.comp(XY = test_data,
-                            Cell_size_locations = 10 # input$locations_size min=0.1, max=50, value = 10, round=TRUE, step=1
+                            Cell_size_locations = 10,  # input$locations_size min=0.1, max=50, value = 10, round=TRUE, step=1
+                            threat_list =  all_shp,
+                            method_polygons = "no_more_than_one"  # input$method_polygons a définir par utilisateur : 'spheroid' or 'planar'. By default 'spheroid'
 )
 
+
 categories <-
-  cat_criterion_b(EOO = eoo_res$results$eoo, AOO = aoo_res$AOO$aoo, locations = locations$locations$locations)
+  cat_criterion_b(EOO = eoo_res$results$eoo,
+                  AOO = aoo_res$AOO$aoo,
+                  locations = locations$locations$locations)
 
 results_full <-
   data.frame(
@@ -43,3 +68,4 @@ results_full <-
     issue_eoo = eoo_res$results$issue_eoo,
     issue_locations = locations$locations$issue_locations
   )
+

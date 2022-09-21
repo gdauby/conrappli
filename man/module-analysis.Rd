@@ -8,7 +8,11 @@
 \usage{
 criterion_b_ui(id)
 
-criterion_b_server(id, data_r = reactive(NULL))
+criterion_b_server(
+  id,
+  data_r = reactive(NULL),
+  spatial_data_r = reactive(NULL)
+)
 }
 \arguments{
 \item{id}{Module's ID.}

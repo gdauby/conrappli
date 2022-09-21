@@ -16,15 +16,22 @@ conr_server <- function() {
 
     data_r <- data_server("data")
 
-    data_mapped_r <- mapping_server(id = "mapping", data_r = reactive({
+    mapping_l <- mapping_server(id = "mapping", data_r = reactive({
       req(data_r(), hasName(data_r(), "STATUS_CONR")) %>%
         dplyr::filter(STATUS_CONR == "IN")
     }))
 
-    criterion_b_server(id = "criterion_b", data_r = reactive({
-      req(data_mapped_r(), hasName(data_r(), "STATUS_CONR")) %>%
-        dplyr::filter(STATUS_CONR == "IN")
-    }))
+    criterion_b_server(
+      id = "criterion_b",
+      data_r = reactive({
+        req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
+          dplyr::filter(STATUS_CONR == "IN")
+      }),
+      spatial_data_r = reactive({
+        check_spatial_data <<- mapping_l$spatial_data()
+        mapping_l$spatial_data()
+      })
+    )
 
   }
 }

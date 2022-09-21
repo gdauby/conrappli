@@ -88,24 +88,6 @@ criterion_b_ui <- function(id) {
       column(
         width = 8,
 
-        tags$div(
-          id = ns("container-spatial-data"),
-          # class = "d-none",
-          tags$p("Overlaping spatial data available:"),
-          reactable::reactableOutput(outputId = ns("spatial_data")),
-          shinyWidgets::virtualSelectInput(
-            inputId = ns("spatial_data_select"),
-            label = "Spatial data to use (select in order):",
-            choices = NULL,
-            multiple = TRUE,
-            hasOptionDescription = TRUE,
-            showValueAsTags = TRUE,
-            disableSelectAll = TRUE,
-            zIndex = 10,
-            width = "100%"
-          )
-        ),
-
         actionButton(
           inputId = ns("launch"),
           label = tagList(
@@ -139,7 +121,7 @@ criterion_b_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
-criterion_b_server <- function(id, data_r = reactive(NULL)) {
+criterion_b_server <- function(id, data_r = reactive(NULL), spatial_data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -151,43 +133,6 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
 
       rv <- reactiveValues()
 
-      observeEvent(data_r(), {
-        data <- req(data_r())
-        check_overlap <- extract_overlap_shp(XY = data, col_x = ".__longitude", col_y = ".__latitude")
-        rv$check_overlap <- check_overlap
-        if (!(all(check_overlap$shp_tables$overlap))) {
-          rv$spatial_data <- NULL
-          rv$all_shp <- NULL
-          shinyjs::addClass(id = "container-spatial-data", class = "d-none")
-        } else {
-          rv$spatial_data <- check_overlap$shp_tables %>%
-            dplyr::select(table_name, type, description, reference)
-          shinyWidgets::updateVirtualSelect(
-            inputId = "spatial_data_select",
-            choices = rv$spatial_data %>%
-              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
-          )
-          shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
-        }
-      })
-
-      output$spatial_data <- reactable:::renderReactable({
-        req(rv$spatial_data) %>%
-          reactable::reactable(
-            compact = TRUE,
-            columns = list(
-              table_name = reactable::colDef(name = "Name", minWidth = 100),
-              type = reactable::colDef(name = "Type", minWidth = 50),
-              description = reactable::colDef(name = "Description", minWidth = 200),
-              reference = reactable::colDef(
-                name = "Reference", minWidth = 100,
-                cell = function(value, index) {
-                  htmltools::tags$a(href = value, target = "_blank", as.character(value))
-                }
-              )
-            )
-          )
-      })
 
 
       observeEvent(input$launch, {
@@ -202,18 +147,9 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
         data <- data %>%
           dplyr::select(.__latitude, .__longitude, .__taxa)
 
+        spatial_data <- spatial_data_r()
 
-        shp_tbls <- rv$check_overlap$shp_tables
-        if (is.null(input$spatial_data_select)) {
-          all_shp <- NULL
-        } else {
-          shinybusy::update_modal_spinner("Collecting spatial data")
-          tbls_nms <- shp_tbls[match(x = input$spatial_data_select, table = shp_tbls$table_name), ]
-          all_shp <- collect_shp(
-            table_names = tbls_nms,
-            XY_sf = rv$check_overlap$XY_sf
-          )
-        }
+        # browser()
 
         shinybusy::update_modal_spinner("Extent of Occurrences multi-taxa computation")
         eoo_res <- EOO.computing(
@@ -234,7 +170,7 @@ criterion_b_server <- function(id, data_r = reactive(NULL)) {
         locations <- locations.comp(
           XY = data,
           Cell_size_locations = input$locations_size,
-          threat_list = all_shp,
+          threat_list = spatial_data,
           method_polygons = "no_more_than_one"
         )
 
