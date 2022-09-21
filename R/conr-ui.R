@@ -19,7 +19,7 @@ conr_ui <- function() {
       header = tagList(
         shinyjs::useShinyjs(),
         shinyWidgets::useSweetAlert(),
-        shinybusy::add_busy_bar(color = "#088A08", height = "5px"),
+        shinybusy::add_busy_bar(color = "#088A08", height = "7px"),
         tags$style(
           ".swal2-popup {font-size: 1rem !important;}",
           ".badge-dragula {font-size: 1rem !important;}",
@@ -31,7 +31,7 @@ conr_ui <- function() {
       nav_spacer(),
       nav(
         title = "",
-        value = "home", 
+        value = "home",
         icon = ph_i("house"),
         home_ui("home")
       ),

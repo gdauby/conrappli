@@ -59,7 +59,7 @@ mapping_ui <- function(id) {
       style = htmltools::css(
         background = "#FFF",
         borderRadius = "5px",
-        padding = "10px"
+        padding = "7px"
       ),
       # verbatimTextOutput(ns("test")),
       uiOutput(outputId = ns("summary")),
@@ -73,7 +73,6 @@ mapping_ui <- function(id) {
         )
       ),
       uiOutput(outputId = ns("filter_coord_accuracy")),
-      uiOutput(outputId = ns("filter_taxa")),
       uiOutput(outputId = ns("filter_year")),
       fluidRow(
         class = "mt-3 mb-3",
@@ -85,7 +84,7 @@ mapping_ui <- function(id) {
             width = "100%",
             icon = ph_i("prohibit"),
             class = "btn-outline-danger",
-            style = "height: 80px; padding: 3px;"
+            style = "height: 70px; padding: 3px;"
           )
         ),
         column(
@@ -96,7 +95,7 @@ mapping_ui <- function(id) {
             width = "100%",
             icon = ph_i("arrow-counter-clockwise"),
             class = "btn-outline-primary",
-            style = "height: 80px; padding: 3px;"
+            style = "height: 70px; padding: 3px;"
           )
         )
       )
@@ -110,18 +109,22 @@ mapping_ui <- function(id) {
       style = htmltools::css(
         background = "#FFF",
         borderRadius = "5px",
-        padding = "10px"
+        padding = "7px"
       ),
-      shinyWidgets::virtualSelectInput(
-        inputId = ns("spatial_data_select"),
-        label = "Spatial data to use :",
-        choices = NULL,
-        multiple = TRUE,
-        hasOptionDescription = TRUE,
-        showValueAsTags = TRUE,
-        disableSelectAll = TRUE,
-        zIndex = 10,
-        width = "100%"
+      uiOutput(outputId = ns("filter_taxa")),
+      tags$div(
+        id = ns("container-spatial-overlap"),
+        shinyWidgets::virtualSelectInput(
+          inputId = ns("spatial_data_select"),
+          label = "Spatial data to use :",
+          choices = NULL,
+          multiple = TRUE,
+          hasOptionDescription = TRUE,
+          showValueAsTags = TRUE,
+          disableSelectAll = TRUE,
+          zIndex = 10,
+          width = "100%"
+        )
       )
     )
   )
@@ -228,7 +231,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         limit <- get_max_obs()
         if (isTruthy(limit) && is.numeric(limit)) {
           if (isTRUE(nrow(datamap) > limit)) {
-            removeUI(selector = jns("container-show_in"), immediate = TRUE)
+            # removeUI(selector = jns("container-show_in"), immediate = TRUE)
             rv$show_in <- TRUE
             datamap <- dplyr::mutate(
               datamap,
@@ -249,7 +252,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             .__selected = STATUS_CONR == "IN" &
               .__display_year == TRUE &
               .__display_coord_accuracy == TRUE &
-              .__display_taxa == TRUE &
+              # .__display_taxa == TRUE &
               .__selected == TRUE
           )
       })
@@ -275,18 +278,21 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         taxas <- unique(datamap$.__taxa)
         limit <- get_max_obs()
         choices <- list(
-          " " = list("All"),
+          "All" = list("All"),
           "Species" = as.list(taxas)
         )
+        selected <- "All"
         if (isTruthy(limit) && is.numeric(limit)) {
           if (isTRUE(nrow(datamap) > limit)) {
             choices <- as.list(taxas)
+            selected <- taxas[1]
           }
         }
         shinyWidgets::virtualSelectInput(
           inputId = ns("taxa"),
-          label = "Taxa:",
+          label = "Taxa to display:",
           choices = choices,
+          selected = selected,
           search = TRUE,
           width = "100%"
         )
@@ -307,12 +313,13 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
 
       output$map <- renderLeaflet({
+        req(data_map_r())
         pal <- leaflet::colorFactor(
           palette = c("forestgreen", "firebrick"),
           domain = c(TRUE, FALSE),
           levels = c(TRUE, FALSE)
         )
-        data_map <- data_map_r()
+        data_map <- dplyr::filter(data_map_r(), .__display_taxa == TRUE)
         if (isTRUE(rv$show_in)) {
           data_map <- dplyr::filter(data_map, .__selected == TRUE)
         }
@@ -460,13 +467,12 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         data_map <- req(data_map_r())
         # check_summary <<- data_map
         tagList(
-          tags$span(
-            "Points IN:", sum(data_map[[".__selected"]]),
+          tags$div(
+            "Points SELECTED:", sum(data_map[[".__selected"]]),
             style = htmltools::css(color = "forestgreen", fontWeight = "bold")
           ),
-          "|",
-          tags$span(
-            "Points OUT:", sum(!data_map[[".__selected"]]),
+          tags$div(
+            "Points EXCLUDED:", sum(!data_map[[".__selected"]]),
             style = htmltools::css(color = "firebrick", fontWeight = "bold")
           )
         )

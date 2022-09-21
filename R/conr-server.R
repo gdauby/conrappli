@@ -30,6 +30,9 @@ conr_server <- function() {
       spatial_data_r = reactive({
         check_spatial_data <<- mapping_l$spatial_data()
         mapping_l$spatial_data()
+      }),
+      taxa_selected_r = reactive({
+        mapping_l$taxa()
       })
     )
 

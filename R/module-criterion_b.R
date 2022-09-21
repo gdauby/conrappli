@@ -25,6 +25,13 @@ criterion_b_ui <- function(id) {
         width = 4,
         shinyWidgets::panel(
           status = "primary",
+          shinyWidgets::virtualSelectInput(
+            inputId = ns("taxa"),
+            label = "Taxa:",
+            choices = NULL,
+            search = TRUE,
+            width = "100%"
+          ),
           radioButtons(
             inputId = ns("mode_eoo"),
             label = tagList(
@@ -121,7 +128,10 @@ criterion_b_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
-criterion_b_server <- function(id, data_r = reactive(NULL), spatial_data_r = reactive(NULL)) {
+criterion_b_server <- function(id,
+                               data_r = reactive(NULL),
+                               spatial_data_r = reactive(NULL),
+                               taxa_selected_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -133,6 +143,20 @@ criterion_b_server <- function(id, data_r = reactive(NULL), spatial_data_r = rea
 
       rv <- reactiveValues()
 
+
+      observeEvent(data_r(), {
+        data <- req(data_r())
+        taxas <- unique(data$.__taxa)
+        choices <- list(
+          "All" = list("All"),
+          "Species" = as.list(taxas)
+        )
+        shinyWidgets::updateVirtualSelect(
+          inputId = "taxa",
+          choices = choices,
+          selected = taxa_selected_r()
+        )
+      })
 
 
       observeEvent(input$launch, {
@@ -146,6 +170,10 @@ criterion_b_server <- function(id, data_r = reactive(NULL), spatial_data_r = rea
 
         data <- data %>%
           dplyr::select(.__latitude, .__longitude, .__taxa)
+
+        if (isTruthy(input$taxa) && !identical(input$taxa, "All")) {
+          data <- dplyr::filter(data, .__taxa == input$taxa)
+        }
 
         spatial_data <- spatial_data_r()
 
