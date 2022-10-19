@@ -7,9 +7,9 @@
 collect_shp(table_names, XY_sf = NULL)
 }
 \arguments{
-\item{XY_sf}{sf object of dataset}
+\item{table_names}{string name of the table}
 
-\item{names}{string name of the table}
+\item{XY_sf}{sf object of dataset}
 }
 \value{
 A sf object

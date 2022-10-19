@@ -123,6 +123,8 @@ criterion_b_ui <- function(id) {
 }
 
 #' @param data_r A `reactive` function returning a `data.frame`.
+#' @param spatial_data_r A `reactive` function returning spatial data to use in analysis.
+#' @param taxa_selected_r A `reactive` function returning the taxa to select by default.
 #'
 #' @export
 #'
@@ -217,7 +219,7 @@ criterion_b_server <- function(id,
           nbe.rep.rast.AOO = input$rep_rast,
           export_shp = TRUE
         )
-check_spatial_data <<- spatial_data_r()
+
         shinybusy::update_modal_spinner("Number of locations computation")
         locations <- locations.comp(
           XY = data,

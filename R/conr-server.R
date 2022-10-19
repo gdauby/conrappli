@@ -28,7 +28,6 @@ conr_server <- function() {
           dplyr::filter(STATUS_CONR == "IN")
       }),
       spatial_data_r = reactive({
-        check_spatial_data <<- mapping_l$spatial_data()
         mapping_l$spatial_data()
       }),
       taxa_selected_r = reactive({

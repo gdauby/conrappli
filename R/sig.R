@@ -85,7 +85,7 @@ extract_overlap_shp <- function(XY, col_x = "ddlon", col_y = "ddlat") {
 #'
 #' Extract a shapefile from the database
 #'
-#' @param names string name of the table
+#' @param table_names string name of the table
 #' @param XY_sf sf object of dataset
 #'
 #'
