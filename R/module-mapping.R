@@ -19,25 +19,7 @@ mapping_ui <- function(id) {
   ns <- NS(id)
   tagList(
 
-    tags$div(
-      style = htmltools::css(
-        position = "fixed",
-        top = "56px",
-        left = "0",
-        right = "0",
-        bottom = "0",
-        overflow = "hidden",
-        padding = "0",
-        zIndex = 9999,
-        background = "#FFF"
-      ),
-      id = ns("no-data"),
-      shinyWidgets::alert(
-        status = "info",
-        class = "mt-5",
-        ph("info"), "You need to import data and select variable before using this tab."
-      )
-    ),
+    alert_no_data(id = ns("no-data")),
 
     tags$div(
       style = htmltools::css(
@@ -175,11 +157,11 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           rv$all_shp <- NULL
           shinyjs::addClass(id = "container-spatial-overlap", class = "d-none")
         } else {
-          rv$spatial_data <- check_overlap$shp_tables %>%
+          list_spatial_data <- check_overlap$shp_tables %>%
             dplyr::select(table_name, type, description, reference)
           shinyWidgets::updateVirtualSelect(
             inputId = "spatial_data_select",
-            choices = rv$spatial_data %>%
+            choices = list_spatial_data %>%
               shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
           )
           shinyjs::removeClass(id = "container-spatial-data", class = "d-none")

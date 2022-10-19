@@ -29,3 +29,27 @@ btn_help <- function(text, ...) {
     ...
   )
 }
+
+
+alert_no_data <- function(id) {
+  tags$div(
+    style = htmltools::css(
+      position = "fixed",
+      top = "56px",
+      left = "0",
+      right = "0",
+      bottom = "0",
+      overflow = "hidden",
+      padding = "0",
+      zIndex = 9999,
+      background = "#FFF"
+    ),
+    id = id,
+    shinyWidgets::alert(
+      status = "info",
+      class = "mt-5",
+      ph("info"), "You need to import data and select variable before using this tab."
+    )
+  )
+}
+

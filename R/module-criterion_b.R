@@ -19,6 +19,8 @@ criterion_b_ui <- function(id) {
   template_ui(
     title = "Evaluation - Criterion B",
 
+    alert_no_data(id = ns("no-data")),
+
     fluidRow(
 
       column(
@@ -141,7 +143,29 @@ criterion_b_server <- function(id,
         paste0("#", ns(x))
       }
 
-      rv <- reactiveValues()
+      rv <- reactiveValues(
+        results = data.frame(
+          taxa = character(0),
+          EOO = character(0),
+          AOO = character(0),
+          locations = character(0),
+          category = character(0),
+          cat_codes = character(0),
+          issue_aoo = character(0),
+          issue_eoo = character(0),
+          issue_locations = character(0)
+        )
+      )
+
+      observeEvent(data_r(), {
+        req(
+          data_r(),
+          hasName(data_r(), ".__latitude"),
+          hasName(data_r(), ".__longitude"),
+          hasName(data_r(), "STATUS_CONR")
+        )
+        shinyjs::addClass(id = "no-data", class = "d-none")
+      })
 
 
       observeEvent(data_r(), {
@@ -164,7 +188,7 @@ criterion_b_server <- function(id,
 
         shinybusy::show_modal_spinner(
           spin = "half-circle",
-          color = "#2472b5",
+          color = "#088A08",
           text = "Launching calculation"
         )
 
@@ -193,7 +217,7 @@ criterion_b_server <- function(id,
           nbe.rep.rast.AOO = input$rep_rast,
           export_shp = TRUE
         )
-
+check_spatial_data <<- spatial_data_r()
         shinybusy::update_modal_spinner("Number of locations computation")
         locations <- locations.comp(
           XY = data,
@@ -243,7 +267,10 @@ criterion_b_server <- function(id,
         reactable::reactable(
           data = rv$results,
           bordered = TRUE,
-          compact = TRUE
+          compact = TRUE,
+          language = reactable::reactableLang(
+            noData = "No results of criterion b analysis to display"
+          )
         )
       })
 
