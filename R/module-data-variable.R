@@ -152,15 +152,22 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
       })
 
       observe({
-        if (isTruthy(data_r()) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
+        donnees <- req(data_r())
+        if (isTruthy(donnees) & isTRUE(var_sel_rv$other) & isTRUE(var_sel_rv$taxa)) {
           vars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target))
           var_sel_rv$vars <- vars
           allvars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target, input$optionnal_cols$target))
           allvars <- unlist(allvars, recursive = TRUE, use.names = FALSE)
-          var_sel_rv$data <- dplyr::bind_cols(
-            dplyr::select(data_r(), dplyr::any_of(allvars)),
-            dplyr::select(data_r(), !!!vars)
-          )
+          if (all(allvars %in% names(donnees))) {
+            var_sel_rv$data <- dplyr::bind_cols(
+              dplyr::select(donnees, dplyr::any_of(allvars)),
+              dplyr::select(donnees, !!!vars)
+            )
+          } else {
+            var_sel_rv$data <- NULL
+          }
+        } else {
+          var_sel_rv$data <- NULL
         }
       })
 

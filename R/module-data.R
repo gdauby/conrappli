@@ -23,9 +23,21 @@ data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import & validate data",
-    
+
     html_dependency_phosphor(),
-    
+
+    actionButton(
+      inputId = ns("go_next"),
+      label = tagList(
+        "You must import a dataset and select variables before proceeding to the next step.",
+        ph("arrow-circle-right")
+      ),
+      class = "btn-outline-primary my-3",
+      disabled = "disabled",
+      width = "100%",
+      onclick = "$(\"a[data-value='mapping']\").click();"
+    ),
+
     navs_pill(
       id = ns("navs"),
       header = tags$hr(),
@@ -108,7 +120,17 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_variable_selection, nav_select("navs", "variable_selection"))
 
-      observeEvent(data_imported_r(), rv$data <- data_imported_r())
+      observeEvent(data_imported_r(), {
+        shinyjs::disable(id = "go_next")
+        shinyjs::html(
+          id = "go_next",
+          html = htmltools::doRenderTags(tagList(
+            "You must import a dataset and select variables before proceeding to the next step.",
+            ph("arrow-circle-right")
+          ))
+        )
+        rv$data <- data_imported_r()
+      })
 
 
 
@@ -130,7 +152,9 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_data_validation, nav_select("navs", "data_validation"))
 
-      observeEvent(variable_r()$data, rv$data <- variable_r()$data)
+      observeEvent(variable_r()$data, {
+        rv$data <- variable_r()$data
+      })
 
 
 
@@ -156,7 +180,16 @@ data_server <- function(id) {
       })
       observeEvent(input$go_to_data, nav_select("navs", "data"))
 
-      observeEvent(data_validated_r(), rv$data <- data_validated_r())
+      observeEvent(data_validated_r(), {
+        shinyjs::enable(id = "go_next")
+        shinyjs::html(
+          id = "go_next",
+          html = htmltools::doRenderTags(tagList(
+            "Go to mapping", ph("arrow-circle-right")
+          ))
+        )
+        rv$data <- data_validated_r()
+      })
 
 
       # Data display ----
