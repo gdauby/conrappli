@@ -71,7 +71,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 #'
 #' @author Gilles Dauby, \email{gilles.dauby@@ird.fr}
 #'
-#' @importFrom sf st_as_text st_read st_drop_geometry
+#' @importFrom sf st_as_text st_read st_drop_geometry st_combine st_cast
 #' @importFrom glue glue
 #' @importFrom dplyr as_tibble distinct
 #' @importFrom cli cli_alert_success
@@ -89,7 +89,8 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
   on.exit(DBI::dbDisconnect(mydb_rb))
 
   if (inherits(poly, "sf")) {
-    sss_txt <- sf::st_as_text(poly$geometry)
+    p_geo <- sf::st_cast(sf::st_combine(poly$geometry), to = "MULTIPOLYGON")
+    sss_txt <- sf::st_as_text(p_geo)
   } else if (inherits(poly, "sfc")) {
     sss_txt <- sf::st_as_text(poly)
   } else {
@@ -100,7 +101,7 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
   query_g <-
     glue::glue(
       "SELECT * FROM {`tbl`} WHERE St_intersects(geometry::geography,
-        ST_PolygonFromText('{`sss_txt`}', 4326)::geography);"
+        ST_MultiPolygonFromText('{`sss_txt`}', 4326)::geography);"
     )
 
   extract <- func_try_st_read(con = mydb_rb, sql = query_g)
@@ -637,16 +638,28 @@ query_exact_match <- function(tbl, field, values_q, con) {
   res_q <-DBI::dbFetch(rs) %>% as_tibble
   DBI::dbClearResult(rs)
 
-  if (length(field) == 1) query_tb <- query_tb %>%
-    dplyr::left_join(res_q %>% dplyr::select(!!field_col) %>% dplyr::mutate(!!field_col := tolower(!!field_col)) %>% distinct() %>%
-                       dplyr::mutate(id = seq_len(nrow(.))))
+  if (length(field) == 1) {
+    query_tb <- query_tb %>%
+      dplyr::left_join(
+        res_q %>%
+          dplyr::select(!!field_col) %>%
+          dplyr::mutate(!!field_col := tolower(!!field_col)) %>%
+          dplyr::distinct() %>%
+          dplyr::mutate(id = seq_len(nrow(.)))
+      )
+  }
 
-  if (length(field) > 1) query_tb <- query_tb %>%
-    dplyr::left_join(res_q %>% dplyr::select(dplyr::all_of(field)) %>%
-                       dplyr::mutate(species = paste(!!dplyr::sym(field[1]), !!dplyr::sym(field[2]), sep = " ")) %>%
-                       dplyr::mutate(species = tolower(species)) %>%
-                       dplyr::distinct() %>%
-                       dplyr::mutate(id = seq_len(nrow(.))))
+  if (length(field) > 1) {
+    query_tb <- query_tb %>%
+      dplyr::left_join(
+        res_q %>% 
+          dplyr::select(dplyr::all_of(field)) %>%
+          dplyr::mutate(species = paste(!!dplyr::sym(field[1]), !!dplyr::sym(field[2]), sep = " ")) %>%
+          dplyr::mutate(species = tolower(species)) %>%
+          dplyr::distinct() %>%
+          dplyr::mutate(id = seq_len(nrow(.)))
+      )
+  }
 
   return(list(res_q = res_q,
               query_tb = query_tb))
@@ -676,11 +689,19 @@ query_fuzzy_match <- function(tbl, field, values_q, con) {
   # if (length(field) == 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower({`field`}), {values_q}) DESC LIMIT 1;",
   #                                              .con = con)
 
-  if (length(field) == 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE SIMILARITY (lower({`field`}), {values_q}) > 0.4;",
-                                               .con = con)
+  if (length(field) == 1) {
+    sql <- glue::glue_sql(
+      "SELECT * FROM {`tbl`} WHERE SIMILARITY (lower({`field`}), {values_q}) > 0.4;",
+      .con = con
+    )
+  }
 
-  if (length(field) > 1)  sql <- glue::glue_sql("SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT 2;",
-                                                .con = con)
+  if (length(field) > 1) {
+    sql <- glue::glue_sql(
+      "SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT 2;",
+      .con = con
+    )
+  }
 
   res_q <- func_try_fetch(con = con, sql = sql)
 
@@ -691,7 +712,6 @@ query_fuzzy_match <- function(tbl, field, values_q, con) {
   }
 
   return(res_q)
-
 }
 
 
@@ -730,9 +750,11 @@ func_try_st_read <- function(con, sql) {
   rep_try <- 1
   while(rep) {
 
-    res_q <-try({st_read(con,
-                         query = sql,
-                         geometry_column = 'geometry')}, silent = T)
+    res_q <-try({st_read(
+      con,
+      query = sql,
+      geometry_column = "geometry"
+    )}, silent = FALSE)
 
     if (any(grepl("Lost connection to database", res_q[1])))
       stop("Lost connection to database")
