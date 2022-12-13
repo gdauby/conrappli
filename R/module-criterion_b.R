@@ -225,6 +225,7 @@ criterion_b_server <- function(id,
           XY = data,
           Cell_size_locations = input$locations_size,
           threat_list = spatial_data,
+          threat_weight = rep(1, length(spatial_data)),
           method_polygons = "no_more_than_one"
         )
 
@@ -244,7 +245,9 @@ criterion_b_server <- function(id,
           cat_codes = categories$cats_code,
           issue_aoo = aoo_res$AOO$issue_aoo,
           issue_eoo = eoo_res$results$issue_eoo,
-          issue_locations = locations$locations$issue_locations
+          issue_locations = locations$locations$issue_locations,
+          main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
+          locations$locations[colnames(locations$locations) %in% names(spatial_data)]
         )
         shinybusy::remove_modal_spinner()
         shinyjs::removeCssClass(id = "download", class = "disabled")
