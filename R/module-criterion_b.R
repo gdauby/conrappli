@@ -194,68 +194,70 @@ criterion_b_server <- function(id,
           text = "Launching calculation"
         )
 
-        data <- data %>%
-          dplyr::select(.__latitude, .__longitude, .__taxa)
+        shinyWidgets::execute_safely({
+          data <- data %>%
+            dplyr::select(.__latitude, .__longitude, .__taxa)
 
-        if (isTruthy(input$taxa) && !identical(input$taxa, "All")) {
-          data <- dplyr::filter(data, .__taxa == input$taxa)
-        }
+          if (isTruthy(input$taxa) && !identical(input$taxa, "All")) {
+            data <- dplyr::filter(data, .__taxa == input$taxa)
+          }
 
-        spatial_data <- spatial_data_r()
+          spatial_data <- spatial_data_r()
 
-        # browser()
+          # browser()
 
-        shinybusy::update_modal_spinner("Extent of Occurrences multi-taxa computation")
-        eoo_res <- EOO.computing(
-          XY = data,
-          mode = input$mode_eoo,
-          export_shp = TRUE
-        )
+          shinybusy::update_modal_spinner("Extent of Occurrences multi-taxa computation")
+          eoo_res <- EOO.computing(
+            XY = data,
+            mode = input$mode_eoo,
+            export_shp = TRUE
+          )
 
-        shinybusy::update_modal_spinner("Area of occupancy computation")
-        aoo_res <- AOO.computing(
-          XY = data,
-          Cell_size_AOO = input$aoo_size,
-          nbe.rep.rast.AOO = input$rep_rast,
-          export_shp = TRUE
-        )
+          shinybusy::update_modal_spinner("Area of occupancy computation")
+          aoo_res <- AOO.computing(
+            XY = data,
+            Cell_size_AOO = input$aoo_size,
+            nbe.rep.rast.AOO = input$rep_rast,
+            export_shp = TRUE
+          )
 
-        shinybusy::update_modal_spinner("Number of locations computation")
-        locations <- locations.comp(
-          XY = data,
-          Cell_size_locations = input$locations_size,
-          threat_list = spatial_data,
-          threat_weight = rep(1, length(spatial_data)),
-          method_polygons = "no_more_than_one"
-        )
+          shinybusy::update_modal_spinner("Number of locations computation")
+          locations <- locations.comp(
+            XY = data,
+            Cell_size_locations = input$locations_size,
+            threat_list = spatial_data,
+            threat_weight = rep(1, length(spatial_data)),
+            method_polygons = "no_more_than_one"
+          )
 
-        shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
-        categories <- cat_criterion_b(
-          EOO = eoo_res$results$eoo,
-          AOO = aoo_res$AOO$aoo,
-          locations = locations$locations$locations
-        )
+          shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
+          categories <- cat_criterion_b(
+            EOO = eoo_res$results$eoo,
+            AOO = aoo_res$AOO$aoo,
+            locations = locations$locations$locations
+          )
 
-        results <- data.frame(
-          taxa = row.names(aoo_res$AOO),
-          EOO = eoo_res$results$eoo,
-          AOO = aoo_res$AOO$aoo,
-          locations = locations$locations$locations,
-          category = categories$ranks_B,
-          cat_codes = categories$cats_code,
-          issue_aoo = aoo_res$AOO$issue_aoo,
-          issue_eoo = eoo_res$results$issue_eoo,
-          issue_locations = locations$locations$issue_locations,
-          main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
-          locations$locations[colnames(locations$locations) %in% names(spatial_data)]
-        )
-        shinybusy::remove_modal_spinner()
-        shinyjs::removeCssClass(id = "download", class = "disabled")
-        rv$eoo_res <- eoo_res
-        rv$aoo_res <- aoo_res
-        rv$locations <- locations
-        rv$categories <- categories
-        rv$results <- results
+          results <- data.frame(
+            taxa = row.names(aoo_res$AOO),
+            EOO = eoo_res$results$eoo,
+            AOO = aoo_res$AOO$aoo,
+            locations = locations$locations$locations,
+            category = categories$ranks_B,
+            cat_codes = categories$cats_code,
+            issue_aoo = aoo_res$AOO$issue_aoo,
+            issue_eoo = eoo_res$results$issue_eoo,
+            issue_locations = locations$locations$issue_locations,
+            main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
+            locations$locations[colnames(locations$locations) %in% names(spatial_data)]
+          )
+          shinybusy::remove_modal_spinner()
+          shinyjs::removeCssClass(id = "download", class = "disabled")
+          rv$eoo_res <- eoo_res
+          rv$aoo_res <- aoo_res
+          rv$locations <- locations
+          rv$categories <- categories
+          rv$results <- results
+        })
       })
 
       output$download <- downloadHandler(
