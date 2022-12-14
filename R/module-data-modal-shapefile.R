@@ -1,5 +1,6 @@
 
-
+#' @importFrom shiny NS modalDialog actionButton uiOutput
+#' @importFrom htmltools tags tagList css
 modal_import_shapefile_ui <- function(id) {
   ns <- NS(id)
   modalDialog(
@@ -19,12 +20,13 @@ modal_import_shapefile_ui <- function(id) {
     uiOutput(outputId = ns("feedback"), class = "my-3"),
 
     actionButton(
-      inputId = ns("go"),
+      inputId = ns("go_next"),
       label = tagList(
-        "Use data",
+        "Continue to next step",
         ph("arrow-circle-right")
       ),
       class = "btn-primary",
+      disabled = "disabled",
       width = "100%"
     ),
 
@@ -43,7 +45,7 @@ modal_import_shapefile_ui <- function(id) {
       class = "btn btn-outline-primary",
       role = "button",
       `data-bs-toggle` = "collapse",
-      `data-bs-target` = paste0("#", ns("variable-container")),
+      `data-bs-target` = paste0("#", ns("validation-container")),
       "See data validation",
       phosphoricons::ph("caret-down", title = "See data validation")
     ),
@@ -51,10 +53,18 @@ modal_import_shapefile_ui <- function(id) {
       class = "collapse",
       id = ns("variable-container"),
       data_variable_ui(ns("variable"))
+    ),
+    tags$div(
+      class = "collapse",
+      id = ns("validation-container"),
+      data_validation_ui(ns("validation"))
     )
   )
 }
 
+#' @importFrom shiny moduleServer reactiveValues observeEvent req renderUI
+#'  eventReactive isTruthy reactive
+#' @importFrom shinyWidgets alert execute_safely
 modal_import_shapefile_server <- function(id) {
   moduleServer(
     id,
@@ -84,7 +94,7 @@ modal_import_shapefile_server <- function(id) {
           shinyWidgets::alert(
             status = "success",
             ph("check"),
-            format(n, big.mark = ","), "successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+            format(n, big.mark = ","), "rows successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
         }
       })
@@ -96,6 +106,26 @@ modal_import_shapefile_server <- function(id) {
         })
       )
 
+      data_validated_r <- data_validation_server(
+        id = "validation",
+        data_r = reactive({
+          req(variable_r())
+          variable_r()$data
+        })
+      )
+
+
+      observeEvent(data_validated_r(), {
+        shinyjs::enable(id = "go_next")
+      })
+
+
+      final_data_r <- eventReactive(input$go_next, {
+        removeModal()
+        data_validated_r()
+      })
+
+      return(final_data_r)
     }
   )
 }

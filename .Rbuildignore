@@ -3,3 +3,4 @@
 ^rsconnect$
 ^app\.R$
 ^dev$
+^\.github$
