@@ -64,9 +64,9 @@ criterion_b_ui <- function(id) {
           sliderInput(
             inputId = ns("rep_rast"),
             label = tagList(
-              "AOO raster number:",
+              "Number of grid replicates with random position:",
               btn_help(
-                "Indicate the number of raster with random starting position for estimating the AOO"
+                "Indicate the number of raster with random starting position for estimating the AOO and the number of locations"
               )
             ),
             min = 0,
@@ -226,7 +226,8 @@ criterion_b_server <- function(id,
           Cell_size_locations = input$locations_size,
           threat_list = spatial_data,
           threat_weight = rep(1, length(spatial_data)),
-          method_polygons = "no_more_than_one"
+          method_polygons = "no_more_than_one", 
+          nbe_rep = input$rep_rast
         )
 
         shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
@@ -235,6 +236,15 @@ criterion_b_server <- function(id,
           AOO = aoo_res$AOO$aoo,
           locations = locations$locations$locations
         )
+        
+        parameters <- 
+          data.frame(
+            EOO_mode = input$mode_eoo,
+            AOO_size = input$aoo_size,
+            locations_size = input$locations_size,
+            nbe_rep_grid = input$rep_rast,
+            threat_data = ifelse(is.null(spatial_data), FALSE, TRUE)
+          )
 
         results <- data.frame(
           taxa = row.names(aoo_res$AOO),
@@ -256,6 +266,7 @@ criterion_b_server <- function(id,
         rv$locations <- locations
         rv$categories <- categories
         rv$results <- results
+        rv$parameters <- parameters
       })
 
       output$download <- downloadHandler(
