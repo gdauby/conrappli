@@ -227,7 +227,7 @@ criterion_b_server <- function(id,
             Cell_size_locations = input$locations_size,
             threat_list = spatial_data,
             threat_weight = rep(1, length(spatial_data)),
-            method_polygons = "no_more_than_one", 
+            method_polygons = "no_more_than_one",
             nbe_rep = input$rep_rast
           )
 
@@ -283,6 +283,7 @@ criterion_b_server <- function(id,
         req(rv$results)
         reactable::reactable(
           data = rv$results,
+          rownames = FALSE,
           bordered = TRUE,
           compact = TRUE,
           language = reactable::reactableLang(

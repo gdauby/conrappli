@@ -5,7 +5,7 @@
 #' @return An UI definition.
 #' @export
 #'
-#' @importFrom bslib page_navbar nav nav_spacer
+#' @importFrom bslib page_navbar nav nav_spacer nav_menu
 #'
 #' @seealso
 #'  * [conr_server()] for server part.
@@ -16,6 +16,7 @@ conr_ui <- function() {
     page_navbar(
       theme = bs_theme_conr(),
       title = "ConR",
+      id = "navbar",
       header = tagList(
         shinyjs::useShinyjs(),
         shinyWidgets::useSweetAlert(),
@@ -35,10 +36,19 @@ conr_ui <- function() {
         icon = ph_i("house"),
         home_ui("home")
       ),
-      nav(
+      nav_menu(
         title = "Data",
-        value = "data"
-        , data_ui("data")
+        value = "data",
+        nav(
+          title = "From SHP",
+          value = "data_from_shp"
+          , data_shapefile_ui("shp")
+        ),
+        nav(
+          title = "Other options",
+          value = "data_other_options"
+          , data_ui("data")
+        )
       ),
       nav(
         title = "Mapping",
@@ -47,7 +57,7 @@ conr_ui <- function() {
       ),
       nav(
         title = "Evaluation - Criterion B",
-        value = "evaluation"
+        value = "evaluation_criterion_b"
         , criterion_b_ui("criterion_b")
       ),
       nav(

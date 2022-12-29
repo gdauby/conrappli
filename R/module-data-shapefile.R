@@ -1,28 +1,18 @@
 
-#' @importFrom shiny NS modalDialog actionButton uiOutput
+#' @importFrom shiny NS actionButton uiOutput
 #' @importFrom htmltools tags tagList css
-modal_import_shapefile_ui <- function(id) {
+data_shapefile_ui <- function(id) {
   ns <- NS(id)
-  modalDialog(
-    title = tagList(
-      tags$button(
-        phosphoricons::ph("x", title = "Close", height = "2em"),
-        class = "btn btn-link",
-        style = css(border = "0 none", position = "absolute", top = "5px", right = "5px"),
-        `data-bs-dismiss` = "modal",
-        `aria-label` = "Close"
-      ),
-      "Import a shapefile to retrieve species occurences"
-    ),
-    size = "xl",
-    footer = NULL,
+  template_ui(
+    title = "Import a shapefile",
+
     read_poly_ui(id = ns("read")),
     uiOutput(outputId = ns("feedback"), class = "my-3"),
 
     actionButton(
       inputId = ns("go_next"),
       label = tagList(
-        "Continue to next step",
+        "Continue to criterion B evaluation",
         ph("arrow-circle-right")
       ),
       class = "btn-primary",
@@ -65,7 +55,7 @@ modal_import_shapefile_ui <- function(id) {
 #' @importFrom shiny moduleServer reactiveValues observeEvent req renderUI
 #'  eventReactive isTruthy reactive
 #' @importFrom shinyWidgets alert execute_safely
-modal_import_shapefile_server <- function(id) {
+data_shapefile_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -78,13 +68,15 @@ modal_import_shapefile_server <- function(id) {
 
       observeEvent(polygon_rv$x, {
         req(polygon_rv$x)
-        show_spinner(
-          text = "Retrieving data, please wait..."
+        shinybusy::show_modal_spinner(
+          text = "Retrieving data, please wait...",
+          spin = "half-circle",
+          color = "#088A08"
         )
         occdata <- shinyWidgets::execute_safely({
           query_rb_poly(poly = polygon_rv$x)
         })
-        remove_spinner()
+        shinybusy::remove_modal_spinner()
         dataset_rv$value <- occdata$extract_all_tax
       })
 
@@ -121,7 +113,6 @@ modal_import_shapefile_server <- function(id) {
 
 
       final_data_r <- eventReactive(input$go_next, {
-        removeModal()
         data_validated_r()
       })
 

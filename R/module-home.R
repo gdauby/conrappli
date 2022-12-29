@@ -1,5 +1,5 @@
 
-
+#' @importFrom shiny NS fluidRow column actionButton actionLink
 home_ui <- function(id) {
   ns <- NS(id)
   template_ui(
@@ -10,33 +10,41 @@ home_ui <- function(id) {
         tags$p(
           class = "text-center fs-5 text mt-5",
           "This explication is designed to perform multi-species estimation of geographical",
-          "range parameters for preliminary assessment of conservation status following Criterion B of the", 
+          "range parameters for preliminary assessment of conservation status following Criterion B of the",
           "International Union for Conservation of Nature (IUCN, see <http://www.iucnredlist.org>)",
-          "through", 
+          "through",
           tags$a(
             "R package ConR",
             href = "https://cran.r-project.org/web/packages/ConR/index.html"
           )
         ),
-        
+
         tags$br(),
-        
+
         actionButton(
-          inputId = ns("start"),
+          inputId = ns("start_shp"),
           label = tagList(
-            "Get started",
+            "Import a shapefile and launch criterion B evaluation",
             ph("arrow-circle-right")
           ),
-          class = "btn-outline-primary text-center fs-4 my-5 d-block",
-          width = "100%",
-          onclick = "$('.navbar').find('a[data-value=\"data\"]').click();"
+          class = "btn-outline-primary text-center fs-4 mb-3 d-block",
+          width = "100%"
         ),
-        
+        actionLink(
+          inputId = ns("start_data"),
+          label = tagList(
+            "Other data import options",
+            ph("arrow-circle-right")
+          ),
+          class = "text-center fs-6 mb-3 d-block",
+          width = "100%"
+        ),
+
         tags$br(),
-        
+
         tags$p("A collaborative work between:"),
         tags$br(),
-        
+
         fluidRow(
           column(
             width = 4,
@@ -75,16 +83,25 @@ home_ui <- function(id) {
             )
           )
         )
-        
+
       )
     )
   )
 }
 
-home_server <- function(id) {
+home_server <- function(id, main_session) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
+
+      observeEvent(input$start_shp, {
+        bslib::nav_select(id = "navbar", selected = "data_from_shp", session = main_session)
+      })
+
+      observeEvent(input$start_data, {
+        bslib::nav_select(id = "navbar", selected = "data_other_options", session = main_session)
+      })
+
     }
   )
 }

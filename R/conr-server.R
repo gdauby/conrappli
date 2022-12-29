@@ -14,12 +14,26 @@
 conr_server <- function() {
   function(input, output, session) {
 
-    data_r <- data_server("data")
+    home_server(id = "home", main_session = session)
 
-    mapping_l <- mapping_server(id = "mapping", data_r = reactive({
-      req(data_r(), hasName(data_r(), "STATUS_CONR")) %>%
-        dplyr::filter(STATUS_CONR == "IN")
-    }))
+    data_rv <- reactiveValues(x = NULL)
+
+    shp_r <- data_shapefile_server(id = "shp")
+    data_r <- data_server(id = "data")
+
+    observeEvent(shp_r(), {
+      data_rv$x <- shp_r()
+      bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
+    })
+    observeEvent(data_r(), data_rv$x <- data_r())
+
+    mapping_l <- mapping_server(
+      id = "mapping",
+      data_r = reactive({
+        req(data_rv$x, hasName(data_rv$x, "STATUS_CONR")) %>%
+          dplyr::filter(STATUS_CONR == "IN")
+      })
+    )
 
     criterion_b_server(
       id = "criterion_b",
