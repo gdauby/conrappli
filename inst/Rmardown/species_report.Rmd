@@ -8,85 +8,174 @@ output:
     toc_depth: 5
     toc_float: yes
     self_contained: yes
-title: "Report species preliminary conservation assessment"
+title: "Report for `r params$tax`"
+params:
+  tax: ""
+  data: ""
+  data_sf: ""
+  res_aoo: ""
+  res_eoo: ""
+  threat_sig: ""
+  parameters: ""
+  res_loc: ""
+  results: ""
 ---
 
+
 ```{r setup, include=FALSE}
-RUN <- TRUE
 knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center", include = RUN)
 library(knitr)
 ```
 
 
-
-# Preliminary Conservation Assessment of `r list.names$df[as.numeric(input$name_chosen)]`
-
-```{r echo = FALSE}
-# select the column we need
-selectColumn <- c(
-  input$sel_taxa, input$sel_genus, input$sel_species_epiteth, input$sel_authors,
-  input$sel_rank, 
-  input$sel_lower_infra, input$sel_lower_infra_authors, input$sel_LONG,
-  "taxa"
-)
-selectedColumn <- selectColumn != "<unselected>"
-
-dataset <- original.dataset$df
-  # readr::read_csv(input$file_DATASET$datapath,
-  #                     locale = readr::locale(encoding = stringi::stri_enc_get()))
-
-Name <- list.names$df[as.numeric(input$name_chosen)]
-name_quo <- dplyr::enquo(Name)
-    
-    # print(selectedColumn)
-
-dataset <-
-  dataset %>%
-  dplyr::select(selectColumn[selectedColumn]) %>%
-  dplyr::filter(taxa==!!name_quo)
+# Summary of parameters analysis
 
 
-# data <- setDT(inv()[, selectColumn[selectedColumn]])
-# setnames(data, names(data), c(
-#   "plot", "genus", "species","D",
-#   "WD", 
-#   "H", "longitude", "latitude"
-# )[selectedColumn])
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
-# print(dataset)
-kable(head(dataset), digits = 3, caption = "Head of the data")
+parameters_formated <-  params$parameters %>% 
+  as_tibble %>% 
+  mutate(across(everything(), as.character)) %>% 
+  pivot_longer(1:5, values_to = "value") %>% 
+  left_join(tibble(name = c("EOO_mode",
+                            "EOO_mode"),
+                   value = c("planar",
+                             "spheroid"),
+                   details = c("Projected coordinates are used to estimate areas",
+                               "Spherical geometry is used to estimate area")),
+            by = c("name", "value"))
 
+knitr::kable(parameters_formated, 
+             caption = "Parameters used for the Criterion B analysis", 
+             format = "html", escape = F
+) %>%
+  kableExtra::kable_styling("striped", 
+                            full_width = F)
 
-
-# print(selectedColumn)
-```
-
-```{r, echo=FALSE}
-map_types <- c("Esri.NatGeoWorldMap", "Esri.WorldImagery", "OpenStreetMap.DE",
-                       "Esri.WorldPhysical")
-dataset_circle_select <-
-        original.dataset.accuracy$df %>%
-        filter(taxa==!!name_quo)
-
-dataset_sf <-
-        sf::st_as_sf(original.dataset$df %>% filter(taxa==!!name_quo, !is.na(!!rlang::sym(input$sel_LAT)),!is.na(!!rlang::sym(input$sel_LONG))), coords = c(input$sel_LONG, input$sel_LAT), crs = 4326)
-
-
-mapview::mapview(dataset_circle_select, map.types = map_types,
-                           col.regions = "red", alpha.regions = 0.1, legend =FALSE, viewer.suppress=F)
-
-# +
-# mapview::mapview(dataset_sf, col.regions = "red", map.types = map_types, legend =FALSE, viewer.suppress=T)
-
-# +
-#              +
-#             mapview::mapview(eoo_poly_full, col.regions = "blue", alpha.regions = 0.05, map.types = map_types, legend =FALSE, viewer.suppress=T) +
-#             mapview::mapview(eoo_poly_left, col.regions = "red", alpha.regions = 0.1, map.types = map_types, legend =FALSE, viewer.suppress=T) +
-#             mapview::mapview(protected_areas_cropped$df, col.regions = "green", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "Protected areas", viewer.suppress=T) +
-#             mapview::mapview(logging_concessions_CA_cropped$df, col.regions = "blueviolet", lwd=2, alpha.regions = 0.2, map.types = map_types, legend = TRUE, layer.name = "Logging concessions", viewer.suppress=T) +
-#             mapview::mapview(raster_mayaux_cropped$df, col.regions = "red", alpha.regions = alpha_raster_mayaux$df, map.types = map_types, legend =FALSE, layer.name = "mayaux human dominated land cover", viewer.suppress=T)  +
-#             mapview::mapview(raster_hansen_cropped$df, col.regions = "purple", alpha.regions = alpha_raster_deforest$df, map.types = map_types, legend =FALSE, layer.name = "proportion of forest cover loss", viewer.suppress=T)  +
-#             mapview::mapview(mineral_cropped$df, col.regions = "black", alpha.regions = 0.3, map.types = map_types, legend = TRUE, layer.name = "mineral deposit", viewer.suppress=T)# pal(100), at = seq(0, 1, 0.1)
 
 ```
 
+# Preliminary Conservation Assessment of _`r params$tax`_ 
+
+</br>
+</br>
+The taxa has been assessed as :
+</br>
+<font size="6.5">
+**`r params$results$category`**
+</font>
+
+</br>
+</br>
+</br>
+
+  
+
+```{r, fig.show='asis', echo=FALSE, results='asis'}
+
+group_lf <- c("Occurences", "AOO grid")
+
+leaf_map <-
+  leaflet::leaflet(data = params$data_sf,
+                   options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+  leaflet::invokeMethod(data = NULL,
+                        method = "addZoom",
+                        list(position = "topright")) %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+  leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+  leaflet::addCircleMarkers(
+    popup = params$data_sf %>%
+      sf::st_drop_geometry() %>%
+      # create_popup() %>%
+      lapply(htmltools::HTML),
+    fillOpacity = 1,
+    clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 1,
+                                                   zoomToBoundsOnClick = FALSE),
+    group = "Occurences"
+  ) %>%
+  leaflet::addPolygons(
+    # params$res_aoo,
+    data = params$res_aoo,
+    fillColor = "blue",
+    weight = 1,
+    opacity = 0.4,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.4,
+    group = "AOO grid",
+    label = "AOO grid"
+  ) 
+
+if (nrow(params$res_eoo) > 0) {
+  
+  group_lf <- c(group_lf, "EOO")
+  
+  leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+      data = params$res_eoo,
+      fillColor = "red",
+      weight = 1,
+      opacity = 0.4,
+      color = "blue",
+      dashArray = "1",
+      fillOpacity = 0.4,
+      group = "EOO",
+      label = "EOO"
+    )
+}
+
+
+if (nrow(params$res_loc %>% filter(threat == "not_threatened")) > 0) {
+  
+  group_lf <- c(group_lf, "Locations not threatened")
+  
+  leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+    data = params$res_loc %>% filter(threat == "not_threatened"),
+    fillColor = "green",
+    weight = 1,
+    opacity = 0.4,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.4,
+    group = "Locations not threatened",
+    label = "Locations not threatened"
+  )
+}
+
+
+if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
+  
+  group_lf <- c(group_lf, "Locations threatened")
+  
+  leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+    data = params$res_loc %>% filter(threat != "not_threatened"),
+    fillColor = "green",
+    weight = 1,
+    opacity = 0.4,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.4,
+    group = "Locations threatened",
+    label = "Locations threatened"
+  )
+}
+
+
+leaf_map <- leaf_map %>%
+  leaflet::addLayersControl(
+    baseGroups = c("OSM", "Esri", "Open Topo Map"),
+    options = leaflet::layersControlOptions(collapsed = FALSE),
+    overlayGroups = group_lf
+  )
+
+
+leaf_map
+
+
+```
