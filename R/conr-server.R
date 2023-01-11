@@ -35,7 +35,7 @@ conr_server <- function() {
       })
     )
 
-    criterion_b_server(
+    criterion_b <- criterion_b_server(
       id = "criterion_b",
       data_r = reactive({
         req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
