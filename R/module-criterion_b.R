@@ -291,6 +291,15 @@ criterion_b_server <- function(id,
           )
         )
       })
+      
+      return(list(
+        eoo = reactive(rv$eoo_res),
+        aoo = reactive(rv$aoo_res),
+        locations = reactive(rv$locations),
+        categories = reactive(rv$categories),
+        results = reactive(rv$results),
+        parameters = reactive(rv$parameters)
+      ))
 
     }
   )
