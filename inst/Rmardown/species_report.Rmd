@@ -117,7 +117,7 @@ if (nrow(params$res_eoo) > 0) {
       data = params$res_eoo,
       fillColor = "red",
       weight = 1,
-      opacity = 0.4,
+      opacity = 0.2,
       color = "blue",
       dashArray = "1",
       fillOpacity = 0.4,
@@ -155,7 +155,7 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
     leaf_map %>%
     leaflet::addPolygons(
     data = params$res_loc %>% filter(threat != "not_threatened"),
-    fillColor = "green",
+    fillColor = "red",
     weight = 1,
     opacity = 0.4,
     color = "blue",
