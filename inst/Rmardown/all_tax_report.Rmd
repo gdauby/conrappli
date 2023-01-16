@@ -1,0 +1,228 @@
+---
+date: '`r invisible( Sys.setlocale("LC_TIME", "C") ); format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+    self_contained: yes
+title: "Report of preliminary and automatic IUCN evaluation"
+params:
+  polygon_rv: ""
+  data: ""
+  threat_sig: ""
+  parameters: ""
+  results: ""
+  resol: ""
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center")
+library(knitr)
+```
+
+
+# Summary of parameters analysis
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+parameters_formated <-  params$parameters %>% 
+  as_tibble %>% 
+  mutate(across(everything(), as.character)) %>% 
+  pivot_longer(1:5, values_to = "value") %>% 
+  left_join(tibble(name = c("EOO_mode",
+                            "EOO_mode"),
+                   value = c("planar",
+                             "spheroid"),
+                   details = c("Projected coordinates are used to estimate areas",
+                               "Spherical geometry is used to estimate area")),
+            by = c("name", "value"))
+
+knitr::kable(parameters_formated, 
+             caption = "Parameters used for the Criterion B analysis", 
+             format = "html", escape = F
+) %>%
+  kableExtra::kable_styling("striped", 
+                            full_width = F)
+
+
+```
+
+# Preliminary Conservation Assessment of _`r nrow(params$results)`_ taxa 
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+parameters_formated <-
+  params$results %>%
+  as_tibble %>%
+  knitr::kable(caption = "",
+               format = "html",
+               escape = F) %>%
+  kableExtra::kable_styling(bootstrap_options = c('responsive'),
+                            full_width = F) %>%
+  kableExtra::row_spec(which(params$results$category == "CR"), 
+                       bold = T, color = "white", background = "darkred") %>%
+  kableExtra::row_spec(which(params$results$category == "EN"), 
+                       bold = T, color = "white", background = "red") %>%
+  kableExtra::row_spec(which(params$results$category == "VU"), 
+                       bold = T, color = "white", background = "darkorange")
+
+parameters_formated %>%
+  kableExtra::scroll_box(width = "1400px", height = "500px")
+```
+
+
+```{r grid-build}
+
+merged_data <- 
+  params$data %>% 
+  left_join(params$results %>% as_tibble() %>% 
+              dplyr::select(taxa, category), by = c("tax_sp_level" = "taxa"))
+
+merged_data_sf <- 
+  sf::st_as_sf(merged_data, coords = c("ddlon", "ddlat"))
+sf::st_crs(merged_data_sf) <- 4326
+
+merged_data_sf_proj <- sf::st_transform(merged_data_sf, sf::st_crs('EPSG:6933'))
+poly_proj <- sf::st_transform(params$polygon_rv, sf::st_crs('EPSG:6933'))
+
+grid <- sf::st_make_grid(x = poly_proj, 
+                         cellsize = params$resol*1000)
+grid <- st_as_sf(grid) %>% 
+  mutate(id = 1:nrow(.))
+
+intersect_grid <- sf::st_intersection(merged_data_sf_proj, grid)
+
+stats_cell1 <- 
+  intersect_grid %>% 
+  sf::st_set_geometry(NULL) %>% 
+  group_by(id) %>% 
+  summarise(nbe_esp = length(unique(tax_sp_level)),
+            n = length(tax_sp_level))
+
+n_cr <- 
+  intersect_grid  %>% 
+  sf::st_set_geometry(NULL) %>% 
+  group_by(id, tax_sp_level, category) %>% 
+  summarise(n = n()) %>% 
+  dplyr::ungroup() %>% 
+  filter(category == "CR") %>% 
+  group_by(id) %>% 
+  summarise(n_cr = n())
+
+
+n_en <- 
+  intersect_grid  %>% 
+  sf::st_set_geometry(NULL) %>% 
+  group_by(id, tax_sp_level, category) %>% 
+  summarise(n = n()) %>% 
+  dplyr::ungroup() %>% 
+  filter(category == "EN") %>% 
+  group_by(id) %>% 
+  summarise(n_en = n())
+
+
+n_vu <- 
+  intersect_grid  %>% 
+  sf::st_set_geometry(NULL) %>% 
+  group_by(id, tax_sp_level, category) %>% 
+  summarise(n = n()) %>% 
+  dplyr::ungroup() %>% 
+  filter(category == "VU") %>% 
+  group_by(id) %>% 
+  summarise(n_vu = n())
+
+
+grid <- grid %>% 
+  left_join(stats_cell1) %>% 
+  left_join(n_cr) %>% 
+  left_join(n_en) %>% 
+  left_join(n_vu) %>% 
+  mutate(n_threatened = n_cr + n_en + n_vu) %>% 
+  mutate(prop_threatened = round((n_threatened/ nbe_esp)*100, 1))
+
+grid <- sf::st_transform(grid, 4326)
+
+
+```
+
+
+```{r, fig.show='asis', echo=FALSE, results='asis'}
+
+group_lf <- c("Occurences", "Polygon", "grid")
+center_m <- as.vector(sf::st_bbox(params$polygon_rv))
+
+grid_s <- grid %>% filter(!is.na(prop_threatened))
+
+pal <- leaflet::colorNumeric(
+  palette = "viridis",
+  domain = grid_s$prop_threatened
+)
+
+leaf_map <-
+  leaflet::leaflet(data = merged_data_sf,
+                   options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+  leaflet::invokeMethod(data = NULL,
+                        method = "addZoom",
+                        list(position = "topright")) %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+  leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+  leaflet::addCircleMarkers(
+    popup = merged_data_sf %>%
+      sf::st_drop_geometry() %>%
+      # create_popup() %>%
+      lapply(htmltools::HTML),
+    fillOpacity = 1,
+    clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 1,
+                                                   zoomToBoundsOnClick = FALSE),
+    group = "Occurences"
+  ) %>% 
+  leaflet::fitBounds(
+    lng1 = center_m[1],
+    lng2 = center_m[3],
+    lat1 = center_m[2],
+    lat2 = center_m[4]
+  ) %>%
+  leaflet::addPolygons(
+    # params$res_aoo,
+    data = params$polygon_rv,
+    fillColor = "blue",
+    weight = 1,
+    opacity = 0.1,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.1,
+    group = "Polygon",
+    label = "Polygon"
+  ) %>%
+  leaflet::addPolygons(
+    # params$res_aoo,
+    data = grid_s,
+    fillColor = ~pal(prop_threatened),
+    weight = 1,
+    opacity = 1,
+    color = "black",
+    dashArray = "1",
+    fillOpacity = 0.6,
+    group = "grid", 
+    label = grid_s %>% pull(prop_threatened),
+    popup = leafpop::popupTable(grid_s %>% sf::st_set_geometry(NULL))
+  )
+
+leaf_map <- leaf_map %>%
+  leaflet::addLayersControl(
+    baseGroups = c("OSM", "Esri", "Open Topo Map"),
+    options = leaflet::layersControlOptions(collapsed = FALSE),
+    overlayGroups = group_lf
+  )
+
+leaf_map 
+
+
+```
