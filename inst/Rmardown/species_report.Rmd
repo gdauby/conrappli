@@ -23,7 +23,7 @@ params:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center", include = RUN)
+knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center")
 library(knitr)
 ```
 
