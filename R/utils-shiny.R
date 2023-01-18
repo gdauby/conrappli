@@ -31,7 +31,7 @@ btn_help <- function(text, ...) {
 }
 
 
-alert_no_data <- function(id) {
+alert_no_data <- function(id, text = "You need to import data and select variable before using this tab.") {
   tags$div(
     style = htmltools::css(
       position = "fixed",
@@ -48,7 +48,7 @@ alert_no_data <- function(id) {
     shinyWidgets::alert(
       status = "info",
       class = "mt-5",
-      ph("info"), "You need to import data and select variable before using this tab."
+      ph("info"), text
     )
   )
 }
