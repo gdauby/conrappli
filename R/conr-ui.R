@@ -66,7 +66,8 @@ conr_ui <- function() {
       ),
       nav(
         title = "Summary report",
-        value = "summary"
+        value = "summary",
+        summary_report_ui("report")
       ),
       nav_spacer()
     )

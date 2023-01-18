@@ -35,6 +35,7 @@ Imports:
     pkgload,
     reactable,
     rgbif,
+    rmarkdown,
     RPostgres,
     sf,
     shiny,

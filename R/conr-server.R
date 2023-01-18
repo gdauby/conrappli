@@ -49,5 +49,17 @@ conr_server <- function() {
       })
     )
 
+    observeEvent(criterion_b(), {
+      bslib::nav_select(id = "navbar", selected = "summary")
+    })
+
+    summary_report_server(
+      id = "report",
+      results_r = criterion_b,
+      data_sf_r = reactive({
+        mapping_l$data_sf()
+      })
+    )
+
   }
 }

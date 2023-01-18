@@ -477,7 +477,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       return(list(
         data = reactive(returned_rv$x),
         spatial_data = reactive(rv$spatial_data),
-        taxa = reactive(input$taxa)
+        taxa = reactive(input$taxa),
+        data_sf = data_map_r
       ))
     }
   )

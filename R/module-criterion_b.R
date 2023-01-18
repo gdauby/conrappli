@@ -115,7 +115,17 @@ criterion_b_ui <- function(id) {
             class = "float-end mb-3 disabled"
           ),
           tags$div(class = "clearfix"),
-          reactable::reactableOutput(outputId = ns("results"))
+          reactable::reactableOutput(outputId = ns("results")),
+          actionButton(
+            inputId = ns("go_report"),
+            label = tagList(
+              ph("file-text"),
+              "Go to summary report"
+            ),
+            class = "my-4",
+            width = "100%",
+            class = "btn-outline-primary d-block"
+          )
         )
       )
     )
@@ -267,6 +277,7 @@ criterion_b_server <- function(id,
           rv$categories <- categories
           rv$results <- results
           rv$parameters <- parameters
+          rv$taxa <- input$taxa
         })
       })
 
@@ -291,16 +302,12 @@ criterion_b_server <- function(id,
           )
         )
       })
-      
-      return(list(
-        eoo = reactive(rv$eoo_res),
-        aoo = reactive(rv$aoo_res),
-        locations = reactive(rv$locations),
-        categories = reactive(rv$categories),
-        results = reactive(rv$results),
-        parameters = reactive(rv$parameters)
-      ))
 
+      results_r <- eventReactive(input$go_report, {
+        reactiveValuesToList(rv)
+      })
+
+      return(results_r)
     }
   )
 }
