@@ -124,7 +124,7 @@ criterion_b_ui <- function(id) {
             ),
             class = "my-4",
             width = "100%",
-            class = "btn-outline-primary d-block"
+            class = "btn-outline-primary d-block disabled"
           )
         )
       )
@@ -269,8 +269,8 @@ criterion_b_server <- function(id,
             main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
             locations$locations[colnames(locations$locations) %in% names(spatial_data)]
           )
-          shinybusy::remove_modal_spinner()
           shinyjs::removeCssClass(id = "download", class = "disabled")
+          shinyjs::removeCssClass(id = "go_report", class = "disabled")
           rv$eoo_res <- eoo_res
           rv$aoo_res <- aoo_res
           rv$locations <- locations
@@ -279,6 +279,7 @@ criterion_b_server <- function(id,
           rv$parameters <- parameters
           rv$taxa <- input$taxa
         })
+        shinybusy::remove_modal_spinner()
       })
 
       output$download <- downloadHandler(
