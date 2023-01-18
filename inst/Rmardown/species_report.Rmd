@@ -126,7 +126,8 @@ if (nrow(params$res_eoo) > 0) {
     )
 }
 
-
+if (any(names(params$res_loc) == "threat")) {
+  
 if (nrow(params$res_loc %>% filter(threat == "not_threatened")) > 0) {
   
   group_lf <- c(group_lf, "Locations not threatened")
@@ -164,6 +165,7 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
     group = "Locations threatened",
     label = "Locations threatened"
   )
+}
 }
 
 
