@@ -165,10 +165,16 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
           )
           shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
+          shinybusy::show_modal_spinner(
+            spin = "half-circle",
+            color = "#088A08",
+            text = "Collecting spatial data"
+          )
           rv$all_shp <- collect_shp(
             table_names = check_overlap$shp_tables,
             XY_sf = check_overlap$XY_sf
           )
+          shinybusy::remove_modal_spinner()
         }
       })
       observeEvent(input$spatial_data_select, {
