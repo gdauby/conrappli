@@ -12,14 +12,18 @@
 #'
 #' @name module-report
 #'
-#' @importFrom shiny NS fluidRow column sliderInput actionButton radioButtons
+#' @importFrom shiny NS fluidRow column actionButton downloadButton uiOutput
 #' @importFrom htmltools tagList
+#' @importFrom shinyWidgets virtualSelectInput
 summary_report_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Summary report",
 
-    alert_no_data(id = ns("no-data"), text = "You must perform the criterion b analysis before you can generate the report."),
+    alert_no_data(
+      id = ns("no-data"), 
+      text = "You must perform the criterion b analysis before you can generate the report."
+    ),
 
     fluidRow(
       class = "mb-3",
@@ -53,6 +57,9 @@ summary_report_ui <- function(id) {
 #' @export
 #'
 #' @rdname module-report
+#' 
+#' @importFrom shiny moduleServer observeEvent req reactive renderUI downloadHandler includeHTML
+#' @importFrom shinyWidgets execute_safely 
 summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -75,7 +82,7 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
       })
 
       output$report_taxa <- renderUI({
-        # check_data_sf_r <<- data_sf_r()
+        check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
@@ -90,10 +97,11 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
             params = list(
               tax = input$taxa,
               data = NULL,
-              data_sf = data_sf,
+              data_sf = data_sf %>%
+                filter(.__taxa == input$taxa),
               res_aoo = results$aoo_res$AOO_poly %>%
                 filter(tax == input$taxa),
-              res_eoo = results$eoo_res$spatial%>%
+              res_eoo = results$eoo_res$spatial %>%
                 filter(tax == input$taxa),
               threat_sig = NULL,
               parameters = results$parameters,
@@ -135,10 +143,11 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
               params = list(
                 tax = input$taxa,
                 data = NULL,
-                data_sf = data_sf,
+                data_sf = data_sf %>%
+                  filter(.__taxa == input$taxa),
                 res_aoo = results$aoo_res$AOO_poly %>%
                   filter(tax == input$taxa),
-                res_eoo = results$eoo_res$spatial%>%
+                res_eoo = results$eoo_res$spatial %>%
                   filter(tax == input$taxa),
                 threat_sig = NULL,
                 parameters = results$parameters,
