@@ -41,8 +41,8 @@ conr_server <- function() {
         req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
           dplyr::filter(STATUS_CONR == "IN")
       }),
-      spatial_data_r = reactive({
-        mapping_l$spatial_data()
+      threat_sig_r = reactive({
+        mapping_l$threat_sig()
       }),
       taxa_selected_r = reactive({
         mapping_l$taxa()
@@ -58,6 +58,9 @@ conr_server <- function() {
       results_r = criterion_b,
       data_sf_r = reactive({
         mapping_l$data_sf()
+      }),
+      threat_sig_r = reactive({
+        mapping_l$threat_sig()
       })
     )
 

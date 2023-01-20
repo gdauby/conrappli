@@ -25,32 +25,57 @@ summary_report_ui <- function(id) {
       text = "You must perform the criterion b analysis before you can generate the report."
     ),
 
-    fluidRow(
-      class = "mb-3",
-      column(
-        width = 4,
-        shinyWidgets::virtualSelectInput(
-          inputId = ns("taxa"),
-          label = "Select the taxa for which to generate the report:",
-          choices = NULL,
-          search = TRUE,
-          width = "100%"
-        )
+    
+    bslib::navs_pill_card(
+      title = "Report",
+      nav(
+        title = "by species",
+        fluidRow(
+          class = "mb-3",
+          column(
+            width = 4,
+            shinyWidgets::virtualSelectInput(
+              inputId = ns("taxa"),
+              label = "Select the taxa for which to generate the report:",
+              choices = NULL,
+              search = TRUE,
+              width = "100%"
+            )
+          ),
+          column(
+            width = 4,
+            offset = 4,
+            tags$label(class = "control-label", HTML("&nbsp;")),
+            downloadButton(
+              outputId = ns("download"),
+              label = "Download the report",
+              class = "disabled",
+              style = "width: 100%;"
+            )
+          )
+        ),
+        uiOutput(outputId = ns("report_taxa"))
       ),
-      column(
-        width = 4,
-        offset = 4,
-        tags$label(class = "control-label", HTML("&nbsp;")),
-        downloadButton(
-          outputId = ns("download"),
-          label = "Download the report",
-          class = "disabled",
-          style = "width: 100%;"
-        )
+      nav(
+        title = "global",
+        fluidRow(
+          class = "mb-3",
+          column(
+            width = 4,
+            offset = 8,
+            tags$label(class = "control-label", HTML("&nbsp;")),
+            downloadButton(
+              outputId = ns("download_all"),
+              label = "Download the report",
+              class = "disabled",
+              style = "width: 100%;"
+            )
+          )
+        ),
+        uiOutput(outputId = ns("report_all_taxa"))
       )
-    ),
-
-    uiOutput(outputId = ns("report_taxa"))
+    )
+    
   )
 }
 
@@ -60,7 +85,10 @@ summary_report_ui <- function(id) {
 #' 
 #' @importFrom shiny moduleServer observeEvent req reactive renderUI downloadHandler includeHTML
 #' @importFrom shinyWidgets execute_safely 
-summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = reactive(NULL)) {
+summary_report_server <- function(id, 
+                                  results_r = reactive(NULL),
+                                  data_sf_r = reactive(NULL),
+                                  threat_sig_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -79,8 +107,12 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
         )
         shinyjs::addClass(id = "no-data", class = "d-none")
         shinyjs::removeCssClass(id = "download", class = "disabled")
+        shinyjs::removeCssClass(id = "download_all", class = "disabled")
       })
 
+      
+      # one taxa ----
+      
       output$report_taxa <- renderUI({
         check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
@@ -103,7 +135,7 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
                 filter(tax == input$taxa),
               res_eoo = results$eoo_res$spatial %>%
                 filter(tax == input$taxa),
-              threat_sig = NULL,
+              threat_sig = threat_sig_r(),
               parameters = results$parameters,
               res_loc = results$locations$locations_poly %>%
                 filter(tax == input$taxa),
@@ -149,7 +181,7 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
                   filter(tax == input$taxa),
                 res_eoo = results$eoo_res$spatial %>%
                   filter(tax == input$taxa),
-                threat_sig = NULL,
+                threat_sig = threat_sig_r(),
                 parameters = results$parameters,
                 res_loc = results$locations$locations_poly %>%
                   filter(tax == input$taxa),
@@ -163,6 +195,35 @@ summary_report_server <- function(id, results_r = reactive(NULL), data_sf_r = re
           file.copy(from = tmp, to = file)
         }
       )
+      
+      
+      
+      # global ----
+      
+      output$report_all_taxa <- renderUI({
+        check_data_sf_r <<- data_sf_r()
+        check_results_r <<- results_r()
+        data_sf <- req(data_sf_r())
+        results <- req(results_r())
+        
+        tmp <- tempfile(fileext = ".html")
+        
+        shinyWidgets::execute_safely({
+          rmarkdown::render(
+            input =  system.file(package = "conrappli", "reports/all_tax_report.Rmd"),
+            output_format = rmarkdown::html_fragment(number_sections = TRUE),
+            params = list(
+              polygon_rv = NULL,
+              threat_sig = threat_sig_r(),
+              parameters = results$parameters,
+              results = results$results %>%
+                filter(taxa == input$taxa)
+            ),
+            output_file = tmp
+          )
+        })
+        includeHTML(tmp)
+      })
 
     }
   )
