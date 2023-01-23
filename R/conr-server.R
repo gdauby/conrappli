@@ -16,16 +16,16 @@ conr_server <- function() {
 
     home_server(id = "home", main_session = session)
 
-    data_rv <- reactiveValues(x = NULL)
+    data_rv <- reactiveValues(x = NULL, polygon = NULL)
 
-    shp_r <- data_shapefile_server(id = "shp")
-    data_r <- data_server(id = "data")
+    shp_lr <- data_shapefile_server(id = "shp")
+    data_lr <- data_server(id = "data")
 
-    observeEvent(shp_r(), {
-      data_rv$x <- shp_r()
+    observeEvent(shp_lr$data(), {
+      data_rv$x <- shp_lr$data()
       bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
     })
-    observeEvent(data_r(), data_rv$x <- data_r())
+    observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
 
     mapping_l <- mapping_server(
       id = "mapping",

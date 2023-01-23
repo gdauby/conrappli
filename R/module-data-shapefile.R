@@ -116,7 +116,10 @@ data_shapefile_server <- function(id) {
         data_validated_r()
       })
 
-      return(final_data_r)
+      return(list(
+        data = final_data_r,
+        poly = reactive(polygon_rv$x)
+      ))
     }
   )
 }
