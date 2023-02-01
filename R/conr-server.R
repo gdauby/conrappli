@@ -18,7 +18,7 @@ conr_server <- function() {
 
     data_rv <- reactiveValues(x = NULL)
 
-    shp_r <- data_shapefile_server(id = "shp")
+    shp_r <- data_2_server(id = "shp")
     data_r <- data_server(id = "data")
 
     observeEvent(shp_r(), {
