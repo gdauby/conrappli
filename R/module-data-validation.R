@@ -35,7 +35,7 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
     module = function(input, output, session) {
 
       to_validate_r <- reactive({
-        req(data_r())
+        req(data_r(), nrow(data_r()) > 0)
         prepare_data_validate(
           data = data_r(),
           lat = ".__latitude",
