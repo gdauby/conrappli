@@ -19,10 +19,11 @@ conr_server <- function() {
     data_rv <- reactiveValues(x = NULL, polygon = NULL)
 
     shp_lr <- data_2_server(id = "shp")
-    data_r <- data_server(id = "data")
+    data_lr <- data_server(id = "data")
 
     observeEvent(shp_lr$data(), {
       data_rv$x <- shp_lr$data()
+      data_rv$polygon <- shp_lr$poly()
       bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
     })
     observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
@@ -65,7 +66,8 @@ conr_server <- function() {
       }),
       threat_sig_r = reactive({
         mapping_l$threat_sig()
-      })
+      }),
+      polygon_r = reactive(data_rv$polygon)
     )
 
   }

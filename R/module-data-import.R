@@ -158,8 +158,8 @@ data_import_server <- function(id) {
       raw_data_polygon <- data_import_polygon_server(
         id = "polygon"
       )
-      observeEvent(raw_data_polygon(), {
-        dataset_rv$value <- raw_data_polygon()
+      observeEvent(raw_data_polygon$value(), {
+        dataset_rv$value <- raw_data_polygon$value()
       })
 
       raw_data_file <- datamods::import_file_server(

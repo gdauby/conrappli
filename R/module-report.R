@@ -89,7 +89,8 @@ summary_report_server <- function(id,
                                   data_r = reactive(NULL),
                                   results_r = reactive(NULL),
                                   data_sf_r = reactive(NULL),
-                                  threat_sig_r = reactive(NULL)) {
+                                  threat_sig_r = reactive(NULL),
+                                  polygon_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -205,6 +206,7 @@ summary_report_server <- function(id,
         check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
         check_data_r <<- data_r()
+        check_polygon_r <<- polygon_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         
@@ -216,7 +218,7 @@ summary_report_server <- function(id,
             output_format = rmarkdown::html_fragment(number_sections = TRUE),
             params = list(
               data = data_r(),
-              polygon_rv = NULL,
+              polygon_rv = polygon_r(),
               threat_sig = threat_sig_r(),
               parameters = results$parameters,
               results = results$results,

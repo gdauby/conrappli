@@ -117,7 +117,10 @@ data_import_polygon_server <- function(id) {
       })
 
 
-      return(reactive(dataset_rv$value))
+      return(list(
+        value = reactive(dataset_rv$value),
+        poly = reactive(polygon_rv$x)
+      ))
     }
   )
 }

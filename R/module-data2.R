@@ -61,11 +61,11 @@ data_2_server <- function(id) {
     id,
     function(input, output, session) {
 
-      polygon_rv <- reactiveValues()
       dataset_rv <- reactiveValues(value = NULL)
 
       polygon_read_r <- data_import_polygon_server(id = "read")
-      observeEvent(polygon_read_r(), dataset_rv$value <- polygon_read_r())
+      observeEvent(polygon_read_r$value(), dataset_rv$value <- polygon_read_r$value())
+      observeEvent(polygon_read_r$poly(), dataset_rv$poly <- polygon_read_r$poly())
 
 
       output$feedback <- renderUI({
@@ -106,7 +106,7 @@ data_2_server <- function(id) {
 
       return(list(
         data = final_data_r,
-        poly = reactive(polygon_rv$x)
+        poly = reactive(dataset_rv$poly)
       ))
     }
   )
