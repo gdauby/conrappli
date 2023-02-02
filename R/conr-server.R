@@ -55,6 +55,10 @@ conr_server <- function() {
 
     summary_report_server(
       id = "report",
+      data_r = reactive({
+        req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
+          dplyr::filter(STATUS_CONR == "IN")
+      }),
       results_r = criterion_b,
       data_sf_r = reactive({
         mapping_l$data_sf()

@@ -86,6 +86,7 @@ summary_report_ui <- function(id) {
 #' @importFrom shiny moduleServer observeEvent req reactive renderUI downloadHandler includeHTML
 #' @importFrom shinyWidgets execute_safely 
 summary_report_server <- function(id, 
+                                  data_r = reactive(NULL),
                                   results_r = reactive(NULL),
                                   data_sf_r = reactive(NULL),
                                   threat_sig_r = reactive(NULL)) {
@@ -203,6 +204,7 @@ summary_report_server <- function(id,
       output$report_all_taxa <- renderUI({
         check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
+        check_data_r <<- data_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         
@@ -213,11 +215,12 @@ summary_report_server <- function(id,
             input =  system.file(package = "conrappli", "reports/all_tax_report.Rmd"),
             output_format = rmarkdown::html_fragment(number_sections = TRUE),
             params = list(
+              data = data_r(),
               polygon_rv = NULL,
               threat_sig = threat_sig_r(),
               parameters = results$parameters,
-              results = results$results %>%
-                filter(taxa == input$taxa)
+              results = results$results,
+              resol = 2
             ),
             output_file = tmp
           )
