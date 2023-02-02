@@ -173,6 +173,24 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
     label = "Locations threatened"
   )
 }
+} else {
+  
+  group_lf <- c(group_lf, "Locations")
+  
+    leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+    data = params$res_loc,
+    fillColor = "red",
+    weight = 1,
+    opacity = 0.4,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.4,
+    group = "Locations",
+    label = "Locations"
+  )
+  
 }
 
 

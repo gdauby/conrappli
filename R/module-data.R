@@ -171,14 +171,14 @@ data_server <- function(id) {
         validated <- data_validated_r()
         if (nrow(validated) > 0) {
           actionButton(
-            inputId = ns("go_to_data"),
-            label = "See data",
+            inputId = ns("go_to_mapping"),
+            label = "Go to mapping",
             icon = ph_i("arrow-circle-right"),
-            class = "float-end btn-outline-primary"
+            class = "float-end btn-outline-primary",
+            onclick = "$(\"a[data-value='mapping']\").click();"
           )
         }
       })
-      observeEvent(input$go_to_data, nav_select("navs", "data"))
 
       observeEvent(data_validated_r(), {
         shinyjs::enable(id = "go_next")

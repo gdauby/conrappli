@@ -74,7 +74,8 @@ draw_poly_server <- function(id) {
           shinyWidgets::execute_safely(
             geojson_to_sf(polys) %>%
               sf::st_combine() %>%
-              sf::st_cast(to = "POLYGON")
+              sf::st_cast(to = "POLYGON") %>%
+              sf::st_cast(to = "MULTIPOLYGON")
           )
         } else {
           NULL

@@ -18,8 +18,8 @@ conr_server <- function() {
 
     data_rv <- reactiveValues(x = NULL, polygon = NULL)
 
-    shp_lr <- data_shapefile_server(id = "shp")
-    data_lr <- data_server(id = "data")
+    shp_lr <- data_2_server(id = "shp")
+    data_r <- data_server(id = "data")
 
     observeEvent(shp_lr$data(), {
       data_rv$x <- shp_lr$data()

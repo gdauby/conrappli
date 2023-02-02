@@ -9,10 +9,10 @@ home_ui <- function(id) {
         width = 8, offset = 2,
         tags$p(
           class = "text-center fs-5 text mt-5",
-          "This explication is designed to perform multi-species estimation of geographical",
-          "range parameters for preliminary assessment of conservation status following Criterion B of the",
+          "This application is designed to perform multi-species estimation of geographical",
+          "range parameters for preliminary assessment of conservation status following Criterion A and B of the",
           "International Union for Conservation of Nature (IUCN, see <http://www.iucnredlist.org>)",
-          "through",
+          "It is based on the ",
           tags$a(
             "R package ConR",
             href = "https://cran.r-project.org/web/packages/ConR/index.html"
@@ -39,10 +39,30 @@ home_ui <- function(id) {
           class = "text-center fs-6 mb-3 d-block",
           width = "100%"
         ),
-
+        
+        tags$br(),
+        
+        tags$p("The development of this application has been funded by the franklinia fondation :"),
+        
+        fluidRow(
+          column(
+            width = 4,
+            class = "text-center",
+            tags$a(
+              href="https://fondationfranklinia.org/",
+              target="_blank",
+              tags$img(
+                style = "height: 200px;",
+                src = "conrappli/medias/logo_franklinia.jpg"
+              )
+            )
+          )
+        ),
+        
+        tags$br(),
         tags$br(),
 
-        tags$p("A collaborative work between:"),
+        tags$p("This is a collaborative work between several institutions :"),
         tags$br(),
 
         fluidRow(
@@ -74,11 +94,11 @@ home_ui <- function(id) {
             width = 4,
             class = "text-center",
             tags$a(
-              href="https://www.plantentuinmeise.be/",
+              href="https://www.ulb.be/",
               target="_blank",
               tags$img(
-                style = "height: 200px;",
-                src = "conrappli/medias/th.webp"
+                style = "height: 180px;",
+                src = "conrappli/medias/logo_ULB.jpg"
               )
             )
           )

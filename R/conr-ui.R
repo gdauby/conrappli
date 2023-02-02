@@ -42,7 +42,7 @@ conr_ui <- function() {
         nav(
           title = "From SHP",
           value = "data_from_shp"
-          , data_shapefile_ui("shp")
+          , data_2_ui("shp")
         ),
         nav(
           title = "Other options",

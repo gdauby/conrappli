@@ -1,12 +1,13 @@
 
 #' @importFrom shiny NS actionButton uiOutput
 #' @importFrom htmltools tags tagList css
-data_shapefile_ui <- function(id) {
+data_2_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import a shapefile",
 
-    read_poly_ui(id = ns("read")),
+    # read_poly_ui(id = ns("read")),
+    data_import_polygon_ui(id = ns("read")),
     uiOutput(outputId = ns("feedback"), class = "my-3"),
 
     actionButton(
@@ -55,7 +56,7 @@ data_shapefile_ui <- function(id) {
 #' @importFrom shiny moduleServer reactiveValues observeEvent req renderUI
 #'  eventReactive isTruthy reactive
 #' @importFrom shinyWidgets alert execute_safely
-data_shapefile_server <- function(id) {
+data_2_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -63,22 +64,9 @@ data_shapefile_server <- function(id) {
       polygon_rv <- reactiveValues()
       dataset_rv <- reactiveValues(value = NULL)
 
-      polygon_read_r <- read_poly_server(id = "read")
-      observeEvent(polygon_read_r(), polygon_rv$x <- polygon_read_r())
+      polygon_read_r <- data_import_polygon_server(id = "read")
+      observeEvent(polygon_read_r(), dataset_rv$value <- polygon_read_r())
 
-      observeEvent(polygon_rv$x, {
-        req(polygon_rv$x)
-        shinybusy::show_modal_spinner(
-          text = "Retrieving data, please wait...",
-          spin = "half-circle",
-          color = "#088A08"
-        )
-        occdata <- shinyWidgets::execute_safely({
-          query_rb_poly(poly = polygon_rv$x)
-        })
-        shinybusy::remove_modal_spinner()
-        dataset_rv$value <- occdata$extract_all_tax
-      })
 
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
