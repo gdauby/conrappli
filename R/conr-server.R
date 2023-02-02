@@ -16,16 +16,16 @@ conr_server <- function() {
 
     home_server(id = "home", main_session = session)
 
-    data_rv <- reactiveValues(x = NULL)
+    data_rv <- reactiveValues(x = NULL, polygon = NULL)
 
-    shp_r <- data_2_server(id = "shp")
+    shp_lr <- data_2_server(id = "shp")
     data_r <- data_server(id = "data")
 
-    observeEvent(shp_r(), {
-      data_rv$x <- shp_r()
+    observeEvent(shp_lr$data(), {
+      data_rv$x <- shp_lr$data()
       bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
     })
-    observeEvent(data_r(), data_rv$x <- data_r())
+    observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
 
     mapping_l <- mapping_server(
       id = "mapping",
@@ -41,8 +41,8 @@ conr_server <- function() {
         req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
           dplyr::filter(STATUS_CONR == "IN")
       }),
-      spatial_data_r = reactive({
-        mapping_l$spatial_data()
+      threat_sig_r = reactive({
+        mapping_l$threat_sig()
       }),
       taxa_selected_r = reactive({
         mapping_l$taxa()
@@ -55,9 +55,16 @@ conr_server <- function() {
 
     summary_report_server(
       id = "report",
+      data_r = reactive({
+        req(mapping_l$data(), hasName(mapping_l$data(), "STATUS_CONR")) %>%
+          dplyr::filter(STATUS_CONR == "IN")
+      }),
       results_r = criterion_b,
       data_sf_r = reactive({
         mapping_l$data_sf()
+      }),
+      threat_sig_r = reactive({
+        mapping_l$threat_sig()
       })
     )
 

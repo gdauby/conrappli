@@ -57,20 +57,27 @@ knitr::kable(parameters_formated,
 
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
-parameters_formated <-
-  params$results %>%
+parameters_formated <- params$results %>%
   as_tibble %>%
   knitr::kable(caption = "",
                format = "html",
-               escape = F) %>%
-  kableExtra::kable_styling(bootstrap_options = c('responsive'),
-                            full_width = F) %>%
-  kableExtra::row_spec(which(params$results$category == "CR"), 
-                       bold = T, color = "white", background = "darkred") %>%
-  kableExtra::row_spec(which(params$results$category == "EN"), 
-                       bold = T, color = "white", background = "red") %>%
-  kableExtra::row_spec(which(params$results$category == "VU"), 
-                       bold = T, color = "white", background = "darkorange")
+               escape = FALSE) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("responsive"),
+    full_width = FALSE
+  ) %>%
+  kableExtra::row_spec(
+    which(params$results$category == "CR"), 
+    bold = TRUE, color = "white", background = "darkred"
+  ) %>%
+  kableExtra::row_spec(
+    which(params$results$category == "EN"), 
+    bold = TRUE, color = "white", background = "red"
+  ) %>%
+  kableExtra::row_spec(
+    which(params$results$category == "VU"), 
+    bold = TRUE, color = "white", background = "darkorange"
+  )
 
 parameters_formated %>%
   kableExtra::scroll_box(width = "1400px", height = "500px")
@@ -78,98 +85,99 @@ parameters_formated %>%
 
 
 ```{r grid-build}
+merged_data <- dplyr::left_join(
+  x = params$data,
+  y = params$results %>%
+    tibble::as_tibble() %>% 
+    dplyr::select(taxa, category), by = c(".__taxa" = "taxa")
+)
 
-merged_data <- 
-  params$data %>% 
-  left_join(params$results %>% as_tibble() %>% 
-              dplyr::select(taxa, category), by = c("tax_sp_level" = "taxa"))
-
-merged_data_sf <- 
-  sf::st_as_sf(merged_data, coords = c("ddlon", "ddlat"))
+merged_data_sf <- sf::st_as_sf(merged_data, coords = c(".__longitude", ".__latitude"))
 sf::st_crs(merged_data_sf) <- 4326
 
-merged_data_sf_proj <- sf::st_transform(merged_data_sf, sf::st_crs('EPSG:6933'))
-poly_proj <- sf::st_transform(params$polygon_rv, sf::st_crs('EPSG:6933'))
+merged_data_sf_proj <- sf::st_transform(merged_data_sf, sf::st_crs("EPSG:6933"))
+poly_proj <- sf::st_transform(params$polygon_rv, sf::st_crs("EPSG:6933"))
 
-grid <- sf::st_make_grid(x = poly_proj, 
-                         cellsize = params$resol*1000)
+grid <- sf::st_make_grid(
+  x = poly_proj, 
+  cellsize = params$resol*1000
+)
 grid <- st_as_sf(grid) %>% 
-  mutate(id = 1:nrow(.))
+  mutate(id = seq_len(n()))
 
 intersect_grid <- sf::st_intersection(merged_data_sf_proj, grid)
 
-stats_cell1 <- 
-  intersect_grid %>% 
+stats_cell1 <- intersect_grid %>% 
   sf::st_set_geometry(NULL) %>% 
-  group_by(id) %>% 
-  summarise(nbe_esp = length(unique(tax_sp_level)),
-            n = length(tax_sp_level))
+  dplyr::group_by(id) %>% 
+  dplyr::summarise(
+    nbe_esp = dplyr::n_distinct(.__taxa),
+    n = length(.__taxa)
+  )
 
-n_cr <- 
-  intersect_grid  %>% 
+n_cr <- intersect_grid  %>% 
   sf::st_set_geometry(NULL) %>% 
-  group_by(id, tax_sp_level, category) %>% 
-  summarise(n = n()) %>% 
+  dplyr::group_by(id, .__taxa, category) %>% 
+  dplyr::summarise(n = n()) %>% 
   dplyr::ungroup() %>% 
-  filter(category == "CR") %>% 
-  group_by(id) %>% 
-  summarise(n_cr = n())
+  dplyr::filter(category == "CR") %>% 
+  dplyr::group_by(id) %>% 
+  dplyr::summarise(n_cr = n())
 
 
-n_en <- 
-  intersect_grid  %>% 
+n_en <- intersect_grid  %>% 
   sf::st_set_geometry(NULL) %>% 
-  group_by(id, tax_sp_level, category) %>% 
-  summarise(n = n()) %>% 
+  dplyr::group_by(id, .__taxa, category) %>% 
+  dplyr::summarise(n = n()) %>% 
   dplyr::ungroup() %>% 
-  filter(category == "EN") %>% 
-  group_by(id) %>% 
-  summarise(n_en = n())
+  dplyr::filter(category == "EN") %>% 
+  dplyr::group_by(id) %>% 
+  dplyr::summarise(n_en = n())
 
 
-n_vu <- 
-  intersect_grid  %>% 
+n_vu <- intersect_grid  %>% 
   sf::st_set_geometry(NULL) %>% 
-  group_by(id, tax_sp_level, category) %>% 
-  summarise(n = n()) %>% 
+  dplyr::group_by(id, .__taxa, category) %>% 
+  dplyr::summarise(n = n()) %>% 
   dplyr::ungroup() %>% 
-  filter(category == "VU") %>% 
-  group_by(id) %>% 
-  summarise(n_vu = n())
+  dplyr::filter(category == "VU") %>% 
+  dplyr::group_by(id) %>% 
+  dplyr::summarise(n_vu = n())
 
 
 grid <- grid %>% 
-  left_join(stats_cell1) %>% 
-  left_join(n_cr) %>% 
-  left_join(n_en) %>% 
-  left_join(n_vu) %>% 
-  mutate(n_threatened = n_cr + n_en + n_vu) %>% 
-  mutate(prop_threatened = round((n_threatened/ nbe_esp)*100, 1))
+  dplyr::left_join(stats_cell1) %>% 
+  dplyr::left_join(n_cr) %>% 
+  dplyr::left_join(n_en) %>% 
+  dplyr::left_join(n_vu) %>% 
+  dplyr::mutate(n_threatened = n_cr + n_en + n_vu) %>% 
+  dplyr::mutate(prop_threatened = round((n_threatened/ nbe_esp)*100, 1))
 
 grid <- sf::st_transform(grid, 4326)
-
-
 ```
 
 
 ```{r, fig.show='asis', echo=FALSE, results='asis'}
 
 group_lf <- c("Occurences", "Polygon", "grid")
-center_m <- as.vector(sf::st_bbox(params$polygon_rv))
 
-grid_s <- grid %>% filter(!is.na(prop_threatened))
+grid_s <- grid %>% 
+  dplyr::filter(!is.na(prop_threatened))
 
 pal <- leaflet::colorNumeric(
   palette = "viridis",
   domain = grid_s$prop_threatened
 )
 
-leaf_map <-
-  leaflet::leaflet(data = merged_data_sf,
-                   options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
-  leaflet::invokeMethod(data = NULL,
-                        method = "addZoom",
-                        list(position = "topright")) %>%
+leaf_map <- leaflet::leaflet(
+  data = merged_data_sf,
+  options = leaflet::leafletOptions(zoomControl = FALSE)
+) %>%
+  leaflet::invokeMethod(
+    data = NULL,
+    method = "addZoom",
+    list(position = "topright")
+  ) %>%
   leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
   leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
   leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
@@ -179,27 +187,11 @@ leaf_map <-
       # create_popup() %>%
       lapply(htmltools::HTML),
     fillOpacity = 1,
-    clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 1,
-                                                   zoomToBoundsOnClick = FALSE),
+    clusterOptions = leaflet::markerClusterOptions(
+      maxClusterRadius = 1,
+      zoomToBoundsOnClick = FALSE
+    ),
     group = "Occurences"
-  ) %>% 
-  leaflet::fitBounds(
-    lng1 = center_m[1],
-    lng2 = center_m[3],
-    lat1 = center_m[2],
-    lat2 = center_m[4]
-  ) %>%
-  leaflet::addPolygons(
-    # params$res_aoo,
-    data = params$polygon_rv,
-    fillColor = "blue",
-    weight = 1,
-    opacity = 0.1,
-    color = "blue",
-    dashArray = "1",
-    fillOpacity = 0.1,
-    group = "Polygon",
-    label = "Polygon"
   ) %>%
   leaflet::addPolygons(
     # params$res_aoo,
@@ -215,6 +207,29 @@ leaf_map <-
     popup = leafpop::popupTable(grid_s %>% sf::st_set_geometry(NULL))
   )
 
+if (!is.null(params$polygon_rv)) {
+  center_m <- as.vector(sf::st_bbox(params$polygon_rv))
+  leaf_map <- leaf_map  %>% 
+    leaflet::fitBounds(
+      lng1 = center_m[1],
+      lng2 = center_m[3],
+      lat1 = center_m[2],
+      lat2 = center_m[4]
+    ) %>%
+    leaflet::addPolygons(
+      # params$res_aoo,
+      data = params$polygon_rv,
+      fillColor = "blue",
+      weight = 1,
+      opacity = 0.1,
+      color = "blue",
+      dashArray = "1",
+      fillOpacity = 0.1,
+      group = "Polygon",
+      label = "Polygon"
+    )
+}
+
 leaf_map <- leaf_map %>%
   leaflet::addLayersControl(
     baseGroups = c("OSM", "Esri", "Open Topo Map"),
@@ -223,6 +238,4 @@ leaf_map <- leaf_map %>%
   )
 
 leaf_map 
-
-
 ```

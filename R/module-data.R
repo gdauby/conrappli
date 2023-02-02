@@ -199,7 +199,10 @@ data_server <- function(id) {
         data_r = reactive(rv$data)
       )
 
-      return(reactive(rv$data))
+      return(list(
+        data = reactive(rv$data),
+        poly = reactive(NULL)
+      ))
     }
   )
 }

@@ -133,7 +133,7 @@ criterion_b_ui <- function(id) {
 }
 
 #' @param data_r A `reactive` function returning a `data.frame`.
-#' @param spatial_data_r A `reactive` function returning spatial data to use in analysis.
+#' @param threat_sig_r A `reactive` function returning spatial data to use in analysis.
 #' @param taxa_selected_r A `reactive` function returning the taxa to select by default.
 #'
 #' @export
@@ -144,7 +144,7 @@ criterion_b_ui <- function(id) {
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
 criterion_b_server <- function(id,
                                data_r = reactive(NULL),
-                               spatial_data_r = reactive(NULL),
+                               threat_sig_r = reactive(NULL),
                                taxa_selected_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -212,7 +212,7 @@ criterion_b_server <- function(id,
             data <- dplyr::filter(data, .__taxa == input$taxa)
           }
 
-          spatial_data <- spatial_data_r()
+          spatial_data <- threat_sig_r()
 
           # browser()
 
