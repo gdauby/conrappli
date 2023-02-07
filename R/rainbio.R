@@ -87,6 +87,8 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
+  
+  poly <- sf::st_transform(poly, 4326)
 
   if (inherits(poly, "sf")) {
     p_geo <- sf::st_cast(sf::st_combine(poly$geometry), to = "MULTIPOLYGON")
