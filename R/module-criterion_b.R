@@ -71,7 +71,7 @@ criterion_b_ui <- function(id) {
             ),
             min = 0,
             max = 30,
-            value = 10,
+            value = 5,
             round = TRUE,
             step = 1,
             width = "100%"
@@ -269,6 +269,17 @@ criterion_b_server <- function(id,
             main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
             locations$locations[colnames(locations$locations) %in% names(spatial_data)]
           )
+          
+          
+          results <- results %>% 
+            as_tibble() %>% 
+            mutate(category = replace(category, locations == 6, "VU+")) %>% 
+            mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>% 
+            mutate(category = replace(category, category == "LC or NT", "LC")) %>% 
+            mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
+          
+          
+          
           shinyjs::removeCssClass(id = "download", class = "disabled")
           shinyjs::removeCssClass(id = "go_report", class = "disabled")
           rv$eoo_res <- eoo_res
