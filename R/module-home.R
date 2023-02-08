@@ -3,19 +3,32 @@
 home_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Welcome to ConR application",
+    title = "Welcome to ConApp !",
     fluidRow(
       column(
         width = 8, offset = 2,
         tags$p(
-          class = "text-center fs-5 text mt-5",
-          "This application is designed to perform multi-species estimation of geographical",
-          "range parameters for preliminary assessment of conservation status following Criterion A and B of the",
-          "International Union for Conservation of Nature (IUCN, see <http://www.iucnredlist.org>)",
-          "It is based on the ",
-          tags$a(
-            "R package ConR",
-            href = "https://cran.r-project.org/web/packages/ConR/index.html"
+          class = "fs-5 text mt-5",
+          "This app is designed to help you:",
+          tags$ol(
+            tags$li(
+              "Identify the presence of threatened (extinction risk status published on the IUCN Red List; see ",
+              tags$a(
+                "<http://www.iucnredlist.org>",
+                href = "http://www.iucnredlist.org"
+              ),
+              ") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice.",
+              "To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map."
+            ),
+            tags$li(
+              "Obtain information on the distribution of Gabon's tree species and endangered species in particular."
+            ),
+            tags$li(
+              "Obtain the published extinction risk status on the IUCN Red List (if it exists) of one or more species and define",
+              "a preliminary extinction risk status according to criterion B (geographic range) from the IUCN Red List based on",
+              "the most recent distribution data. This can be done from your own distribution data or by getting distribution data",
+              "from different databases (GBIF for all types of taxa or Rainbio and a database of Central African forest plots and transects for plants of tropical Africa."
+            )
           )
         ),
 
@@ -39,11 +52,11 @@ home_ui <- function(id) {
           class = "text-center fs-6 mb-3 d-block",
           width = "100%"
         ),
-        
+
         tags$br(),
-        
+
         tags$p("The development of this application has been funded by the franklinia fondation :"),
-        
+
         fluidRow(
           column(
             width = 4,
@@ -58,7 +71,7 @@ home_ui <- function(id) {
             )
           )
         ),
-        
+
         tags$br(),
         tags$br(),
 
