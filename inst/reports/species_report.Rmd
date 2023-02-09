@@ -24,64 +24,67 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center")
+options(knitr.kable.NA = '')
 library(knitr)
+create_popup <- function(.data) {
+  template <- glue::glue("<b>{column}:</b>", column = names(.data))
+  template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
+  template <- paste(template, collapse = "")
+  glue::glue_data(.data, template)
+}
 ```
 
-
-# Summary of parameters analysis
-
-
-```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
-
-parameters_formated <-  params$parameters %>% 
-  as_tibble %>% 
-  mutate(across(everything(), as.character)) %>% 
-  pivot_longer(1:5, values_to = "value") %>% 
-  left_join(tibble(name = c("EOO_mode",
-                            "EOO_mode"),
-                   value = c("planar",
-                             "spheroid"),
-                   details = c("Projected coordinates are used to estimate areas",
-                               "Spherical geometry is used to estimate area")),
-            by = c("name", "value"))
-
-knitr::kable(
-  parameters_formated, 
-  caption = "Parameters used for the Criterion B analysis", 
-  format = "html",
-  escape = FALSE, 
-  booktabs = TRUE
-) %>%
-  kableExtra::kable_styling(
-    bootstrap_options = "striped", 
-    full_width = FALSE
-  )
-
-
-```
 
 # Preliminary Conservation Assessment of _`r params$tax`_ 
 
 </br>
 </br>
-The taxa has been assessed as :
+
+<center> The taxa has been assessed as : </center>
 </br>
 <font size="6.5">
-**`r params$results$category`**
+<center> **`r params$results$category`** </center>
 </font>
 
 </br>
-</br>
-</br>
 
-  
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+knitr::kable(t(params$results), 
+             caption = "Results of the assessment", 
+             format = "html", escape = F,
+      format.args = list(big.mark = ".")
+) %>%
+  kableExtra::kable_styling("striped", 
+                            full_width = F)
+
+
+```
+
+
+</br>
+</br>
+</br>
 
 ```{r, fig.show='asis', echo=FALSE, results='asis'}
 
 group_lf <- c("Occurences", "AOO grid")
 
+dataset <- params$data_sf %>% 
+  sf::st_drop_geometry() %>% 
+  # dplyr::bind_cols(sf::st_coordinates(params$data_sf) %>% 
+  #             tibble::as_tibble() %>% 
+  #             dplyr::rename(ddlat = Y,
+  #                           ddlon = X)) %>% 
+  dplyr::mutate(ID = 1:nrow(.))
+
+dataset <- 
+  dataset %>% 
+  dplyr::relocate(ID, .before = names(dataset)[1])
+
 leaf_map <-
-  leaflet::leaflet(data = params$data_sf,
+  leaflet::leaflet(
                    options = leaflet::leafletOptions(zoomControl = FALSE), 
                    width = "100%",
                    height = "500px") %>%
@@ -91,15 +94,14 @@ leaf_map <-
   leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
   leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
   leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-  leaflet::addCircleMarkers(
-    popup = params$data_sf %>%
-      sf::st_drop_geometry() %>%
-      # create_popup() %>%
-      lapply(htmltools::HTML),
-    fillOpacity = 1,
-    clusterOptions = leaflet::markerClusterOptions(maxClusterRadius = 1,
+  leaflet::addMarkers(
+    data = params$data_sf,
+    clusterOptions = leaflet::markerClusterOptions(
                                                    zoomToBoundsOnClick = FALSE),
-    group = "Occurences"
+    group = "Occurences",
+    popup = dataset %>% dplyr::select(ID) %>%
+      create_popup() %>% 
+      lapply(htmltools::HTML)
   ) %>%
   leaflet::addPolygons(
     # params$res_aoo,
@@ -111,7 +113,13 @@ leaf_map <-
     dashArray = "1",
     fillOpacity = 0.4,
     group = "AOO grid",
-    label = "AOO grid"
+    label = "AOO grid",
+        highlight = leaflet::highlightOptions(
+          weight = 5,
+          color = "red",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        )
   ) 
 
 if (nrow(params$res_eoo) > 0) {
@@ -150,7 +158,13 @@ if (nrow(params$res_loc %>% filter(threat == "not_threatened")) > 0) {
     dashArray = "1",
     fillOpacity = 0.4,
     group = "Locations not threatened",
-    label = "Locations not threatened"
+    label = "Locations not threatened",
+        highlight = leaflet::highlightOptions(
+          weight = 5,
+          color = "red",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        )
   )
 }
 
@@ -170,7 +184,13 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
     dashArray = "1",
     fillOpacity = 0.4,
     group = "Locations threatened",
-    label = "Locations threatened"
+    label = "Locations threatened",
+        highlight = leaflet::highlightOptions(
+          weight = 5,
+          color = "red",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        )
   )
 }
 } else {
@@ -188,7 +208,13 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
     dashArray = "1",
     fillOpacity = 0.4,
     group = "Locations",
-    label = "Locations"
+    label = "Locations",
+        highlight = leaflet::highlightOptions(
+          weight = 5,
+          color = "red",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        )
   )
   
 }
@@ -203,6 +229,61 @@ leaf_map <- leaf_map %>%
 
 
 leaf_map
+
+
+```
+
+
+# Occurences data
+
+
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+
+
+reactable::reactable(data = dataset, 
+                     filterable = TRUE, 
+                     highlight = TRUE, 
+                     searchable = TRUE)
+
+
+```
+
+
+</br>
+</br>
+</br>
+
+# Summary of parameters analysis
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+parameters_formated <-  params$parameters %>% 
+  as_tibble %>% 
+  mutate(across(everything(), as.character)) %>% 
+  pivot_longer(1:5, values_to = "value") %>% 
+  left_join(tibble(name = c("EOO_mode",
+                            "EOO_mode"),
+                   value = c("planar",
+                             "spheroid"),
+                   details = c("Projected coordinates are used to estimate areas",
+                               "Spherical geometry is used to estimate area")),
+            by = c("name", "value"))
+
+knitr::kable(
+  parameters_formated, 
+  caption = "Parameters used for the Criterion B analysis", 
+  format = "html",
+  escape = FALSE, 
+  booktabs = TRUE
+) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = "striped", 
+    full_width = FALSE
+  )
 
 
 ```
