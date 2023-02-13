@@ -223,7 +223,7 @@ summary_report_server <- function(id,
 
       output$download_all_taxa <- downloadHandler(
         filename = function() {
-          paste0("ConR-report-", input$taxa, "-", Sys.Date(), ".html")
+          paste0("ConR-report-", "-", Sys.Date(), ".html")
         },
         content = function(file) {
           file.copy(from = rv$all_tax_report, to = file)
