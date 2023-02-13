@@ -64,9 +64,9 @@ conr_server <- function() {
       data_sf_r = reactive({
         mapping_l$data_sf()
       }),
-      threat_sig_r = reactive({
-        mapping_l$threat_sig()
-      }),
+      # threat_sig_r = reactive({
+      #   mapping_l$threat_sig()
+      # }),
       polygon_r = reactive(data_rv$polygon)
     )
 

@@ -220,6 +220,38 @@ if (nrow(params$res_loc %>% filter(threat != "not_threatened")) > 0) {
 }
 
 
+if (any(!is.na(params$threat_sig))) {
+  
+  
+  
+  for (i in 1:length(params$threat_sig)) {
+    
+    
+    threat_layer <- st_transform(params$threat_sig[[i]], 4326)
+  
+    group_lf <- c(group_lf, names(params$threat_sig)[i])
+    
+    leaf_map <-
+      leaf_map %>%
+      leaflet::addPolygons(
+        data = threat_layer,
+        fillColor = "grey",
+        weight = 1,
+        opacity = 0.2,
+        color = "blue",
+        dashArray = "1",
+        fillOpacity = 0.4,
+        group = names(params$threat_sig)[i],
+        label = names(params$threat_sig)[i]
+      )
+    
+  }
+  
+  
+  
+}
+
+
 leaf_map <- leaf_map %>%
   leaflet::addLayersControl(
     baseGroups = c("OSM", "Esri", "Open Topo Map"),

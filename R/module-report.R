@@ -27,7 +27,7 @@ summary_report_ui <- function(id) {
 
     
     bslib::navs_pill_card(
-      title = "Report",
+      # title = "Report",
       nav(
         title = "by species",
         fluidRow(
@@ -89,7 +89,7 @@ summary_report_server <- function(id,
                                   data_r = reactive(NULL),
                                   results_r = reactive(NULL),
                                   data_sf_r = reactive(NULL),
-                                  threat_sig_r = reactive(NULL),
+                                  # threat_sig_r = reactive(NULL),
                                   polygon_r = reactive(NULL)) {
   moduleServer(
     id = id,
@@ -101,6 +101,9 @@ summary_report_server <- function(id,
           length(results_r()) > 0,
           !is.null(results_r()$results$taxa)
         )
+        
+        print(results_r()$locations)
+        
         species <- results_r()$results$taxa
         shinyWidgets::updateVirtualSelect(
           inputId = "taxa",
@@ -121,6 +124,8 @@ summary_report_server <- function(id,
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         req(input$taxa)
+        
+        print(results$locations$threat_list)
 
         tmp <- tempfile(fileext = ".html")
 
@@ -137,7 +142,7 @@ summary_report_server <- function(id,
                 filter(tax == input$taxa),
               res_eoo = results$eoo_res$spatial %>%
                 filter(tax == input$taxa),
-              threat_sig = threat_sig_r(),
+              threat_sig = results$locations$threat_list,
               parameters = results$parameters,
               res_loc = results$locations$locations_poly %>%
                 filter(tax == input$taxa),
@@ -183,7 +188,7 @@ summary_report_server <- function(id,
                   filter(tax == input$taxa),
                 res_eoo = results$eoo_res$spatial %>%
                   filter(tax == input$taxa),
-                threat_sig = threat_sig_r(),
+                threat_sig = results$locations$threat_list,
                 parameters = results$parameters,
                 res_loc = results$locations$locations_poly %>%
                   filter(tax == input$taxa),
@@ -219,7 +224,7 @@ summary_report_server <- function(id,
             params = list(
               data = data_r(),
               polygon_rv = polygon_r(),
-              threat_sig = threat_sig_r(),
+              threat_sig = results$locations$threat_list,
               parameters = results$parameters,
               results = results$results,
               resol = 2
