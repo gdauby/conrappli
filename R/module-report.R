@@ -47,7 +47,7 @@ summary_report_ui <- function(id) {
             offset = 4,
             tags$label(class = "control-label", HTML("&nbsp;")),
             downloadButton(
-              outputId = ns("download"),
+              outputId = ns("download_taxa"),
               label = "Download the report",
               class = "disabled",
               style = "width: 100%;"
@@ -65,7 +65,7 @@ summary_report_ui <- function(id) {
             offset = 8,
             tags$label(class = "control-label", HTML("&nbsp;")),
             downloadButton(
-              outputId = ns("download_all"),
+              outputId = ns("download_all_taxa"),
               label = "Download the report",
               class = "disabled",
               style = "width: 100%;"
@@ -94,6 +94,12 @@ summary_report_server <- function(id,
   moduleServer(
     id = id,
     module = function(input, output, session) {
+      
+      rv <- reactiveValues()
+      
+      report_dir <- tempfile(pattern = "ConRAppReport")
+      dir.create(report_dir)
+      shiny::addResourcePath(prefix = "ConRAppReport", directoryPath = report_dir)
 
       observeEvent(results_r(), {
         req(
@@ -111,8 +117,8 @@ summary_report_server <- function(id,
           selected = species[1]
         )
         shinyjs::addClass(id = "no-data", class = "d-none")
-        shinyjs::removeCssClass(id = "download", class = "disabled")
-        shinyjs::removeCssClass(id = "download_all", class = "disabled")
+        shinyjs::removeCssClass(id = "download_taxa", class = "disabled")
+        shinyjs::removeCssClass(id = "download_all_taxa", class = "disabled")
       })
 
       
@@ -127,12 +133,20 @@ summary_report_server <- function(id,
         
         print(results$locations$threat_list)
 
-        tmp <- tempfile(fileext = ".html")
+        tmp <- tempfile(tmpdir = report_dir, fileext = ".html")
+        rv$species_report <- tmp
 
         shinyWidgets::execute_safely({
           rmarkdown::render(
             input =  system.file(package = "conrappli", "reports/species_report.Rmd"),
-            output_format = rmarkdown::html_fragment(number_sections = TRUE),
+            output_format = rmarkdown::html_document(
+              theme = bs_theme_conr(),
+              number_sections = TRUE,
+              toc = TRUE,
+              toc_float = TRUE,
+              toc_depth = 5,
+              self_contained = TRUE
+            ),
             params = list(
               tax = input$taxa,
               data = NULL,
@@ -152,54 +166,19 @@ summary_report_server <- function(id,
             output_file = tmp
           )
         })
-        includeHTML(tmp)
+        tags$iframe(
+          width = "100%",
+          height = "700px",
+          src = paste0("ConRAppReport/", basename(tmp))
+        )
       })
 
-      output$download <- downloadHandler(
+      output$download_taxa <- downloadHandler(
         filename = function() {
           paste0("ConR-report-", input$taxa, "-", Sys.Date(), ".html")
         },
         content = function(file) {
-          shinybusy::show_modal_spinner(
-            spin = "half-circle",
-            color = "#088A08",
-            text = "Generating report"
-          )
-          data_sf <- req(data_sf_r())
-          results <- req(results_r())
-          tmp <- tempfile(fileext = ".html")
-          shinyWidgets::execute_safely({
-            rmarkdown::render(
-              input =  system.file(package = "conrappli", "reports/species_report.Rmd"),
-              output_format = rmarkdown::html_document(
-                theme = bs_theme_conr(),
-                number_sections = TRUE,
-                toc = TRUE,
-                toc_float = TRUE,
-                toc_depth = 5,
-                self_contained = TRUE
-              ),
-              params = list(
-                tax = input$taxa,
-                data = NULL,
-                data_sf = data_sf %>%
-                  filter(.__taxa == input$taxa),
-                res_aoo = results$aoo_res$AOO_poly %>%
-                  filter(tax == input$taxa),
-                res_eoo = results$eoo_res$spatial %>%
-                  filter(tax == input$taxa),
-                threat_sig = results$locations$threat_list,
-                parameters = results$parameters,
-                res_loc = results$locations$locations_poly %>%
-                  filter(tax == input$taxa),
-                results = results$results %>%
-                  filter(taxa == input$taxa)
-              ),
-              output_file = tmp
-            )
-          })
-          shinybusy::remove_modal_spinner()
-          file.copy(from = tmp, to = file)
+          file.copy(from = rv$species_report, to = file)
         }
       )
       
@@ -215,12 +194,20 @@ summary_report_server <- function(id,
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         
-        tmp <- tempfile(fileext = ".html")
+        tmp <- tempfile(tmpdir = report_dir, fileext = ".html")
+        rv$all_tax_report <- tmp
         
         shinyWidgets::execute_safely({
           rmarkdown::render(
             input =  system.file(package = "conrappli", "reports/all_tax_report.Rmd"),
-            output_format = rmarkdown::html_fragment(number_sections = TRUE),
+            output_format = rmarkdown::html_document(
+              theme = bs_theme_conr(),
+              number_sections = TRUE,
+              toc = TRUE,
+              toc_float = TRUE,
+              toc_depth = 5,
+              self_contained = TRUE
+            ),
             params = list(
               data = data_r(),
               polygon_rv = polygon_r(),
@@ -232,9 +219,22 @@ summary_report_server <- function(id,
             output_file = tmp
           )
         })
-        includeHTML(tmp)
+        tags$iframe(
+          width = "100%",
+          height = "700px",
+          src = paste0("ConRAppReport/", basename(tmp))
+        )
       })
 
+      output$download_all_taxa <- downloadHandler(
+        filename = function() {
+          paste0("ConR-report-", "-", Sys.Date(), ".html")
+        },
+        content = function(file) {
+          file.copy(from = rv$all_tax_report, to = file)
+        }
+      )
+      
     }
   )
 }

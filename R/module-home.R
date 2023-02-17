@@ -8,7 +8,7 @@ home_ui <- function(id) {
       column(
         width = 8, offset = 2,
         tags$p(
-          class = "fs-5 text mt-5",
+          class = "fs-5 mt-5",
           "This app is designed to help you:",
           tags$ol(
             tags$li(
@@ -33,23 +33,37 @@ home_ui <- function(id) {
         ),
 
         tags$br(),
+        
+        tags$p(
+          class = "fs-5",
+          "What do you want to do?"
+        ),
 
         actionButton(
           inputId = ns("start_shp"),
           label = tagList(
-            "Import a shapefile and launch criterion B evaluation",
+            "Identify threatened plant species at a site",
             ph("arrow-circle-right")
           ),
-          class = "btn-outline-primary text-center fs-4 mb-3 d-block",
+          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
           width = "100%"
         ),
-        actionLink(
-          inputId = ns("start_data"),
+        actionButton(
+          inputId = ns("start_mod2"),
           label = tagList(
-            "Other data import options",
+            "Get information on (threatened) tree species in Gabon (coming soon)",
             ph("arrow-circle-right")
           ),
-          class = "text-center fs-6 mb-3 d-block",
+          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
+          width = "100%"
+        ),
+        actionButton(
+          inputId = ns("start_data"),
+          label = tagList(
+            "Conduct a preliminary multi-species assessment of extinction risk under Criterion B",
+            ph("arrow-circle-right")
+          ),
+          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
           width = "100%"
         ),
 

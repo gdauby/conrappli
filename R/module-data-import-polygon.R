@@ -112,7 +112,10 @@ data_import_polygon_server <- function(id) {
           compact = TRUE,
           bordered = TRUE,
           defaultPageSize = 10,
-          searchable = TRUE
+          searchable = TRUE,
+          defaultColDef = reactable::colDef(
+            style = list(whiteSpace = "nowrap", textOverflow = "ellipsis")
+          )
         )
       })
 
