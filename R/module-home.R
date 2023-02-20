@@ -69,7 +69,7 @@ home_ui <- function(id) {
 
         tags$br(),
 
-        tags$p("The development of this application has been funded by the franklinia fondation :"),
+        tags$p("The development of this application has been funded by the Foundation Franklinia:"),
 
         fluidRow(
           column(
