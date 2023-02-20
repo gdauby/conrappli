@@ -69,15 +69,23 @@ home_ui <- function(id) {
 
         tags$br(),
 
-        tags$p("The development of this application has been funded by the Foundation Franklinia:"),
+        tags$p(
+          "The development of this application has been funded by the",
+          tags$a(
+            class = "fw-bold text-decoration-underline text-reset",
+            "Foundation Franklinia:",
+            href = "https://fondationfranklinia.org/",
+            target = "_blank"
+          )
+        ),
 
         fluidRow(
           column(
             width = 4,
             class = "text-center",
             tags$a(
-              href="https://fondationfranklinia.org/",
-              target="_blank",
+              href = "https://fondationfranklinia.org/",
+              target = "_blank",
               tags$img(
                 style = "height: 200px;",
                 src = "conrappli/medias/logo_franklinia.jpg"
@@ -89,7 +97,7 @@ home_ui <- function(id) {
         tags$br(),
         tags$br(),
 
-        tags$p("This is a collaborative work between several institutions :"),
+        tags$p("This is a collaborative work between several institutions:"),
         tags$br(),
 
         fluidRow(
