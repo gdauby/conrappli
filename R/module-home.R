@@ -72,8 +72,8 @@ home_ui <- function(id) {
         tags$p(
           "The development of this application has been funded by the",
           tags$a(
-            class = "fw-bold text-decoration-underline text-reset",
-            "Foundation Franklinia:",
+            class = "text-reset",
+            "Fondation Franklinia:",
             href = "https://fondationfranklinia.org/",
             target = "_blank"
           )
