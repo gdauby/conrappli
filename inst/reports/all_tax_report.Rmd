@@ -95,7 +95,7 @@ knitr::kable(count_cat,
 reactable::reactable(data = params$results %>% tibble::as_tibble(), 
                      filterable = TRUE, 
                      highlight = TRUE, 
-                     searchable = TRUE)
+                     searchable = TRUE, pagination = FALSE, height = 1000)
 
 
 ```
@@ -105,7 +105,7 @@ reactable::reactable(data = params$results %>% tibble::as_tibble(),
 </br>
 </br>
 
-```{r grid-build, warning=FALSE, message=FALSE}
+```{r grid-build, warning=FALSE, message=FALSE, eval=F}
 merged_data <- dplyr::left_join(
   x = params$data,
   y = params$results %>%
@@ -198,9 +198,8 @@ grid <- sf::st_transform(grid, 4326)
 
 # Synthetic map
 
-The grid (is shown) show the proportion of threatened species.
 
-```{r leaflet, fig.show='asis', echo=FALSE, results='asis'}
+```{r leaflet, fig.show='asis', echo=FALSE, results='asis', eval=T, warning=FALSE}
 
 group_lf <- c("Occurences")
 
@@ -349,9 +348,7 @@ leaf_map
 ```
 
 
-# Distribution of Extent of occurrences values
-
-```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE, eval=F}
 
 eoo_res <- 
   results %>% 
