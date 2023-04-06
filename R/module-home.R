@@ -11,7 +11,7 @@ home_ui <- function(id) {
           class = "fs-5 mt-5",
           "This app is designed to help you:",
           tags$ol(
-            tags$li(
+            tags$ol(
               "Identify the presence of threatened (extinction risk status published on the IUCN Red List; see ",
               tags$a(
                 "<http://www.iucnredlist.org>",
@@ -19,43 +19,46 @@ home_ui <- function(id) {
               ),
               ") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice.",
               "To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map."
+            )
+          ),
+          
+          actionButton(
+            inputId = ns("start_shp"),
+            label = tagList(
+              "Identify potentially oir likely threatened plant species at a site (Tropical Africa only)",
+              ph("arrow-circle-right")
             ),
-            tags$li(
+            class = "btn-outline-primary text-center fs-5 mb-3 d-block",
+            width = "100%"
+          )
+        ),
+        tags$p(
+          class = "fs-5 mt-5",
+          tags$ol(
+            tags$ol(
               "Obtain information on the distribution of Gabon's tree species and endangered species in particular."
-            ),
-            tags$li(
+            )
+          )
+        ),
+        actionButton(
+          inputId = ns("start_mod2"),
+          label = tagList(
+            "Get information on (threatened) tree species in Gabon (not yet available)",
+            ph("arrow-circle-right")
+          ),
+          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
+          width = "100%"
+        ),
+        tags$p(
+          class = "fs-5 mt-5",
+          tags$ol(
+            tags$ol(
               "Obtain the published extinction risk status on the IUCN Red List (if it exists) of one or more species and define",
               "a preliminary extinction risk status according to criterion B (geographic range) from the IUCN Red List based on",
               "the most recent distribution data. This can be done from your own distribution data or by getting distribution data",
               "from different databases (GBIF for all types of taxa or Rainbio and a database of Central African forest plots and transects for plants of tropical Africa."
             )
           )
-        ),
-
-        tags$br(),
-        
-        tags$p(
-          class = "fs-5",
-          "What do you want to do?"
-        ),
-
-        actionButton(
-          inputId = ns("start_shp"),
-          label = tagList(
-            "Identify threatened plant species at a site",
-            ph("arrow-circle-right")
-          ),
-          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
-          width = "100%"
-        ),
-        actionButton(
-          inputId = ns("start_mod2"),
-          label = tagList(
-            "Get information on (threatened) tree species in Gabon (coming soon)",
-            ph("arrow-circle-right")
-          ),
-          class = "btn-outline-primary text-center fs-5 mb-3 d-block",
-          width = "100%"
         ),
         actionButton(
           inputId = ns("start_data"),
@@ -66,6 +69,8 @@ home_ui <- function(id) {
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",
           width = "100%"
         ),
+
+        tags$br(),
 
         tags$br(),
 
