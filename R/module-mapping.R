@@ -162,7 +162,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           shinyWidgets::updateVirtualSelect(
             inputId = "spatial_data_select",
             choices = list_spatial_data %>%
-              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description)
+              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description),
+            selected = list_spatial_data$table_name
           )
           shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
           shinybusy::show_modal_spinner(
