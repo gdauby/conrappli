@@ -224,8 +224,8 @@ auto_selection_cols_taxa <- function(.data) {
   x <- list()
   if (hasName(.data, "family"))
     x[[".__taxa"]] <- "family"
-  if (hasName(.data, "scientificName"))
-    x[[".__taxa"]] <- "scientificName"
+  if (hasName(.data, "species"))
+    x[[".__taxa"]] <- "species"
   if (hasName(.data, "tax_sp_level"))
     x[[".__taxa"]] <- "tax_sp_level"
   if (hasName(.data, "genus"))
