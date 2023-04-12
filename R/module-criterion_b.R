@@ -240,6 +240,8 @@ criterion_b_server <- function(id,
             method_polygons = "no_more_than_one",
             nbe_rep = input$rep_rast
           )
+          
+          print(locations$locations)
 
           shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
           categories <- cat_criterion_b(
@@ -266,7 +268,9 @@ criterion_b_server <- function(id,
             issue_aoo = aoo_res$AOO$issue_aoo,
             issue_eoo = eoo_res$results$issue_eoo,
             issue_locations = locations$locations$issue_locations,
-            main_threat = ifelse(!is.null(locations$locations$main_threat), locations$locations$main_threat, NA),
+            main_threat = ifelse(rep(is.null(locations$locations$main_threat), nrow(locations$locations)), 
+                                 NA, 
+                                 locations$locations$main_threat),
             locations$locations[colnames(locations$locations) %in% names(spatial_data)]
           )
           
