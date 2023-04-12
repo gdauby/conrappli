@@ -26,7 +26,7 @@ data_import_polygon_ui <- function(id) {
         tags$p(
           "Click buttons representing a rectangle or a polygon",
           "on the right of the map to draw a shape on the map,",
-          "then click the confirm button to import data about the concerned area."
+          "then click the confirm button below the map to import data about the concerned area."
         ),
         draw_poly_ui(id = ns("draw"))
       ),
