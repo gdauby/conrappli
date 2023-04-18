@@ -35,7 +35,7 @@ conr_server <- function() {
           dplyr::filter(STATUS_CONR == "IN")
       })
     )
-
+    
     criterion_b <- criterion_b_server(
       id = "criterion_b",
       data_r = reactive({
@@ -47,7 +47,10 @@ conr_server <- function() {
       }),
       taxa_selected_r = reactive({
         mapping_l$taxa()
-      })
+      }),
+      table_overlap_r = reactive({
+        mapping_l$table_overlap()
+        })
     )
 
     observeEvent(criterion_b(), {

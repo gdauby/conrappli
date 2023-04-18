@@ -169,7 +169,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           shinybusy::show_modal_spinner(
             spin = "half-circle",
             color = "#088A08",
-            text = "Collecting spatial data"
+            text = "Collecting spatial data documenting threats distribution"
           )
           rv$all_shp <- collect_shp(
             table_names = check_overlap$shp_tables,
@@ -182,8 +182,12 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         proxy <- leaflet::leafletProxy(mapId = "map") %>%
           leaflet::clearShapes()
         rv$spatial_data <- NULL
+        rv$table_overlap <- NULL
         if (isTruthy(input$spatial_data_select)) {
           rv$spatial_data <- rv$all_shp[input$spatial_data_select]
+          rv$table_overlap <- 
+            rv$check_overlap$shp_tables[which(rv$check_overlap$shp_tables$table_name %in% input$spatial_data_select),] %>%
+            dplyr::select(table_name, type, description, reference, priority)
           lapply(
             X = rv$spatial_data,
             FUN = function(x) {
@@ -485,7 +489,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         data = reactive(returned_rv$x),
         threat_sig = reactive(rv$spatial_data),
         taxa = reactive(input$taxa),
-        data_sf = data_map_r
+        data_sf = data_map_r,
+        table_overlap = reactive(rv$table_overlap)
       ))
     }
   )

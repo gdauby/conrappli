@@ -145,7 +145,8 @@ criterion_b_ui <- function(id) {
 criterion_b_server <- function(id,
                                data_r = reactive(NULL),
                                threat_sig_r = reactive(NULL),
-                               taxa_selected_r = reactive(NULL)) {
+                               taxa_selected_r = reactive(NULL),
+                               table_overlap_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -213,6 +214,10 @@ criterion_b_server <- function(id,
           }
 
           spatial_data <- threat_sig_r()
+          
+          table_overlap <- table_overlap_r()
+          
+          print(table_overlap)
 
           # browser()
 
@@ -236,7 +241,7 @@ criterion_b_server <- function(id,
             XY = data,
             Cell_size_locations = input$locations_size,
             threat_list = spatial_data,
-            threat_weight = rep(1, length(spatial_data)),
+            threat_weight = table_overlap$priority,
             method_polygons = "no_more_than_one",
             nbe_rep = input$rep_rast
           )
