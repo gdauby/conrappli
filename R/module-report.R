@@ -25,9 +25,26 @@ summary_report_ui <- function(id) {
       text = "You must perform the criterion b analysis before you can generate the report."
     ),
 
-    
     bslib::navs_pill_card(
       # title = "Report",
+      nav(
+        title = "global",
+        fluidRow(
+          class = "mb-3",
+          column(
+            width = 4,
+            offset = 8,
+            tags$label(class = "control-label", HTML("&nbsp;")),
+            downloadButton(
+              outputId = ns("download_all_taxa"),
+              label = "Download the report",
+              class = "disabled",
+              style = "width: 100%;"
+            )
+          )
+        ),
+        uiOutput(outputId = ns("report_all_taxa"))
+      ),
       nav(
         title = "by species",
         fluidRow(
@@ -55,24 +72,6 @@ summary_report_ui <- function(id) {
           )
         ),
         uiOutput(outputId = ns("report_taxa"))
-      ),
-      nav(
-        title = "global",
-        fluidRow(
-          class = "mb-3",
-          column(
-            width = 4,
-            offset = 8,
-            tags$label(class = "control-label", HTML("&nbsp;")),
-            downloadButton(
-              outputId = ns("download_all_taxa"),
-              label = "Download the report",
-              class = "disabled",
-              style = "width: 100%;"
-            )
-          )
-        ),
-        uiOutput(outputId = ns("report_all_taxa"))
       )
     )
     
@@ -213,8 +212,7 @@ summary_report_server <- function(id,
               polygon_rv = polygon_r(),
               threat_sig = results$locations$threat_list,
               parameters = results$parameters,
-              results = results$results,
-              resol = 2
+              results = results$results
             ),
             output_file = tmp
           )

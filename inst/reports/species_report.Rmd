@@ -290,10 +290,12 @@ leaf_map
 
 ```{r react-table, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 reactable::reactable(
-  data = dataset, 
-  filterable = TRUE, 
-  highlight = TRUE, 
-  searchable = TRUE
+  data = dataset,
+  filterable = TRUE,
+  highlight = TRUE,
+  searchable = TRUE,
+  pagination = FALSE,
+  height = 2000
 )
 ```
 
