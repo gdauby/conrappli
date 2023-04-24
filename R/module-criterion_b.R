@@ -262,6 +262,16 @@ criterion_b_server <- function(id,
             nbe_rep_grid = input$rep_rast,
             threat_data = !is.null(spatial_data)
           )
+          
+          count_unique_coord <- data %>% 
+            group_by(.__taxa) %>% 
+            mutate(pair_unique_coordinates = n_distinct(across(everything())))%>% 
+            ungroup()
+          
+          count_unique_coord <- 
+            distinct(count_unique_coord %>% 
+                     select(.__taxa, pair_unique_coordinates))
+          
 
           results <- data.frame(
             taxa = row.names(aoo_res$AOO),
@@ -279,6 +289,11 @@ criterion_b_server <- function(id,
             locations$locations[colnames(locations$locations) %in% names(spatial_data)]
           )
           
+          results <- 
+            results %>% 
+            left_join(count_unique_coord %>% 
+                        dplyr::select(.__taxa, pair_unique_coordinates), 
+                      by = c("taxa" = ".__taxa"))
           
           results <- results %>% 
             as_tibble() %>% 
