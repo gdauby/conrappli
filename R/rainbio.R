@@ -43,7 +43,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
   rs <- DBI::dbSendQuery(mydb_rb, sql)
   res <- DBI::dbFetch(rs)
   DBI::dbClearResult(rs)
-  res <- dplyr::as_tibble(res)
+  res <- tibble::as_tibble(res)
 
   if (only_checked_georef) {
 
@@ -55,7 +55,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 
   return(list(
     extract_all_tax = res,
-    idtax = tibble(idtax_f = idtax)
+    idtax = tibble::tibble(idtax_f = idtax)
   ))
 }
 
@@ -112,7 +112,7 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
 
   idtax_sel <- extract %>%
     sf::st_drop_geometry() %>%
-    dplyr::as_tibble() %>%
+    tibble::as_tibble() %>%
     dplyr::filter(!is.na(tax_sp_level)) %>%
     dplyr::distinct(idtax_f)
 
@@ -613,6 +613,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 #' @importFrom glue glue_sql
 #' @importFrom DBI dbSendQuery dbFetch dbClearResult
 #' @importFrom dplyr sym tibble mutate distinct left_join
+#' @importFrom tibble tibble
 #'
 #' @return A list of two elements, one with the extract if any, two with the names with id not NA when matched
 #' @export
@@ -622,22 +623,22 @@ query_exact_match <- function(tbl, field, values_q, con) {
 
     field_col <- dplyr::sym(field)
 
-    query_tb <- tibble(!!field_col := tolower(values_q))
+    query_tb <- tibble::tibble(!!field_col := tolower(values_q))
 
   } else {
 
-    query_tb <- tibble(species := tolower(values_q))
+    query_tb <- tibble::tibble(species := tolower(values_q))
 
   }
 
-  if (length(field) == 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE lower({`field`}) IN ({vals*})",
+  if (length(field) == 1) sql <- glue::glue_sql("SELECT * FROM {`tbl`} WHERE lower({`field`}) IN ({vals*})",
                                                vals = tolower(values_q), .con = con)
-  if (length(field) > 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE lower(concat({`field[1]`},' ',{`field[2]`})) IN ({vals*})",
+  if (length(field) > 1) sql <- glue::glue_sql("SELECT * FROM {`tbl`} WHERE lower(concat({`field[1]`},' ',{`field[2]`})) IN ({vals*})",
                                               vals = tolower(values_q), .con = con)
 
 
   rs <- DBI::dbSendQuery(con, sql)
-  res_q <-DBI::dbFetch(rs) %>% as_tibble
+  res_q <-DBI::dbFetch(rs) %>% tibble::as_tibble
   DBI::dbClearResult(rs)
 
   if (length(field) == 1) {
@@ -740,7 +741,7 @@ func_try_fetch <- function(con, sql) {
     if (rep_try == 10)
       stop("Failed to connect to database")
   }
-  res_q <- res_q %>% as_tibble
+  res_q <- res_q %>% tibble::as_tibble()
   DBI::dbClearResult(rs)
 
   return(res_q)
@@ -752,7 +753,7 @@ func_try_st_read <- function(con, sql) {
   rep_try <- 1
   while(rep) {
 
-    res_q <-try({st_read(
+    res_q <-try({sf::st_read(
       con,
       query = sql,
       geometry_column = "geometry"

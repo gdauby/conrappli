@@ -11,8 +11,9 @@ criterion_b_ui(id)
 criterion_b_server(
   id,
   data_r = reactive(NULL),
-  spatial_data_r = reactive(NULL),
-  taxa_selected_r = reactive(NULL)
+  threat_sig_r = reactive(NULL),
+  taxa_selected_r = reactive(NULL),
+  table_overlap_r = reactive(NULL)
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ criterion_b_server(
 
 \item{data_r}{A \code{reactive} function returning a \code{data.frame}.}
 
-\item{spatial_data_r}{A \code{reactive} function returning spatial data to use in analysis.}
+\item{threat_sig_r}{A \code{reactive} function returning spatial data to use in analysis.}
 
 \item{taxa_selected_r}{A \code{reactive} function returning the taxa to select by default.}
 }

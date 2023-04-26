@@ -142,6 +142,7 @@ criterion_b_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
+#' @importFrom tidyr everything
 criterion_b_server <- function(id,
                                data_r = reactive(NULL),
                                threat_sig_r = reactive(NULL),
@@ -291,16 +292,16 @@ criterion_b_server <- function(id,
           
           results <- 
             results %>% 
-            left_join(count_unique_coord %>% 
+            dplyr::left_join(count_unique_coord %>% 
                         dplyr::select(.__taxa, pair_unique_coordinates), 
                       by = c("taxa" = ".__taxa"))
           
           results <- results %>% 
-            as_tibble() %>% 
-            mutate(category = replace(category, locations == 6, "VU+")) %>% 
-            mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>% 
-            mutate(category = replace(category, category == "LC or NT", "LC")) %>% 
-            mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
+            tibble::as_tibble() %>% 
+            dplyr::mutate(category = replace(category, locations == 6, "VU+")) %>% 
+            dplyr::mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>% 
+            dplyr::mutate(category = replace(category, category == "LC or NT", "LC")) %>% 
+            dplyr::mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
           
           
           
