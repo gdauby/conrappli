@@ -17,14 +17,22 @@
 #' @importFrom dplyr group_by count filter
 filtering_out_data <- function(data, threshold) {
   
-  species_to_keep <- 
-    data %>% 
-    dplyr::group_by(.__taxa) %>% 
-    dplyr::count() %>% 
-    dplyr::filter(n < threshold)
-  
-  data_filtered <- data %>% 
-    dplyr::filter(.__taxa %in% species_to_keep$.__taxa)
+  if (!is.na(threshold)) {
+    
+    species_to_keep <- 
+      data %>% 
+      dplyr::group_by(.__taxa) %>% 
+      dplyr::count() %>% 
+      dplyr::filter(n < threshold)
+    
+    data_filtered <- data %>% 
+      dplyr::filter(.__taxa %in% species_to_keep$.__taxa)
+    
+  } else {
+    
+    data_filtered <- data 
+    
+  }
   
   return(data_filtered)
 }

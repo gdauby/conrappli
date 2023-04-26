@@ -104,7 +104,7 @@ data_2_server <- function(id) {
         })
       )
       
-      observeEvent(data_validated_r(), {
+      observeEvent(data_filterout_r(), {
         shinyjs::enable(id = "go_next")
       })
 
