@@ -264,13 +264,13 @@ criterion_b_server <- function(id,
           )
           
           count_unique_coord <- data %>% 
-            group_by(.__taxa) %>% 
-            mutate(pair_unique_coordinates = n_distinct(across(everything())))%>% 
-            ungroup()
+            dplyr::group_by(.__taxa) %>% 
+            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyr::everything())))%>% 
+            dplyr::ungroup()
           
           count_unique_coord <- 
-            distinct(count_unique_coord %>% 
-                     select(.__taxa, pair_unique_coordinates))
+            dplyr::distinct(count_unique_coord %>% 
+                              dplyr::select(.__taxa, pair_unique_coordinates))
           
 
           results <- data.frame(

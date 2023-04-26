@@ -5,6 +5,8 @@ data_2_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import a shapefile",
+    
+    data_filterout_ui(id = ns("filterout")),
 
     # read_poly_ui(id = ns("read")),
     data_import_polygon_ui(id = ns("read")),
@@ -74,7 +76,7 @@ data_2_server <- function(id) {
           shinyWidgets::alert(
             status = "success",
             ph("check"),
-            format(n, big.mark = ","), "rows successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+            format(n, big.mark = ","), "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
         }
       })
@@ -93,15 +95,22 @@ data_2_server <- function(id) {
           variable_r()$data
         })
       )
-
-
+      
+      data_filterout_r <- data_filterout_server(
+        id = "filterout",
+        data = reactive({
+          req(data_validated_r())
+          data_validated_r()
+        })
+      )
+      
       observeEvent(data_validated_r(), {
         shinyjs::enable(id = "go_next")
       })
 
 
       final_data_r <- eventReactive(input$go_next, {
-        data_validated_r()
+        data_filterout_r()
       })
 
       return(list(
