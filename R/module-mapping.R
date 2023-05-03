@@ -150,7 +150,11 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
        # Overlaping spatial data ----------------
       observeEvent(data_r(), {
         data <- req(data_r())
-        check_overlap <- extract_overlap_shp(XY = data, col_x = ".__longitude", col_y = ".__latitude")
+        check_overlap <- extract_overlap_shp(
+          XY = data, 
+          col_x = ".__longitude", 
+          col_y = ".__latitude"
+        )
         rv$check_overlap <- check_overlap
         if (!(all(check_overlap$shp_tables$overlap))) {
           rv$spatial_data <- NULL
@@ -162,7 +166,11 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           shinyWidgets::updateVirtualSelect(
             inputId = "spatial_data_select",
             choices = list_spatial_data %>%
-              shinyWidgets::prepare_choices(label = table_name, value = table_name, description = description),
+              shinyWidgets::prepare_choices(
+                label = table_name, 
+                value = table_name, 
+                description = description
+              ),
             selected = list_spatial_data$table_name
           )
           shinyjs::removeClass(id = "container-spatial-data", class = "d-none")
@@ -177,10 +185,9 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           )
           shinybusy::remove_modal_spinner()
         }
+        check_rv_ammpping <<- reactiveValuesToList(rv)
       })
       observeEvent(input$spatial_data_select, {
-        proxy <- leaflet::leafletProxy(mapId = "map") %>%
-          leaflet::clearShapes()
         rv$spatial_data <- NULL
         rv$table_overlap <- NULL
         if (isTruthy(input$spatial_data_select)) {
@@ -188,15 +195,6 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
           rv$table_overlap <- 
             rv$check_overlap$shp_tables[which(rv$check_overlap$shp_tables$table_name %in% input$spatial_data_select),] %>%
             dplyr::select(table_name, type, description, reference, priority)
-          lapply(
-            X = rv$spatial_data,
-            FUN = function(x) {
-              if (inherits(x, "sf")) {
-                proxy %>%
-                  leaflet::addPolygons(data = x, weight = 1, color = "#088A08")
-              }
-            }
-          )
         }
       }, ignoreNULL = FALSE)
 
@@ -316,15 +314,11 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         if (isTRUE(rv$show_in)) {
           data_map <- dplyr::filter(data_map, .__selected == TRUE)
         }
-        leaflet::leaflet(data = data_map, options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+        map <- leaflet::leaflet(data = data_map, options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
           leaflet::invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
           leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-          leaflet::addLayersControl(
-            baseGroups = c("OSM", "Esri", "Open Topo Map"),
-            options = leaflet::layersControlOptions(collapsed = FALSE)
-          ) %>%
           leafpm::addPmToolbar(
             toolbarOptions = leafpm::pmToolbarOptions(
               drawMarker = FALSE,
@@ -362,6 +356,39 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               zoomToBoundsOnClick = FALSE
             )
           )
+        
+        if (!is.null(rv$all_shp)) {
+          
+          overlap_sf <- rv$all_shp
+          overlap_sf <- overlap_sf[vapply(overlap_sf, FUN = function(x) {
+            inherits(x, "sf")
+          }, FUN.VALUE = logical(1))]
+          
+          map <- map %>%
+            leaflet::addLayersControl(
+              baseGroups = c("OSM", "Esri", "Open Topo Map"),
+              overlayGroups = names(overlap_sf),
+              options = leaflet::layersControlOptions(collapsed = FALSE)
+            )
+          for (i in seq_along(overlap_sf)) {
+            map <- map %>%
+              leaflet::addPolygons(
+                data = overlap_sf[[i]],
+                weight = 1, 
+                color = "#088A08", 
+                group = names(overlap_sf)[i]
+              ) %>% 
+              leaflet::hideGroup(names(overlap_sf)[i])
+          }
+        } else {
+          map <- map %>%
+            leaflet::addLayersControl(
+              baseGroups = c("OSM", "Esri", "Open Topo Map"),
+              options = leaflet::layersControlOptions(collapsed = FALSE)
+            )
+        }
+        
+        return(map)
       })
 
 
