@@ -14,6 +14,10 @@
 conr_server <- function() {
   function(input, output, session) {
 
+    observeEvent(input$nav, {
+      bslib::nav_select(id = "navbar", selected = input$nav)
+    })
+
     home_server(id = "home", main_session = session)
 
     data_rv <- reactiveValues(x = NULL, polygon = NULL)
@@ -35,7 +39,7 @@ conr_server <- function() {
           dplyr::filter(STATUS_CONR == "IN")
       })
     )
-    
+
     criterion_b <- criterion_b_server(
       id = "criterion_b",
       data_r = reactive({

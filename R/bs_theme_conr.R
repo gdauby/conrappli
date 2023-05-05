@@ -11,7 +11,8 @@ bs_theme_conr <- function() {
     "modal-lg" = "1000px",
     primary = "#088A08",
     "navbar-light-color" = "#088A08",
-    "navbar-bg" = "#FFF"
+    "navbar-bg" = "#FFF",
+    "enable-negative-margins" = TRUE
   )
   bslib::bs_add_rules(
     theme = theme,
