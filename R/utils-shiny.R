@@ -76,6 +76,26 @@ navigation <- function(inputId, choices, title) {
 
 
       tags$div(
+        class = "float-right pt-2",
+        tags$label(
+          style = css(verticalAlign = "top", marginTop = "0.5rem"),
+          "Language:",
+          `for` = paste0(inputId, "_lang")
+        ),
+        tagAppendAttributes(
+          selectInput(
+            inputId = paste0(inputId, "_lang"),
+            label = NULL,
+            choices = c("en", "fr"),
+            width = "80px"
+          ),
+          style = css(display = "inline-block"),
+          class = "mt-1"
+        )
+      ),
+
+
+      tags$div(
         class = "offcanvas offcanvas-start",
         tabindex = "-1",
         id = paste0(inputId, "_menu"),

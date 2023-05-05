@@ -6,6 +6,7 @@
 #' @export
 #'
 #' @importFrom bslib page_fluid nav navs_hidden
+#' @importFrom datamods i18n
 #'
 #' @seealso
 #'  * [conr_server()] for server part.
@@ -18,14 +19,18 @@ conr_ui <- function() {
 
       navigation(
         inputId = "nav",
-        choices = list(
-          "Home" = "home",
-          "Import data from SHP" = "data_from_shp",
-          "Import data from other sources" = "data_other_options",
-          "Mapping" = "mapping",
-          "Evaluation - Criterion B" = "evaluation_criterion_b",
-          "Habitat quality/population decline" = "habitat",
-          "Summary report" = "report"
+        choices = setNames(
+          list("home", "data_from_shp", "data_other_options",
+            "mapping", "evaluation_criterion_b", "habitat", "report"),
+          c(
+            i18n("Home"),
+            i18n("Import data from SHP"),
+            i18n("Import data from other sources"),
+            i18n("Mapping"),
+            i18n("Evaluation - Criterion B"),
+            i18n("Habitat quality/population decline"),
+            i18n("Summary report")
+          )
         ),
         title = "ConR"
       ),

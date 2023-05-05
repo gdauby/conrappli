@@ -1,0 +1,13 @@
+label,translation
+"Home","Accueil"
+"Import data from SHP","Import de données rapide"
+"Import data from other sources","Import de données expert"
+"Mapping","Carte"
+"Evaluation - Criterion B","Evaluation critère B"
+"Habitat quality/population decline","Qualité de l'habitat/déclin de la population"
+"Summary report","Rapport"
+"Welcome to ConApp !","Bienvenue sur ConApp !"
+"This app is designed to help you:","Cette application est conçue pour vous aider à :"
+"Identify the presence of threatened (extinction risk status published on the IUCN Red List; see ","Identifier la présence d'espèces menacées (statut de risque d'extinction publié sur la liste rouge de l'UICN ; voir "
+") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice.",") ou potentiellement menacées (statut préliminaire de risque d'extinction) sur un site de votre choix."
+"To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map.","Pour ce faire, vous avez le choix entre importer un fichier de forme de votre zone d'étude ou dessiner un polygone sur une carte."

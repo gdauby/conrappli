@@ -1,27 +1,28 @@
 
 #' @importFrom shiny NS fluidRow column actionButton actionLink
+#' @importFrom datamods i18n
 home_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Welcome to ConApp !",
+    title = i18n("Welcome to ConApp !"),
     fluidRow(
       column(
         width = 8, offset = 2,
         tags$p(
           class = "fs-5 mt-5",
-          "This app is designed to help you:",
+          i18n("This app is designed to help you:"),
           tags$ol(
             tags$ol(
-              "Identify the presence of threatened (extinction risk status published on the IUCN Red List; see ",
+              i18n("Identify the presence of threatened (extinction risk status published on the IUCN Red List; see "),
               tags$a(
                 "<http://www.iucnredlist.org>",
                 href = "http://www.iucnredlist.org"
               ),
-              ") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice.",
-              "To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map."
+              i18n(") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice."),
+              i18n("To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map.")
             )
           ),
-          
+
           actionButton(
             inputId = ns("start_shp"),
             label = tagList(

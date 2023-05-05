@@ -18,6 +18,15 @@ conr_server <- function() {
       bslib::nav_select(id = "navbar", selected = input$nav)
     })
 
+    observeEvent(input$nav_lang, {
+      if (input$nav_lang == "fr") {
+        datamods::set_i18n("fr", packages = c("conrappli", "datamods"))
+      } else {
+        datamods::set_i18n(NULL, packages = c("conrappli", "datamods"))
+      }
+      session$reload()
+    }, ignoreInit = TRUE)
+
     home_server(id = "home", main_session = session)
 
     data_rv <- reactiveValues(x = NULL, polygon = NULL)
