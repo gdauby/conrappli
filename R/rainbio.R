@@ -244,7 +244,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
         query_tb_miss <-
           q_res$query_tb %>%
-          filter(is.na(id))
+          dplyr::filter(is.na(id))
 
         fuz_list <- vector('list', nrow(query_tb_miss))
         for (i in 1:nrow(query_tb_miss)) {
@@ -263,7 +263,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       }
 
       if (!exact_match & any(is.na(q_res$query_tb$id))) {
-        res_order <- bind_rows(fuz_res, q_res$res_q)
+        res_order <- dplyr::bind_rows(fuz_res, q_res$res_q)
       } else {
         res_order <- q_res$res_q
       }
@@ -287,7 +287,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
         query_tb_miss <-
           q_res$query_tb %>%
-          filter(is.na(id))
+          dplyr::filter(is.na(id))
 
         fuz_list <- vector('list', nrow(query_tb_miss))
         for (i in 1:nrow(query_tb_miss)) {
@@ -306,7 +306,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       }
 
       if (!exact_match & any(is.na(q_res$query_tb$id))) {
-        res_family <- bind_rows(fuz_res, q_res$res_q)
+        res_family <- dplyr::bind_rows(fuz_res, q_res$res_q)
       } else {
         res_family <- q_res$res_q
       }
@@ -330,7 +330,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
         query_tb_miss <-
           q_res$query_tb %>%
-          filter(is.na(id))
+          dplyr::filter(is.na(id))
 
         fuz_list <- vector('list', nrow(query_tb_miss))
         for (i in 1:nrow(query_tb_miss)) {
@@ -349,7 +349,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       }
 
       if (!exact_match & any(is.na(q_res$query_tb$id))) {
-        res_genus <- bind_rows(fuz_res, q_res$res_q)
+        res_genus <- dplyr::bind_rows(fuz_res, q_res$res_q)
       } else {
         res_genus <- q_res$res_q
       }
@@ -373,7 +373,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
         query_tb_miss <-
           q_res$query_tb %>%
-          filter(is.na(id))
+          dplyr::filter(is.na(id))
 
         fuz_list <- vector('list', nrow(query_tb_miss))
         for (i in 1:nrow(query_tb_miss)) {
@@ -392,7 +392,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       }
 
       if (!exact_match & any(is.na(q_res$query_tb$id))) {
-        res_species <- bind_rows(fuz_res, q_res$res_q)
+        res_species <- dplyr::bind_rows(fuz_res, q_res$res_q)
       } else {
         res_species <- q_res$res_q
       }
@@ -518,7 +518,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
   if (extract_known_syn & !no_match) {
     ## retrieving all synonyms from selected taxa
     id_synonyms <-
-      tbl(mydb_rb, "table_taxa") %>%
+      dplyr::tbl(mydb_rb, "table_taxa") %>%
       dplyr::filter(idtax_good_n %in% !!res$idtax_n) %>% ## all taxa synonyms of selected taxa
       # filter(idtax_n %in% !!res$idtax_n) %>% ## excluding taxa already in extract
       dplyr::select(idtax_n, idtax_good_n) %>%
@@ -537,7 +537,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
       res <-
         res %>%
-        bind_rows(synonyms)
+        dplyr::bind_rows(synonyms)
 
     }
 
@@ -546,8 +546,8 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
   if(!is.null(res)) {
     res <-
       res %>%
-      mutate(tax_sp_level = ifelse(!is.na(tax_esp), paste(tax_gen, tax_esp), NA)) %>%
-      mutate(tax_infra_level = ifelse(!is.na(tax_esp),
+      dplyr::mutate(tax_sp_level = ifelse(!is.na(tax_esp), paste(tax_gen, tax_esp), NA)) %>%
+      dplyr::mutate(tax_infra_level = ifelse(!is.na(tax_esp),
                                       paste0(tax_gen,
                                              " ",
                                              tax_esp,
@@ -556,7 +556,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                                              ifelse(!is.na(tax_rank02), paste0(" ", tax_rank02), ""),
                                              ifelse(!is.na(tax_nam02), paste0(" ", tax_nam02), "")),
                                       NA)) %>%
-      mutate(tax_infra_level_auth = ifelse(!is.na(tax_esp),
+      dplyr::mutate(tax_infra_level_auth = ifelse(!is.na(tax_esp),
                                            paste0(tax_gen,
                                                   " ",
                                                   tax_esp,
@@ -638,7 +638,7 @@ query_exact_match <- function(tbl, field, values_q, con) {
 
 
   rs <- DBI::dbSendQuery(con, sql)
-  res_q <-DBI::dbFetch(rs) %>% tibble::as_tibble
+  res_q <-DBI::dbFetch(rs) %>% tibble::as_tibble()
   DBI::dbClearResult(rs)
 
   if (length(field) == 1) {

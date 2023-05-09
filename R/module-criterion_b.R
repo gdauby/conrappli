@@ -142,7 +142,7 @@ criterion_b_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
-#' @importFrom tidyr everything
+#' @importFrom tidyselect everything
 criterion_b_server <- function(id,
                                data_r = reactive(NULL),
                                threat_sig_r = reactive(NULL),
@@ -266,7 +266,7 @@ criterion_b_server <- function(id,
           
           count_unique_coord <- data %>% 
             dplyr::group_by(.__taxa) %>% 
-            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyr::everything())))%>% 
+            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyselect::everything())))%>% 
             dplyr::ungroup()
           
           count_unique_coord <- 
