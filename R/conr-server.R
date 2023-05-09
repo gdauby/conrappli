@@ -14,6 +14,19 @@
 conr_server <- function() {
   function(input, output, session) {
 
+    observeEvent(input$nav, {
+      bslib::nav_select(id = "navbar", selected = input$nav)
+    })
+
+    observeEvent(input$nav_lang, {
+      if (input$nav_lang == "fr") {
+        datamods::set_i18n("fr", packages = c("conrappli", "datamods"))
+      } else {
+        datamods::set_i18n(NULL, packages = c("conrappli", "datamods"))
+      }
+      session$reload()
+    }, ignoreInit = TRUE)
+
     home_server(id = "home", main_session = session)
 
     data_rv <- reactiveValues(x = NULL, polygon = NULL)
@@ -35,7 +48,7 @@ conr_server <- function() {
           dplyr::filter(STATUS_CONR == "IN")
       })
     )
-    
+
     criterion_b <- criterion_b_server(
       id = "criterion_b",
       data_r = reactive({
