@@ -46,7 +46,8 @@ conr_server <- function() {
       data_r = reactive({
         req(data_rv$x, hasName(data_rv$x, "STATUS_CONR")) %>%
           dplyr::filter(STATUS_CONR == "IN")
-      })
+      }),
+      trigger_map_r = reactive(identical(input$navbar, "mapping"))
     )
 
     criterion_b <- criterion_b_server(

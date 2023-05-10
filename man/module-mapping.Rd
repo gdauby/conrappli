@@ -8,7 +8,7 @@
 \usage{
 mapping_ui(id)
 
-mapping_server(id, data_r = reactive(NULL))
+mapping_server(id, data_r = reactive(NULL), trigger_map_r = reactive(FALSE))
 }
 \arguments{
 \item{id}{Module's ID.}

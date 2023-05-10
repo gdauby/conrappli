@@ -124,7 +124,7 @@ mapping_ui <- function(id) {
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
 #' @importFrom stats setNames
-mapping_server <- function(id, data_r = reactive(NULL)) {
+mapping_server <- function(id, data_r = reactive(NULL), trigger_map_r = reactive(FALSE)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -304,6 +304,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
 
       output$map <- renderLeaflet({
+        req(trigger_map_r())
         leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
           leaflet::invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
@@ -333,9 +334,10 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             )
           )
       })
-      outputOptions(output, "map", suspendWhenHidden = FALSE)
+      # outputOptions(outreq(trigger_map_r())put, "map", suspendWhenHidden = FALSE)
 
       observe({
+        req(trigger_map_r())
         if (!is.null(rv$all_shp)) {
 
           overlap_sf <- rv$all_shp
@@ -369,7 +371,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       })
 
 
-      observeEvent(data_map_r(), {
+      observe({
+        req(trigger_map_r())
         req(data_map_r())
         pal <- leaflet::colorFactor(
           palette = c("forestgreen", "firebrick"),
