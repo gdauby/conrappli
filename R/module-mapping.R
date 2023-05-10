@@ -151,8 +151,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       observeEvent(data_r(), {
         data <- req(data_r())
         check_overlap <- extract_overlap_shp(
-          XY = data, 
-          col_x = ".__longitude", 
+          XY = data,
+          col_x = ".__longitude",
           col_y = ".__latitude"
         )
         rv$check_overlap <- check_overlap
@@ -167,8 +167,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             inputId = "spatial_data_select",
             choices = list_spatial_data %>%
               shinyWidgets::prepare_choices(
-                label = table_name, 
-                value = table_name, 
+                label = table_name,
+                value = table_name,
                 description = description
               ),
             selected = list_spatial_data$table_name
@@ -192,7 +192,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         rv$table_overlap <- NULL
         if (isTruthy(input$spatial_data_select)) {
           rv$spatial_data <- rv$all_shp[input$spatial_data_select]
-          rv$table_overlap <- 
+          rv$table_overlap <-
             rv$check_overlap$shp_tables[which(rv$check_overlap$shp_tables$table_name %in% input$spatial_data_select),] %>%
             dplyr::select(table_name, type, description, reference, priority)
         }
@@ -356,14 +356,14 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               zoomToBoundsOnClick = FALSE
             )
           )
-        
+
         if (!is.null(rv$all_shp)) {
-          
+
           overlap_sf <- rv$all_shp
           overlap_sf <- overlap_sf[vapply(overlap_sf, FUN = function(x) {
             inherits(x, "sf")
           }, FUN.VALUE = logical(1))]
-          
+
           map <- map %>%
             leaflet::addLayersControl(
               baseGroups = c("OSM", "Esri", "Open Topo Map"),
@@ -374,10 +374,10 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
             map <- map %>%
               leaflet::addPolygons(
                 data = overlap_sf[[i]],
-                weight = 1, 
-                color = "#088A08", 
+                weight = 1,
+                color = "#088A08",
                 group = names(overlap_sf)[i]
-              ) %>% 
+              ) %>%
               leaflet::hideGroup(names(overlap_sf)[i])
           }
         } else {
@@ -387,7 +387,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               options = leaflet::layersControlOptions(collapsed = FALSE)
             )
         }
-        
+
         return(map)
       })
 
@@ -441,13 +441,16 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
       })
 
       observeEvent(rect_rv$x, {
-        req(data_map_r())
         rect <- reactiveValuesToList(rect_rv)$x
         if (length(rect) > 0) {
           rectangles <- geojson_to_sf(rect) %>%
             sf::st_combine()
-          selected <- data_map_r() %>%
-            dplyr::filter(.__selected == TRUE) %>%
+          selected <- data_rv$map %>%
+            dplyr::filter(
+              .__selected == TRUE,
+              .__display_taxa == TRUE
+              # .__taxa %in% `if`(identical(input$taxa, "All"), .__taxa, input$taxa)
+            ) %>%
             pts_in_poly(rectangles)
           n <- sum(selected)
         } else {
@@ -475,7 +478,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         rectangles <- geojson_to_sf(rect) %>%
           sf::st_combine()
         selected <- data_map_r() %>%
-          dplyr::filter(.__selected == TRUE) %>%
+          dplyr::filter(.__selected == TRUE, .__display_taxa == TRUE) %>%
           sf::st_intersection(rectangles)
         data_map$.__selected[data_map$.__id %in% selected$.__id] <- FALSE
         data_rv$map <- data_map
