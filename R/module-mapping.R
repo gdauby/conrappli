@@ -124,7 +124,7 @@ mapping_ui <- function(id) {
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
 #' @importFrom stats setNames
-mapping_server <- function(id, data_r = reactive(NULL), trigger_map_r = reactive(FALSE)) {
+mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive(NULL), trigger_map_r = reactive(FALSE)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -148,8 +148,8 @@ mapping_server <- function(id, data_r = reactive(NULL), trigger_map_r = reactive
 
 
        # Overlaping spatial data ----------------
-      observeEvent(data_r(), {
-        data <- req(data_r())
+      observeEvent(data_latlon_r(), {
+        data <- req(data_latlon_r())
         check_overlap <- extract_overlap_shp(
           XY = data,
           col_x = ".__longitude",
@@ -187,6 +187,7 @@ mapping_server <- function(id, data_r = reactive(NULL), trigger_map_r = reactive
         }
         check_rv_ammpping <<- reactiveValuesToList(rv)
       })
+
       observeEvent(input$spatial_data_select, {
         rv$spatial_data <- NULL
         rv$table_overlap <- NULL
@@ -232,6 +233,7 @@ mapping_server <- function(id, data_r = reactive(NULL), trigger_map_r = reactive
         }
         # check_datamap <<- datamap
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"), crs = 4326)
+        check_pts_sf <<- pts_sf
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
