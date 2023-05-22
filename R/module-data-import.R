@@ -52,7 +52,7 @@ data_import_ui <- function(id) {
               "Search for", tags$a("Global Biodiversity Information Facility (GBIF)", href = "https://www.gbif.org/fr/", target = "_blank"),
               "occurrences from taxonomic names, either import a CSV file containing those names or paste a list of names to search for."
             ),
-            bslib::navs_pill(
+            bslib::navs_pill_card(
               header = tags$br(),
               bslib::nav(
                 title = "From file",
@@ -71,7 +71,7 @@ data_import_ui <- function(id) {
               class = "mb-1",
               "Extract from the Rainbio database of all records from a species list, either import a CSV file containing those species names or paste a list of names to search for."
             ),
-            bslib::navs_pill(
+            bslib::navs_pill_card(
               header = tags$br(),
               bslib::nav(
                 title = "From file",
@@ -95,7 +95,7 @@ data_import_ui <- function(id) {
               class = "mb-1",
               "Use a ready-to-use dataset, either from an Excel or CSV file, or directly copied and pasted from a spreadsheet."
             ),
-            bslib::navs_pill(
+            bslib::navs_pill_card(
               header = tags$br(),
               bslib::nav(
                 title = "From file",

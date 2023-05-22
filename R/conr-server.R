@@ -54,7 +54,8 @@ conr_server <- function() {
             !is.na(.__longitude), !is.na(.__latitude)
           )
       }),
-      trigger_map_r = reactive(identical(input$navbar, "mapping"))
+      trigger_map_r = reactive(identical(input$navbar, "mapping")),
+      main_session = session
     )
 
     criterion_b <- criterion_b_server(

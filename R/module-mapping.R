@@ -108,6 +108,25 @@ mapping_ui <- function(id) {
           width = "100%"
         )
       )
+    ),
+    
+    absolutePanel(
+      bottom = "20px",
+      right = "5px",
+      width = "170px",
+      style = htmltools::css(
+        background = "#FFF",
+        borderRadius = "5px"
+      ),
+      actionButton(
+        inputId = ns("go_next"),
+        label = tagList(
+          "Go to criterion B",
+          ph("arrow-circle-right", title = "Go to criterion B")
+        ),
+        class = "btn-outline-primary",
+        width = "100%"
+      )
     )
   )
 }
@@ -124,7 +143,11 @@ mapping_ui <- function(id) {
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
 #' @importFrom stats setNames
-mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive(NULL), trigger_map_r = reactive(FALSE)) {
+mapping_server <- function(id,
+                           data_r = reactive(NULL), 
+                           data_latlon_r = reactive(NULL), 
+                           trigger_map_r = reactive(FALSE),
+                           main_session = shiny::getDefaultReactiveDomain()) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -135,6 +158,14 @@ mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive
       rv <- reactiveValues()
       data_rv <- reactiveValues()
       rect_rv <- reactiveValues()
+      
+      observeEvent(input$go_next, {
+        bslib::nav_select(
+          session = main_session, 
+          id = "navbar", 
+          selected = "evaluation_criterion_b"
+        )
+      })
 
       observeEvent(input$show_in, {
         datamap <- req(data_r())

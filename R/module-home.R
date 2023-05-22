@@ -156,11 +156,19 @@ home_server <- function(id, main_session) {
     module = function(input, output, session) {
 
       observeEvent(input$start_shp, {
-        bslib::nav_select(id = "navbar", selected = "data_from_shp", session = main_session)
+        bslib::nav_select(
+          id = "navbar",
+          selected = "data_from_shp", 
+          session = main_session
+        )
       })
 
       observeEvent(input$start_data, {
-        bslib::nav_select(id = "navbar", selected = "data_other_options", session = main_session)
+        bslib::nav_select(
+          id = "navbar", 
+          selected = "data_other_options", 
+          session = main_session
+        )
       })
 
     }
