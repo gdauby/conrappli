@@ -5,7 +5,7 @@ data_2_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Import a shapefile",
-    
+
     data_filterout_ui(id = ns("filterout")),
 
     # read_poly_ui(id = ns("read")),
@@ -95,7 +95,7 @@ data_2_server <- function(id) {
           variable_r()$data
         })
       )
-      
+
       data_filterout_r <- data_filterout_server(
         id = "filterout",
         data = reactive({
@@ -103,7 +103,7 @@ data_2_server <- function(id) {
           data_validated_r()
         })
       )
-      
+
       observeEvent(data_filterout_r(), {
         shinyjs::enable(id = "go_next")
       })
@@ -115,6 +115,7 @@ data_2_server <- function(id) {
 
       return(list(
         data = final_data_r,
+        data_latlon = reactive(variable_r()$data_latlon),
         poly = reactive(dataset_rv$poly)
       ))
     }

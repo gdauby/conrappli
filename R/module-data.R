@@ -154,6 +154,7 @@ data_server <- function(id) {
 
       observeEvent(variable_r()$data, {
         rv$data <- variable_r()$data
+        rv$data_latlon <- variable_r()$data_latlon
       })
 
 
@@ -201,6 +202,7 @@ data_server <- function(id) {
 
       return(list(
         data = reactive(rv$data),
+        data_latlon = reactive(rv$data_latlon),
         poly = reactive(NULL)
       ))
     }

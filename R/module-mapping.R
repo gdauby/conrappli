@@ -124,7 +124,7 @@ mapping_ui <- function(id) {
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
 #' @importFrom stats setNames
-mapping_server <- function(id, data_r = reactive(NULL)) {
+mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive(NULL), trigger_map_r = reactive(FALSE)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -148,8 +148,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
 
        # Overlaping spatial data ----------------
-      observeEvent(data_r(), {
-        data <- req(data_r())
+      observeEvent(data_latlon_r(), {
+        data <- req(data_latlon_r())
         check_overlap <- extract_overlap_shp(
           XY = data,
           col_x = ".__longitude",
@@ -187,6 +187,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         }
         check_rv_ammpping <<- reactiveValuesToList(rv)
       })
+
       observeEvent(input$spatial_data_select, {
         rv$spatial_data <- NULL
         rv$table_overlap <- NULL
@@ -232,6 +233,7 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         }
         # check_datamap <<- datamap
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"), crs = 4326)
+        check_pts_sf <<- pts_sf
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
@@ -304,17 +306,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
 
 
       output$map <- renderLeaflet({
-        req(data_map_r())
-        pal <- leaflet::colorFactor(
-          palette = c("forestgreen", "firebrick"),
-          domain = c(TRUE, FALSE),
-          levels = c(TRUE, FALSE)
-        )
-        data_map <- dplyr::filter(data_map_r(), .__display_taxa == TRUE)
-        if (isTRUE(rv$show_in)) {
-          data_map <- dplyr::filter(data_map, .__selected == TRUE)
-        }
-        map <- leaflet::leaflet(data = data_map, options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+        req(trigger_map_r())
+        leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
           leaflet::invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>%
           leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
           leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
@@ -341,8 +334,65 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               snappable = FALSE,
               allowSelfIntersection = FALSE
             )
-          ) %>%
-          # leaflet::addCircleMarkers(fillOpacity = 0, opacity = 0) %>%
+          )
+      })
+      # outputOptions(outreq(trigger_map_r())put, "map", suspendWhenHidden = FALSE)
+
+      observe({
+        req(trigger_map_r(), rv$all_shp)
+        if (!is.null(rv$all_shp)) {
+
+          map_data <- req(data_map_r())
+          overlap_sf <- rv$all_shp
+          overlap_sf <- overlap_sf[vapply(overlap_sf, FUN = function(x) {
+            inherits(x, "sf")
+          }, FUN.VALUE = logical(1))]
+
+          leaflet::leafletProxy(mapId = "map") %>%
+            leaflet::addLayersControl(
+              baseGroups = c("OSM", "Esri", "Open Topo Map"),
+              overlayGroups = names(overlap_sf),
+              options = leaflet::layersControlOptions(collapsed = FALSE)
+            )
+          sf::sf_use_s2(FALSE)
+          for (i in seq_along(overlap_sf)) {
+            overlap_poly <- overlap_sf[[i]]
+            pts_contains <- sf::st_contains(x = overlap_poly, y = map_data, sparse = TRUE)
+            pts_contains <- apply(pts_contains, 1, any)
+            overlap_poly <- overlap_poly[pts_contains, ]
+            leaflet::leafletProxy(mapId = "map") %>%
+              leaflet::addPolygons(
+                data = overlap_poly,
+                weight = 1,
+                color = "#088A08",
+                group = names(overlap_sf)[i]
+              ) %>%
+              leaflet::hideGroup(names(overlap_sf)[i])
+          }
+        } else {
+          leaflet::leafletProxy(mapId = "map") %>%
+            leaflet::addLayersControl(
+              baseGroups = c("OSM", "Esri", "Open Topo Map"),
+              options = leaflet::layersControlOptions(collapsed = FALSE)
+            )
+        }
+      })
+
+
+      observe({
+        req(trigger_map_r())
+        req(data_map_r())
+        pal <- leaflet::colorFactor(
+          palette = c("forestgreen", "firebrick"),
+          domain = c(TRUE, FALSE),
+          levels = c(TRUE, FALSE)
+        )
+        data_map <- dplyr::filter(data_map_r(), .__display_taxa == TRUE)
+        if (isTRUE(rv$show_in)) {
+          data_map <- dplyr::filter(data_map, .__selected == TRUE)
+        }
+        leaflet::leafletProxy(mapId = "map", data = data_map) %>%
+          leaflet::clearMarkers() %>%
           leaflet::addCircleMarkers(
             popup = data_map %>%
               sf::st_drop_geometry() %>%
@@ -355,40 +405,8 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
               maxClusterRadius = 20,
               zoomToBoundsOnClick = FALSE
             )
-          )
-
-        if (!is.null(rv$all_shp)) {
-
-          overlap_sf <- rv$all_shp
-          overlap_sf <- overlap_sf[vapply(overlap_sf, FUN = function(x) {
-            inherits(x, "sf")
-          }, FUN.VALUE = logical(1))]
-
-          map <- map %>%
-            leaflet::addLayersControl(
-              baseGroups = c("OSM", "Esri", "Open Topo Map"),
-              overlayGroups = names(overlap_sf),
-              options = leaflet::layersControlOptions(collapsed = FALSE)
-            )
-          for (i in seq_along(overlap_sf)) {
-            map <- map %>%
-              leaflet::addPolygons(
-                data = overlap_sf[[i]],
-                weight = 1,
-                color = "#088A08",
-                group = names(overlap_sf)[i]
-              ) %>%
-              leaflet::hideGroup(names(overlap_sf)[i])
-          }
-        } else {
-          map <- map %>%
-            leaflet::addLayersControl(
-              baseGroups = c("OSM", "Esri", "Open Topo Map"),
-              options = leaflet::layersControlOptions(collapsed = FALSE)
-            )
-        }
-
-        return(map)
+          ) %>% 
+          fit_to_bbox(data = data_map)
       })
 
 
@@ -523,5 +541,22 @@ mapping_server <- function(id, data_r = reactive(NULL)) {
         table_overlap = reactive(rv$table_overlap)
       ))
     }
+  )
+}
+
+
+
+
+fit_to_bbox <- function(map, data = leaflet::getMapData(map)) {
+  if (!inherits(data, "sf"))
+    stop("fit_to_bbox: data must be an 'sf' object", call. = FALSE)
+  bbox <- sf::st_bbox(data)
+  bbox <- as.list(bbox)
+  leaflet::fitBounds(
+    map = map,
+    lng1 = bbox$xmin,
+    lat1 = bbox$ymin,
+    lng2 = bbox$xmax,
+    lat2 = bbox$ymax
   )
 }

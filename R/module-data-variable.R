@@ -159,10 +159,12 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
           allvars <- dropNulls(c(input$taxa_cols$target, input$other_cols$target, input$optionnal_cols$target))
           allvars <- unlist(allvars, recursive = TRUE, use.names = FALSE)
           if (all(allvars %in% names(donnees))) {
-            var_sel_rv$data <- dplyr::bind_cols(
+            ndonnees <- dplyr::bind_cols(
               dplyr::select(donnees, dplyr::any_of(allvars)),
               dplyr::select(donnees, !!!vars)
             )
+            var_sel_rv$data <- ndonnees
+            var_sel_rv$data_latlon <- dplyr::select(ndonnees, .__longitude, .__latitude)
           } else {
             var_sel_rv$data <- NULL
           }

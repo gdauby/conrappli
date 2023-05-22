@@ -40,13 +40,21 @@ conr_server <- function() {
       bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
     })
     observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
+    observeEvent(data_lr$data_latlon(), data_rv$latlon <- data_lr$data_latlon())
 
     mapping_l <- mapping_server(
       id = "mapping",
       data_r = reactive({
         req(data_rv$x, hasName(data_rv$x, "STATUS_CONR")) %>%
           dplyr::filter(STATUS_CONR == "IN")
-      })
+      }),
+      data_latlon_r = reactive({
+        req(data_rv$latlon) %>%
+          filter(
+            !is.na(.__longitude), !is.na(.__latitude)
+          )
+      }),
+      trigger_map_r = reactive(identical(input$navbar, "mapping"))
     )
 
     criterion_b <- criterion_b_server(
@@ -63,7 +71,7 @@ conr_server <- function() {
       }),
       table_overlap_r = reactive({
         mapping_l$table_overlap()
-        })
+      })
     )
 
     observeEvent(criterion_b(), {
