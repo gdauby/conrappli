@@ -339,9 +339,10 @@ mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive
       # outputOptions(outreq(trigger_map_r())put, "map", suspendWhenHidden = FALSE)
 
       observe({
-        req(trigger_map_r())
+        req(trigger_map_r(), rv$all_shp)
         if (!is.null(rv$all_shp)) {
 
+          map_data <- req(data_map_r())
           overlap_sf <- rv$all_shp
           overlap_sf <- overlap_sf[vapply(overlap_sf, FUN = function(x) {
             inherits(x, "sf")
@@ -353,10 +354,15 @@ mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive
               overlayGroups = names(overlap_sf),
               options = leaflet::layersControlOptions(collapsed = FALSE)
             )
+          sf::sf_use_s2(FALSE)
           for (i in seq_along(overlap_sf)) {
+            overlap_poly <- overlap_sf[[i]]
+            pts_contains <- sf::st_contains(x = overlap_poly, y = map_data, sparse = TRUE)
+            pts_contains <- apply(pts_contains, 1, any)
+            overlap_poly <- overlap_poly[pts_contains, ]
             leaflet::leafletProxy(mapId = "map") %>%
               leaflet::addPolygons(
-                data = overlap_sf[[i]],
+                data = overlap_poly,
                 weight = 1,
                 color = "#088A08",
                 group = names(overlap_sf)[i]
@@ -399,7 +405,8 @@ mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive
               maxClusterRadius = 20,
               zoomToBoundsOnClick = FALSE
             )
-          )
+          ) %>% 
+          fit_to_bbox(data = data_map)
       })
 
 
@@ -534,5 +541,22 @@ mapping_server <- function(id, data_r = reactive(NULL), data_latlon_r = reactive
         table_overlap = reactive(rv$table_overlap)
       ))
     }
+  )
+}
+
+
+
+
+fit_to_bbox <- function(map, data = leaflet::getMapData(map)) {
+  if (!inherits(data, "sf"))
+    stop("fit_to_bbox: data must be an 'sf' object", call. = FALSE)
+  bbox <- sf::st_bbox(data)
+  bbox <- as.list(bbox)
+  leaflet::fitBounds(
+    map = map,
+    lng1 = bbox$xmin,
+    lat1 = bbox$ymin,
+    lng2 = bbox$xmax,
+    lat2 = bbox$ymax
   )
 }
