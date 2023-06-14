@@ -55,8 +55,8 @@ alert_no_data <- function(id, text = "You need to import data and select variabl
 }
 
 
-
-#' @importFrom htmltools tags
+#' @importFrom shiny selectInput
+#' @importFrom htmltools tags tagAppendAttributes
 #' @importFrom phosphoricons ph
 navigation <- function(inputId, choices, title) {
   tags$div(

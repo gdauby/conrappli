@@ -20,6 +20,12 @@ mapping_server(
 \item{id}{Module's ID.}
 
 \item{data_r}{A \code{reactive} function returning a \code{data.frame}.}
+
+\item{data_latlon_r}{A \code{reactive} function returning a \code{data.frame} with coordinate only.}
+
+\item{trigger_map_r}{A \code{reactive} function to trigger map update.}
+
+\item{main_session}{The main Shiny session to navigate between tabs.}
 }
 \value{
 \itemize{

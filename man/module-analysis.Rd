@@ -24,6 +24,8 @@ criterion_b_server(
 \item{threat_sig_r}{A \code{reactive} function returning spatial data to use in analysis.}
 
 \item{taxa_selected_r}{A \code{reactive} function returning the taxa to select by default.}
+
+\item{table_overlap_r}{A \code{reactive} function.}
 }
 \value{
 \itemize{

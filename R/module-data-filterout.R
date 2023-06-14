@@ -12,7 +12,7 @@
 #'
 #' @name module-data-validation
 #'
-#' @importFrom shiny NS
+#' @importFrom shiny NS numericInput
 #' @importFrom htmltools tagList
 data_filterout_ui <- function(id) {
   ns <- NS(id)
@@ -45,7 +45,7 @@ data_filterout_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
-      
+
       to_filter_r <- reactive({
         req(data_r(), nrow(data_r()) > 0)
         filtering_out_data(
@@ -53,7 +53,7 @@ data_filterout_server <- function(id, data_r = reactive(NULL)) {
           threshold = input$max_occ_filterout
         )
       })
-      
+
       return(to_filter_r)
     }
   )

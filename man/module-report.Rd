@@ -18,6 +18,8 @@ summary_report_server(
 }
 \arguments{
 \item{id}{Module's ID.}
+
+\item{data_r, results_r, data_sf_r, polygon_r}{\code{reactive} functions returning data used to generate reports.}
 }
 \value{
 \itemize{

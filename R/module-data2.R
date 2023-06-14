@@ -106,7 +106,7 @@ data_2_server <- function(id) {
 
       data_filterout_r <- data_filterout_server(
         id = "filterout",
-        data = reactive({
+        data_r = reactive({
           req(data_validated_r())
           data_validated_r()
         })
@@ -132,7 +132,8 @@ data_2_server <- function(id) {
 
 
 
-
+#' @importFrom shiny insertUI
+#' @importFrom htmltools css tags
 show_spinner <- function(text) {
   insertUI(
     selector = ".modal-content",
@@ -170,6 +171,7 @@ show_spinner <- function(text) {
   )
 }
 
+#' @importFrom shiny removeUI
 remove_spinner <- function() {
   removeUI(selector = "#conr-modal_inner-spinner", immediate = TRUE)
 }

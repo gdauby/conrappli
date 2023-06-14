@@ -22,6 +22,8 @@ utils::globalVariables(c(
   "secondes", "species", "tax_esp", "tax_fam", "tax_famclass", "tax_gen", "tax_infra_level",
   "tax_infra_level_auth", "tax_nam01", "tax_nam02", "tax_order", "tax_rank01",
   "tax_rank02", "tax_sp_level", "tax_submitted", "tax_tax",
-  "bbox", "bbox_sf", "table_name", "type", "description", "reference"
+  "bbox", "bbox_sf", "table_name", "type", "description", "reference",
+  "category", "pair_unique_coordinates", "EOO", "priority",
+  "tax", "taxa"
 ))
 

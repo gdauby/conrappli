@@ -135,6 +135,7 @@ criterion_b_ui <- function(id) {
 #' @param data_r A `reactive` function returning a `data.frame`.
 #' @param threat_sig_r A `reactive` function returning spatial data to use in analysis.
 #' @param taxa_selected_r A `reactive` function returning the taxa to select by default.
+#' @param table_overlap_r A `reactive` function.
 #'
 #' @export
 #'
@@ -215,9 +216,9 @@ criterion_b_server <- function(id,
           }
 
           spatial_data <- threat_sig_r()
-          
+
           table_overlap <- table_overlap_r()
-          
+
           print(table_overlap)
 
           # browser()
@@ -246,7 +247,7 @@ criterion_b_server <- function(id,
             method_polygons = "no_more_than_one",
             nbe_rep = input$rep_rast
           )
-          
+
           print(locations$locations)
 
           shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
@@ -263,16 +264,16 @@ criterion_b_server <- function(id,
             nbe_rep_grid = input$rep_rast,
             threat_data = !is.null(spatial_data)
           )
-          
-          count_unique_coord <- data %>% 
-            dplyr::group_by(.__taxa) %>% 
-            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyselect::everything())))%>% 
+
+          count_unique_coord <- data %>%
+            dplyr::group_by(.__taxa) %>%
+            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyselect::everything())))%>%
             dplyr::ungroup()
-          
-          count_unique_coord <- 
-            dplyr::distinct(count_unique_coord %>% 
+
+          count_unique_coord <-
+            dplyr::distinct(count_unique_coord %>%
                               dplyr::select(.__taxa, pair_unique_coordinates))
-          
+
 
           results <- data.frame(
             taxa = row.names(aoo_res$AOO),
@@ -284,27 +285,27 @@ criterion_b_server <- function(id,
             issue_aoo = aoo_res$AOO$issue_aoo,
             issue_eoo = eoo_res$results$issue_eoo,
             issue_locations = locations$locations$issue_locations,
-            main_threat = ifelse(rep(is.null(locations$locations$main_threat), nrow(locations$locations)), 
-                                 NA, 
+            main_threat = ifelse(rep(is.null(locations$locations$main_threat), nrow(locations$locations)),
+                                 NA,
                                  locations$locations$main_threat),
             locations$locations[colnames(locations$locations) %in% names(spatial_data)]
           )
-          
-          results <- 
-            results %>% 
-            dplyr::left_join(count_unique_coord %>% 
-                        dplyr::select(.__taxa, pair_unique_coordinates), 
+
+          results <-
+            results %>%
+            dplyr::left_join(count_unique_coord %>%
+                        dplyr::select(.__taxa, pair_unique_coordinates),
                       by = c("taxa" = ".__taxa"))
-          
-          results <- results %>% 
-            tibble::as_tibble() %>% 
-            dplyr::mutate(category = replace(category, locations == 6, "VU+")) %>% 
-            dplyr::mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>% 
-            dplyr::mutate(category = replace(category, category == "LC or NT", "LC")) %>% 
+
+          results <- results %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(category = replace(category, locations == 6, "VU+")) %>%
+            dplyr::mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>%
+            dplyr::mutate(category = replace(category, category == "LC or NT", "LC")) %>%
             dplyr::mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
-          
-          
-          
+
+
+
           shinyjs::removeCssClass(id = "download", class = "disabled")
           shinyjs::removeCssClass(id = "go_report", class = "disabled")
           rv$eoo_res <- eoo_res

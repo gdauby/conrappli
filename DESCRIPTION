@@ -45,7 +45,9 @@ Imports:
     shinyWidgets (>= 0.7.0),
     taxize,
     terra,
+    tibble,
     tidyr,
+    tidyselect,
     validate
 Remotes: gdauby/ConR@devel
 Suggests: 

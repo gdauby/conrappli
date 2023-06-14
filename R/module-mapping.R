@@ -133,6 +133,9 @@ mapping_ui <- function(id) {
 
 
 #' @param data_r A `reactive` function returning a `data.frame`.
+#' @param data_latlon_r A `reactive` function returning a `data.frame` with coordinate only.
+#' @param trigger_map_r A `reactive` function to trigger map update.
+#' @param main_session The main Shiny session to navigate between tabs.
 #'
 #' @export
 #'

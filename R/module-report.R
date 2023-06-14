@@ -13,7 +13,7 @@
 #' @name module-report
 #'
 #' @importFrom shiny NS fluidRow column actionButton downloadButton uiOutput
-#' @importFrom htmltools tagList
+#' @importFrom htmltools tagList HTML
 #' @importFrom shinyWidgets virtualSelectInput
 #' @importFrom bslib navset_card_pill nav_panel
 summary_report_ui <- function(id) {
@@ -79,6 +79,7 @@ summary_report_ui <- function(id) {
   )
 }
 
+#' @param data_r,results_r,data_sf_r,polygon_r `reactive` functions returning data used to generate reports.
 #' @export
 #'
 #' @rdname module-report
