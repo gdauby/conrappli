@@ -37,7 +37,7 @@ data_import_polygon_ui <- function(id) {
     ),
     uiOutput(outputId = ns("feedback")),
     uiOutput(outputId = ns("alert_max_obs")),
-    reactable::reactableOutput(outputId = ns("table")),
+    reactable::reactableOutput(outputId = ns("table"), height = 500),
     tags$br(),
     tags$br()
   )
@@ -111,8 +111,9 @@ data_import_polygon_server <- function(id) {
           data = head(dataset_rv$value, 1000),
           compact = TRUE,
           bordered = TRUE,
-          defaultPageSize = 10,
+          pagination = FALSE,
           searchable = TRUE,
+          resizable = TRUE,
           defaultColDef = reactable::colDef(
             style = list(whiteSpace = "nowrap", textOverflow = "ellipsis")
           )

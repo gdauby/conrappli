@@ -4,7 +4,15 @@
 data_2_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Import a shapefile",
+    title = "Choice of the site",
+
+    tags$p(
+      "Define your study area either by:",
+      tags$ul(
+        tags$li("Drawing a polygon on the map (\"Draw on map\" tab and drawing tools on the right of the map to define a polygon)"),
+        tags$li("By importing a shapefile from your computer (\"Read a file\" tab, all shapefile files must be loaded)")
+      )
+    ),
 
     data_filterout_ui(id = ns("filterout")),
 

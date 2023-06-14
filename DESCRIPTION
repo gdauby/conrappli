@@ -34,7 +34,7 @@ Imports:
     measurements,
     phosphoricons,
     pkgload,
-    reactable,
+    reactable (>= 0.4.4),
     rgbif,
     rmarkdown,
     RPostgres,
