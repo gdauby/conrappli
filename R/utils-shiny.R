@@ -3,7 +3,7 @@
 #' @importFrom htmltools tags
 template_ui <- function(..., title = NULL) {
   tags$div(
-    class = " row mb-5",
+    class = " row my-5",
     tags$div(
       class = "col-xl-10 offset-xl-1",
 
@@ -62,7 +62,7 @@ navigation <- function(inputId, choices, title) {
   tags$div(
     class = "mt-n1 mb-1 pb-1 border-bottom border-light-subtle",
     tags$div(
-      class = "container-fluid",
+      class = "container-fluid p-3",
       tags$button(
         class = "btn btn-sm btn-outline-primary",
         type = "button",
@@ -76,7 +76,7 @@ navigation <- function(inputId, choices, title) {
 
 
       tags$div(
-        class = "float-right pt-2",
+        class = "float-right mt-n1",
         tags$label(
           style = css(verticalAlign = "top", marginTop = "0.5rem"),
           "Language:",

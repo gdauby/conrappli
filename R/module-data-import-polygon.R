@@ -14,13 +14,13 @@
 #'
 #' @importFrom shiny NS fluidRow column checkboxInput
 #' @importFrom htmltools tagList
-#' @importFrom bslib navs_hidden nav_content
+#' @importFrom bslib navset_hidden nav_panel
 data_import_polygon_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    bslib::navs_pill(
+    bslib::navset_pill(
       header = tags$br(),
-      bslib::nav(
+      bslib::nav_panel(
         title = "Draw on map",
         tags$h5("Draw polygon", class = "mt-0"),
         tags$p(
@@ -30,7 +30,7 @@ data_import_polygon_ui <- function(id) {
         ),
         draw_poly_ui(id = ns("draw"))
       ),
-      bslib::nav(
+      bslib::nav_panel(
         title = "Read a file",
         read_poly_ui(id = ns("read"))
       )

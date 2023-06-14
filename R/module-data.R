@@ -17,7 +17,7 @@
 #'
 #' @importFrom shiny NS uiOutput
 #' @importFrom htmltools tagList tags
-#' @importFrom bslib navs_pill nav nav_spacer
+#' @importFrom bslib navset_pill nav nav_spacer
 #' @importFrom phosphoricons ph_i html_dependency_phosphor
 data_ui <- function(id) {
   ns <- NS(id)
@@ -38,24 +38,24 @@ data_ui <- function(id) {
       onclick = "$(\"a[data-value='mapping']\").click();"
     ),
 
-    navs_pill(
+    navset_pill(
       id = ns("navs"),
       header = tags$hr(),
-      nav(
+      nav_panel(
         title = "Import dataset",
         value = "import_dataset",
         icon = ph_i("file-arrow-up", style = "vertical-align: -0.3em;"),
         data_import_ui(ns("import")),
         uiOutput(outputId = ns("btn_nav_import_dataset"))
       ),
-      nav(
+      nav_panel(
         title = "Variable selection",
         value = "variable_selection",
         icon = ph_i("table", style = "vertical-align: -0.3em;"),
         data_variable_ui(ns("variable")),
         uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
-      nav(
+      nav_panel(
         title = "Data validation",
         value = "data_validation",
         icon = ph_i("check", style = "vertical-align: -0.3em;"),
@@ -68,7 +68,7 @@ data_ui <- function(id) {
         uiOutput(outputId = ns("btn_nav_data_validation"))
       ),
       nav_spacer(),
-      nav(
+      nav_panel(
         title = "Data",
         value = "data",
         icon = ph_i("database", style = "vertical-align: -0.3em;"),

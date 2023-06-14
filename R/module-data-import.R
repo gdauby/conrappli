@@ -14,7 +14,7 @@
 #'
 #' @importFrom shiny NS fluidRow column
 #' @importFrom htmltools tagList
-#' @importFrom bslib navs_hidden nav_content
+#' @importFrom bslib navset_hidden nav_panel_hidden
 data_import_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -42,9 +42,9 @@ data_import_ui <- function(id) {
       ),
       column(
         width = 10,
-        bslib::navs_hidden(
+        bslib::navset_hidden(
           id = ns("navs_type_import"),
-          bslib::nav_content(
+          bslib::nav_panel_hidden(
             value = "gbif",
             tags$h3("Import data from GBIF", class = "mt-0"),
             tags$div(
@@ -52,56 +52,56 @@ data_import_ui <- function(id) {
               "Search for", tags$a("Global Biodiversity Information Facility (GBIF)", href = "https://www.gbif.org/fr/", target = "_blank"),
               "occurrences from taxonomic names, either import a CSV file containing those names or paste a list of names to search for."
             ),
-            bslib::navs_pill_card(
+            bslib::navset_card_pill(
               header = tags$br(),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From file",
                 data_import_gbif_ui(id = ns("gbif_file"), from = "file")
               ),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From copy/paste",
                 data_import_gbif_ui(id = ns("gbif_copypaste"), from = "copypaste")
               )
             )
           ),
-          bslib::nav_content(
+          bslib::nav_panel_hidden(
             value = "rainbio",
             tags$h3("Import data from Rainbio database", class = "mt-0"),
             tags$div(
               class = "mb-1",
               "Extract from the Rainbio database of all records from a species list, either import a CSV file containing those species names or paste a list of names to search for."
             ),
-            bslib::navs_pill_card(
+            bslib::navset_card_pill(
               header = tags$br(),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From file",
                 data_import_rainbio_ui(id = ns("rainbio_file"), from = "file")
               ),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From copy/paste",
                 data_import_rainbio_ui(id = ns("rainbio_copypaste"), from = "copypaste")
               )
             )
           ),
-          bslib::nav_content(
+          bslib::nav_panel_hidden(
             value = "polygon",
             tags$h3("Import data from polygon", class = "mt-0"),
             data_import_polygon_ui(id = ns("polygon"))
           ),
-          bslib::nav_content(
+          bslib::nav_panel_hidden(
             value = "data",
             tags$h3("Import data from a local file", class = "mt-0"),
             tags$div(
               class = "mb-1",
               "Use a ready-to-use dataset, either from an Excel or CSV file, or directly copied and pasted from a spreadsheet."
             ),
-            bslib::navs_pill_card(
+            bslib::navset_card_pill(
               header = tags$br(),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From file",
                 datamods::import_file_ui(id = ns("file"), title = NULL)
               ),
-              bslib::nav(
+              bslib::nav_panel(
                 title = "From copy/paste",
                 datamods::import_copypaste_ui(id = ns("copypaste"), title = NULL)
               )

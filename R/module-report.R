@@ -15,19 +15,20 @@
 #' @importFrom shiny NS fluidRow column actionButton downloadButton uiOutput
 #' @importFrom htmltools tagList
 #' @importFrom shinyWidgets virtualSelectInput
+#' @importFrom bslib navset_card_pill nav_panel
 summary_report_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = "Summary report",
 
     alert_no_data(
-      id = ns("no-data"), 
+      id = ns("no-data"),
       text = "You must perform the criterion b analysis before you can generate the report."
     ),
 
-    bslib::navs_pill_card(
+    bslib::navset_card_pill(
       # title = "Report",
-      nav(
+      nav_panel(
         title = "global",
         fluidRow(
           class = "mb-3",
@@ -45,7 +46,7 @@ summary_report_ui <- function(id) {
         ),
         uiOutput(outputId = ns("report_all_taxa"))
       ),
-      nav(
+      nav_panel(
         title = "by species",
         fluidRow(
           class = "mb-3",
@@ -74,17 +75,17 @@ summary_report_ui <- function(id) {
         uiOutput(outputId = ns("report_taxa"))
       )
     )
-    
+
   )
 }
 
 #' @export
 #'
 #' @rdname module-report
-#' 
+#'
 #' @importFrom shiny moduleServer observeEvent req reactive renderUI downloadHandler includeHTML
-#' @importFrom shinyWidgets execute_safely 
-summary_report_server <- function(id, 
+#' @importFrom shinyWidgets execute_safely
+summary_report_server <- function(id,
                                   data_r = reactive(NULL),
                                   results_r = reactive(NULL),
                                   data_sf_r = reactive(NULL),
@@ -93,9 +94,9 @@ summary_report_server <- function(id,
   moduleServer(
     id = id,
     module = function(input, output, session) {
-      
+
       rv <- reactiveValues()
-      
+
       report_dir <- tempfile(pattern = "ConRAppReport")
       dir.create(report_dir)
       shiny::addResourcePath(prefix = "ConRAppReport", directoryPath = report_dir)
@@ -106,9 +107,9 @@ summary_report_server <- function(id,
           length(results_r()) > 0,
           !is.null(results_r()$results$taxa)
         )
-        
+
         print(results_r()$locations)
-        
+
         species <- results_r()$results$taxa
         shinyWidgets::updateVirtualSelect(
           inputId = "taxa",
@@ -120,16 +121,16 @@ summary_report_server <- function(id,
         shinyjs::removeCssClass(id = "download_all_taxa", class = "disabled")
       })
 
-      
+
       # one taxa ----
-      
+
       output$report_taxa <- renderUI({
         check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         req(input$taxa)
-        
+
         print(results$locations$threat_list)
 
         tmp <- tempfile(tmpdir = report_dir, fileext = ".html")
@@ -180,11 +181,11 @@ summary_report_server <- function(id,
           file.copy(from = rv$species_report, to = file)
         }
       )
-      
-      
-      
+
+
+
       # global ----
-      
+
       output$report_all_taxa <- renderUI({
         check_data_sf_r <<- data_sf_r()
         check_results_r <<- results_r()
@@ -192,10 +193,10 @@ summary_report_server <- function(id,
         check_polygon_r <<- polygon_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
-        
+
         tmp <- tempfile(tmpdir = report_dir, fileext = ".html")
         rv$all_tax_report <- tmp
-        
+
         shinyWidgets::execute_safely({
           rmarkdown::render(
             input =  system.file(package = "conrappli", "reports/all_tax_report.Rmd"),
@@ -232,7 +233,7 @@ summary_report_server <- function(id,
           file.copy(from = rv$all_tax_report, to = file)
         }
       )
-      
+
     }
   )
 }

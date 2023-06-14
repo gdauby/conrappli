@@ -5,7 +5,7 @@
 #' @return An UI definition.
 #' @export
 #'
-#' @importFrom bslib page_fluid nav navs_hidden
+#' @importFrom bslib page_fluid nav_panel navset_hidden
 #' @importFrom datamods i18n
 #'
 #' @seealso
@@ -51,39 +51,39 @@ conr_ui <- function() {
           tags$script(src = "conrappli/js/script.js")
         ),
 
-        navs_hidden(
+        navset_hidden(
           id = "navbar",
-          nav(
+          nav_panel(
             title = "",
             value = "home",
             icon = ph_i("house"),
             home_ui("home")
           ),
-          nav(
+          nav_panel(
             title = "From SHP",
             value = "data_from_shp"
             , data_2_ui("shp")
           ),
-          nav(
+          nav_panel(
             title = "Other options",
             value = "data_other_options"
             , data_ui("data")
           ),
-          nav(
+          nav_panel(
             title = "Mapping",
             value = "mapping"
             , mapping_ui("mapping")
           ),
-          nav(
+          nav_panel(
             title = "Evaluation - Criterion B",
             value = "evaluation_criterion_b"
             , criterion_b_ui("criterion_b")
           ),
-          nav(
+          nav_panel(
             title = "Habitat quality/population decline",
             value = "habitat"
           ),
-          nav(
+          nav_panel(
             title = "Summary report",
             value = "summary",
             summary_report_ui("report")

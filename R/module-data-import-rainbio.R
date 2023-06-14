@@ -15,7 +15,6 @@
 #'
 #' @importFrom shiny NS fluidRow column checkboxInput
 #' @importFrom htmltools tagList
-#' @importFrom bslib navs_hidden nav_content
 data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
   ns <- NS(id)
   from <- match.arg(from)
