@@ -52,6 +52,9 @@ data_ui <- function(id) {
         title = "Variable selection",
         value = "variable_selection",
         icon = ph_i("table", style = "vertical-align: -0.3em;"),
+        tags$p(
+          "Variables are automatically preselected, but you can modify them or add others in the fields by drag and drop."
+        ),
         data_variable_ui(ns("variable")),
         uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
