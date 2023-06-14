@@ -109,7 +109,7 @@ mapping_ui <- function(id) {
         )
       )
     ),
-    
+
     absolutePanel(
       bottom = "20px",
       right = "5px",
@@ -143,9 +143,10 @@ mapping_ui <- function(id) {
 #' @importFrom leaflet renderLeaflet leaflet addTiles leafletProxy clearMarkers addMarkers
 #' @importFrom utils hasName
 #' @importFrom stats setNames
+#' @importFrom grDevices palette
 mapping_server <- function(id,
-                           data_r = reactive(NULL), 
-                           data_latlon_r = reactive(NULL), 
+                           data_r = reactive(NULL),
+                           data_latlon_r = reactive(NULL),
                            trigger_map_r = reactive(FALSE),
                            main_session = shiny::getDefaultReactiveDomain()) {
   moduleServer(
@@ -158,11 +159,11 @@ mapping_server <- function(id,
       rv <- reactiveValues()
       data_rv <- reactiveValues()
       rect_rv <- reactiveValues()
-      
+
       observeEvent(input$go_next, {
         bslib::nav_select(
-          session = main_session, 
-          id = "navbar", 
+          session = main_session,
+          id = "navbar",
           selected = "evaluation_criterion_b"
         )
       })
@@ -386,6 +387,7 @@ mapping_server <- function(id,
               options = leaflet::layersControlOptions(collapsed = FALSE)
             )
           sf::sf_use_s2(FALSE)
+          pals <- palette("Tableau")
           for (i in seq_along(overlap_sf)) {
             overlap_poly <- overlap_sf[[i]]
             pts_contains <- sf::st_contains(x = overlap_poly, y = map_data, sparse = TRUE)
@@ -395,7 +397,7 @@ mapping_server <- function(id,
               leaflet::addPolygons(
                 data = overlap_poly,
                 weight = 1,
-                color = "#088A08",
+                color = pals[i],
                 group = names(overlap_sf)[i]
               ) %>%
               leaflet::hideGroup(names(overlap_sf)[i])
@@ -436,7 +438,7 @@ mapping_server <- function(id,
               maxClusterRadius = 20,
               zoomToBoundsOnClick = FALSE
             )
-          ) %>% 
+          ) %>%
           fit_to_bbox(data = data_map)
       })
 
