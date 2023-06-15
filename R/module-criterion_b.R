@@ -335,9 +335,11 @@ criterion_b_server <- function(id,
           rownames = FALSE,
           bordered = TRUE,
           compact = TRUE,
+          pagination = FALSE,
           language = reactable::reactableLang(
             noData = "No results of criterion b analysis to display"
-          )
+          ),
+          height = 500
         )
       })
 
