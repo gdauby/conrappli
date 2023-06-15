@@ -123,7 +123,7 @@ navigation <- function(inputId, choices, title) {
               FUN = function(i) {
                 tags$button(
                   class = "btn btn-light d-block border-bottom border-top border-light-subtle rounded-0",
-                  if (identical(names(choices)[i], "Home")) {
+                  if (identical(choices[[i]], "home")) {
                     phosphoricons::ph("house")
                   },
                   names(choices)[i],
