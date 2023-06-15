@@ -20,15 +20,22 @@ conr_ui <- function() {
       navigation(
         inputId = "nav",
         choices = setNames(
-          list("home", "data_from_shp", "data_other_options",
-            "mapping", "evaluation_criterion_b", "habitat", "report"),
+          list(
+            "home",
+            "data_from_shp",
+            "data_other_options",
+            "mapping",
+            "evaluation_criterion_b", 
+            # "habitat", 
+            "summary_report"
+          ),
           c(
             i18n("Home"),
             i18n("Import data from SHP"),
             i18n("Import data from other sources"),
             i18n("Mapping"),
             i18n("Evaluation - Criterion B"),
-            i18n("Habitat quality/population decline"),
+            # i18n("Habitat quality/population decline"),
             i18n("Summary report")
           )
         ),
@@ -85,7 +92,7 @@ conr_ui <- function() {
           ),
           nav_panel(
             title = "Summary report",
-            value = "summary",
+            value = "summary_report",
             summary_report_ui("report")
           )
         )

@@ -123,6 +123,9 @@ navigation <- function(inputId, choices, title) {
               FUN = function(i) {
                 tags$button(
                   class = "btn btn-light d-block border-bottom border-top border-light-subtle rounded-0",
+                  if (identical(names(choices)[i], "Home")) {
+                    phosphoricons::ph("house")
+                  },
                   names(choices)[i],
                   onclick = sprintf(
                     "Shiny.setInputValue('%s', '%s', {priority: 'event'})",
