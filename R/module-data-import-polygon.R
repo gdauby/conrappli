@@ -80,10 +80,13 @@ data_import_polygon_server <- function(id) {
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)
+          nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
           shinyWidgets::alert(
             status = "success",
             ph("check"),
-            format(n, big.mark = ","), "successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+            format(nbe_esp, big.mark = ","), "species",
+            ph("check"),
+            format(n, big.mark = ","), "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
         }
       })

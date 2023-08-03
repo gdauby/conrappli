@@ -77,12 +77,14 @@ data_2_server <- function(id) {
       observeEvent(polygon_read_r$value(), dataset_rv$value <- polygon_read_r$value())
       observeEvent(polygon_read_r$poly(), dataset_rv$poly <- polygon_read_r$poly())
 
-
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)
+          nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
           shinyWidgets::alert(
             status = "success",
+            ph("check"),
+            format(nbe_esp, big.mark = ","), "species",
             ph("check"),
             format(n, big.mark = ","), "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
           )
