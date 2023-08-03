@@ -41,6 +41,8 @@ conr_server <- function() {
     })
     observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
     observeEvent(data_lr$data_latlon(), data_rv$latlon <- data_lr$data_latlon())
+    
+    observeEvent(shp_lr$data_latlon(), data_rv$latlon <- shp_lr$data_latlon())
 
     mapping_l <- mapping_server(
       id = "mapping",
