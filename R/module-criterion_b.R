@@ -248,7 +248,6 @@ criterion_b_server <- function(id,
             nbe_rep = input$rep_rast
           )
 
-          print(locations$locations)
 
           shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
           categories <- cat_criterion_b(
@@ -303,8 +302,11 @@ criterion_b_server <- function(id,
             dplyr::mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>%
             dplyr::mutate(category = replace(category, category == "LC or NT", "LC")) %>%
             dplyr::mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
-
-
+          
+          if (any(names(results) == "protected"))
+            results <- 
+            results %>% 
+            dplyr::relocate(protected, .before = pair_unique_coordinates)
 
           shinyjs::removeCssClass(id = "download", class = "disabled")
           shinyjs::removeCssClass(id = "go_report", class = "disabled")
@@ -330,6 +332,22 @@ criterion_b_server <- function(id,
 
       output$results <- reactable::renderReactable({
         req(rv$results)
+        
+        col_defs <- list(
+          EOO = reactable::colDef(name = i18n("Extent of occurence")),
+          AOO = reactable::colDef(name = "Area of occupancy"),
+          locations = reactable::colDef(name = "Infered number of location"),
+          category = reactable::colDef(name = "IUCN preliminary assessment"),
+          pair_unique_coordinates = reactable::colDef(name = "Number of unique occurences"),
+          range_restricted = reactable::colDef(name = "true if taxon is range-restricted"),
+          cat_codes = reactable::colDef(name = "IUCN code of assessment"),
+          issue_aoo = reactable::colDef(name = "Potential issue in AOO estimation"),
+          issue_eoo = reactable::colDef(name = "Potential issue in EOO estimation"),
+          main_threat = reactable::colDef(name = "Main threat identified")
+        )
+        
+        col_defs <- col_defs[names(col_defs) %in% names(rv$results)]
+        
         reactable::reactable(
           data = rv$results,
           rownames = FALSE,
@@ -339,8 +357,8 @@ criterion_b_server <- function(id,
           language = reactable::reactableLang(
             noData = "No results of criterion b analysis to display"
           ),
-          height = 500
-        )
+          height = 500,
+          columns = col_defs)
       })
 
       results_r <- eventReactive(input$go_report, {
