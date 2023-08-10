@@ -6,6 +6,7 @@
 #' @export
 #'
 #' @importFrom shiny reactive reactiveValuesToList
+#' @importFrom bslib sidebar_toggle nav_select
 #'
 #' @seealso
 #'  * [conr_ui()] for UI part.
@@ -14,12 +15,15 @@
 conr_server <- function() {
   function(input, output, session) {
 
-    observeEvent(input$nav, {
-      bslib::nav_select(id = "navbar", selected = input$nav)
+    observeEvent(input$navigation, {
+      bslib::nav_select(id = "navbar", selected = input$navigation)
+    })
+    observeEvent(input$toggle_sidebar, {
+      bslib::sidebar_toggle(id = "sidebar")
     })
 
-    observeEvent(input$nav_lang, {
-      if (input$nav_lang == "fr") {
+    observeEvent(input$app_lang, {
+      if (input$app_lang == "fr") {
         datamods::set_i18n("fr", packages = c("conrappli", "datamods"))
       } else {
         datamods::set_i18n(NULL, packages = c("conrappli", "datamods"))

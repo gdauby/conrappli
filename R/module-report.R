@@ -126,8 +126,8 @@ summary_report_server <- function(id,
       # one taxa ----
 
       output$report_taxa <- renderUI({
-        check_data_sf_r <<- data_sf_r()
-        check_results_r <<- results_r()
+        # check_data_sf_r <<- data_sf_r()
+        # check_results_r <<- results_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
         req(input$taxa)
@@ -188,10 +188,10 @@ summary_report_server <- function(id,
       # global ----
 
       output$report_all_taxa <- renderUI({
-        check_data_sf_r <<- data_sf_r()
-        check_results_r <<- results_r()
-        check_data_r <<- data_r()
-        check_polygon_r <<- polygon_r()
+        # check_data_sf_r <<- data_sf_r()
+        # check_results_r <<- results_r()
+        # check_data_r <<- data_r()
+        # check_polygon_r <<- polygon_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
 

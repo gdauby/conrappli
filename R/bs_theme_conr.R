@@ -22,10 +22,11 @@ bs_theme_conr <- function() {
       ".nav-hidden {height: 0;}",
       ".navbar { @extend .border-bottom }",
       ".navbar { @extend .shadow }",
+      ".nav-item.active { @extend .border-0 }"
       # ".navbar { @extend .text-primary }",
       # ".navbar>.nav-link.active { @extend .text-primary }",
-      ".nav-link.active { @extend .border-bottom }",
-      ".nav-link.active { @extend .border-primary }"
+      # ".nav-link.active { @extend .border-bottom }",
+      # ".nav-link.active { @extend .border-primary }"
     )
   )
 }
