@@ -36,7 +36,7 @@ alert_no_data <- function(id, text = "You need to import data and select variabl
   tags$div(
     style = htmltools::css(
       position = "fixed",
-      top = "56px",
+      top = "76px",
       left = "0",
       right = "0",
       bottom = "0",
@@ -48,7 +48,7 @@ alert_no_data <- function(id, text = "You need to import data and select variabl
     id = id,
     shinyWidgets::alert(
       status = "info",
-      class = "mt-5",
+      class = "mt-5 text-center",
       ph("info"), text
     )
   )

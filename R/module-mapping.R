@@ -24,7 +24,7 @@ mapping_ui <- function(id) {
     tags$div(
       style = htmltools::css(
         position = "fixed",
-        top = "56px",
+        top = "76px",
         left = "0",
         right = "0",
         bottom = "0",

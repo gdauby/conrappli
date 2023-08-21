@@ -75,7 +75,8 @@ conr_ui <- function() {
           ".swal2-popup {font-size: 1rem !important;}",
           ".badge-dragula {font-size: 1rem !important;}",
           ".container-drag-source {border-style: solid !important; border-color: #9b9b9b !important;}",
-          ".box-dad {border-color: #9b9b9b !important; margin: 1px !important;}"
+          ".box-dad {border-color: #9b9b9b !important; margin: 1px !important;}",
+          ".sidebar { z-index: 101; }"
         ),
         tags$script(src = "conrappli/js/script.js"),
         tags$style(

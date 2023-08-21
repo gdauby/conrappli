@@ -7,6 +7,7 @@
 #'
 #' @importFrom shiny reactive reactiveValuesToList
 #' @importFrom bslib sidebar_toggle nav_select
+#' @importFrom shinyWidgets updateRadioGroupButtons
 #'
 #' @seealso
 #'  * [conr_ui()] for UI part.
@@ -41,7 +42,8 @@ conr_server <- function() {
     observeEvent(shp_lr$data(), {
       data_rv$x <- shp_lr$data()
       data_rv$polygon <- shp_lr$poly()
-      bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
+      # bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
+      updateRadioGroupButtons(session = session, inputId = "navigation", selected = "evaluation_criterion_b")
     })
     observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
     observeEvent(data_lr$data_latlon(), data_rv$latlon <- data_lr$data_latlon())
@@ -82,7 +84,8 @@ conr_server <- function() {
     )
 
     observeEvent(criterion_b(), {
-      bslib::nav_select(id = "navbar", selected = "summary")
+      # bslib::nav_select(id = "navbar", selected = "summary")
+      updateRadioGroupButtons(session = session, inputId = "navigation", selected = "summary")
     })
 
     summary_report_server(
