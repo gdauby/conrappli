@@ -429,6 +429,7 @@ mapping_server <- function(id,
         }
         leaflet::leafletProxy(mapId = "map", data = data_map) %>%
           leaflet::clearMarkers() %>%
+          leaflet::clearMarkerClusters() %>%
           leaflet::addCircleMarkers(
             popup = data_map %>%
               sf::st_drop_geometry() %>%
