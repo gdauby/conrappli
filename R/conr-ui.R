@@ -1,6 +1,7 @@
 
 #' UI - ConR user interface
 #'
+#' @param lang Language to be used in the application : english ("en") or french ("fr").
 #'
 #' @return An UI definition.
 #' @export
@@ -17,9 +18,13 @@
 #'  * [conr_server()] for server part.
 #'  * [launch()] to launch application.
 #'
-conr_ui <- function() {
+conr_ui <- function(lang = c("en", "fr")) {
+  lang <- match.arg(lang)
+  if (lang == "en")
+    lang <- NULL
+  datamods::set_i18n(lang, packages = c("conrappli", "datamods"))
   function(request) {
-    
+
     page_navbar(
       title = tagList(
         actionButton(
@@ -49,8 +54,8 @@ conr_ui <- function() {
               "data_from_shp",
               "data_other_options",
               "mapping",
-              "evaluation_criterion_b", 
-              # "habitat", 
+              "evaluation_criterion_b",
+              # "habitat",
               "summary_report"
             ),
             c(
@@ -85,7 +90,7 @@ conr_ui <- function() {
           ".btn-check:checked+.btn.btn-navs { border-left: 5px solid #088A08; background: #E6E6E6; }"
         )
       ),
-      
+
       nav_panel_hidden(
         value = "home",
         # icon = ph_i("house"),
@@ -126,6 +131,7 @@ conr_ui <- function() {
             inputId = "app_lang",
             label = NULL,
             choices = c("en", "fr"),
+            selected = lang,
             width = "80px"
           ),
           style = css(display = "inline-block"),
