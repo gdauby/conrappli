@@ -11,3 +11,5 @@ label,translation
 "Identify the presence of threatened (extinction risk status published on the IUCN Red List; see ","Identifier la présence d'espèces menacées (statut de risque d'extinction publié sur la liste rouge de l'UICN ; voir "
 ") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice.",") ou potentiellement menacées (statut préliminaire de risque d'extinction) sur un site de votre choix."
 "To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map.","Pour ce faire, vous avez le choix entre importer un fichier de forme de votre zone d'étude ou dessiner un polygone sur une carte."
+"Identify potentially or likely threatened plant species at a site (Tropical Africa only)","Identifier les espèces de plantes potentiellement ou très probablement menacées dans une zone définie (Afrique tropicale seulement"
+"Extent of occurence (EOO)","Etendue des occurrences"

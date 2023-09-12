@@ -334,16 +334,22 @@ criterion_b_server <- function(id,
         req(rv$results)
         
         col_defs <- list(
-          EOO = reactable::colDef(name = i18n("Extent of occurence")),
-          AOO = reactable::colDef(name = "Area of occupancy"),
-          locations = reactable::colDef(name = "Infered number of location"),
-          category = reactable::colDef(name = "IUCN preliminary assessment"),
+          EOO = reactable::colDef(name = i18n("Extent of occurence (EOO)")),
+          AOO = reactable::colDef(name = "Area of occupancy (AOO)"),
+          locations = reactable::colDef(name = "Estimated number of location"),
+          category = reactable::colDef(name = "IUCN preliminary category"),
           pair_unique_coordinates = reactable::colDef(name = "Number of unique occurences"),
-          range_restricted = reactable::colDef(name = "true if taxon is range-restricted"),
+          range_restricted = reactable::colDef(name = "True if taxon is range-restricted"),
           cat_codes = reactable::colDef(name = "IUCN code of assessment"),
           issue_aoo = reactable::colDef(name = "Potential issue in AOO estimation"),
           issue_eoo = reactable::colDef(name = "Potential issue in EOO estimation"),
-          main_threat = reactable::colDef(name = "Main threat identified")
+          main_threat = reactable::colDef(name = "Main threat identified"),
+          mining = reactable::colDef(name = "Number of location threatened by mining"),
+          cities = reactable::colDef(name = "Number of location threatened by urban areas"),
+          agroindustry = reactable::colDef(name = "Number of location threatened by agroindustry"),
+          logging = reactable::colDef(name = "Number of location threatened by industrial logging"),
+          cropland = reactable::colDef(name = "Number of location threatened by small-scale agriculture"),
+          protected = reactable::colDef(name = "Number of location in protected areas")
         )
         
         col_defs <- col_defs[names(col_defs) %in% names(rv$results)]

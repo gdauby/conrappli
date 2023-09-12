@@ -26,7 +26,7 @@ home_ui <- function(id) {
           actionButton(
             inputId = ns("start_shp"),
             label = tagList(
-              "Identify potentially or likely threatened plant species at a site (Tropical Africa only)",
+              i18n("Identify potentially or likely threatened plant species at a site (Tropical Africa only)"),
               ph("arrow-circle-right")
             ),
             class = "btn-outline-primary text-center fs-5 mb-3 d-block",

@@ -108,7 +108,7 @@ reactable::reactable(
   highlight = TRUE,
   searchable = TRUE,
   pagination = FALSE,
-  height = 1500
+  height = 600
 )
 
 
@@ -359,8 +359,8 @@ if (!is.null(params$threat_sig)) {
   if (!is.null(params$polygon_rv)) {
     crop_poly <- lapply(params$threat_sig,
                         function(x)
-                          suppressWarnings(st_crop(x = x, y = st_bbox(
-                            st_buffer(merged_data_sf_proj_filtered_threat, 2)
+                          suppressWarnings(sf::st_crop(x = x, y = sf::st_bbox(
+                            sf::st_buffer(merged_data_sf_proj_filtered_threat, 2)
                           ))))
   } else {
     crop_poly <- params$threat_sig
