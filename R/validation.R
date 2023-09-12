@@ -26,10 +26,18 @@ prepare_data_validate <- function(data,
   data <- bdc::bdc_coordinates_empty(data, lat = lat, lon = lon)
   data <- bdc::bdc_scientificName_empty(data, sci_names = sci_names)
   if (hasName(data, ".__year")) {
+    data <-
+      data %>%
+      mutate(.__year = as.numeric(.__year)) %>%
+      mutate(.__year = replace(.__year,
+                                 .__year < 1700 |
+                                   .__year > as.numeric(format(
+                                     as.Date(Sys.Date(),
+                                             format = "%d/%m/%Y"), "%Y"
+                                   )), NA))
     data <- dplyr::mutate(
       data,
-      .__year = as.numeric(.__year),
-      .valid_year = !is.na(.__year) & .__year >= 1700
+      .valid_year = TRUE
     )
   } else {
     data <- dplyr::mutate(

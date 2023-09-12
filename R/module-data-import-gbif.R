@@ -122,7 +122,7 @@ data_import_gbif_server <- function(id) {
       species_names_r <- reactive({
         data <- req(species_rv$names, nrow(species_rv$names) > 0)
         if (isTRUE(input$exact)) {
-          data <- dplyr::filter(data, matchtype == "EXACT" & status == "ACCEPTED")
+          data <- dplyr::filter(data, matchtype == "EXACT") %>% filter(status == "ACCEPTED" | status == "SYNONYM")
         }
         data
       })

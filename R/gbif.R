@@ -27,8 +27,9 @@ search_species_info <- function(species_name, match_type = c("exact", "confidenc
     return(infos)
   infos <- filter(infos, kingdom == "Plantae")
   infos <- as_tibble(infos)
-  infos_exact <- filter(infos, matchtype == "EXACT" & status == "ACCEPTED")
-  infos_conf <- filter(infos, matchtype != "EXACT" & status == "ACCEPTED" & confidence > confidence_level)
+  infos_exact <- filter(infos, matchtype == "EXACT") %>% filter(status == "ACCEPTED" | status == "SYNONYM")
+  infos_conf <- filter(infos, matchtype != "EXACT") %>% filter(status == "ACCEPTED" & confidence > confidence_level |
+                                                               status == "SYNONYM" & confidence > confidence_level)
 
   if (identical(match_type, "exact")) {
     return(infos_exact)
