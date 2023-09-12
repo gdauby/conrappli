@@ -6,6 +6,8 @@
 #' @export
 #'
 #' @importFrom shiny reactive reactiveValuesToList
+#' @importFrom bslib sidebar_toggle nav_select
+#' @importFrom shinyWidgets updateRadioGroupButtons
 #'
 #' @seealso
 #'  * [conr_ui()] for UI part.
@@ -14,12 +16,15 @@
 conr_server <- function() {
   function(input, output, session) {
 
-    observeEvent(input$nav, {
-      bslib::nav_select(id = "navbar", selected = input$nav)
+    observeEvent(input$navigation, {
+      bslib::nav_select(id = "navbar", selected = input$navigation)
+    })
+    observeEvent(input$toggle_sidebar, {
+      bslib::sidebar_toggle(id = "sidebar")
     })
 
-    observeEvent(input$nav_lang, {
-      if (input$nav_lang == "fr") {
+    observeEvent(input$app_lang, {
+      if (input$app_lang == "fr") {
         datamods::set_i18n("fr", packages = c("conrappli", "datamods"))
       } else {
         datamods::set_i18n(NULL, packages = c("conrappli", "datamods"))
@@ -37,11 +42,11 @@ conr_server <- function() {
     observeEvent(shp_lr$data(), {
       data_rv$x <- shp_lr$data()
       data_rv$polygon <- shp_lr$poly()
-      bslib::nav_select(id = "navbar", selected = "evaluation_criterion_b")
+      updateRadioGroupButtons(session = session, inputId = "navigation", selected = "evaluation_criterion_b")
     })
     observeEvent(data_lr$data(), data_rv$x <- data_lr$data())
     observeEvent(data_lr$data_latlon(), data_rv$latlon <- data_lr$data_latlon())
-    
+
     observeEvent(shp_lr$data_latlon(), data_rv$latlon <- shp_lr$data_latlon())
 
     mapping_l <- mapping_server(
@@ -78,7 +83,7 @@ conr_server <- function() {
     )
 
     observeEvent(criterion_b(), {
-      bslib::nav_select(id = "navbar", selected = "summary")
+      updateRadioGroupButtons(session = session, inputId = "navigation", selected = "summary_report")
     })
 
     summary_report_server(

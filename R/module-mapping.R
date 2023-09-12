@@ -24,7 +24,7 @@ mapping_ui <- function(id) {
     tags$div(
       style = htmltools::css(
         position = "fixed",
-        top = "56px",
+        top = "76px",
         left = "0",
         right = "0",
         bottom = "0",
@@ -220,7 +220,7 @@ mapping_server <- function(id,
           )
           shinybusy::remove_modal_spinner()
         }
-        check_rv_ammpping <<- reactiveValuesToList(rv)
+        # check_rv_ammpping <<- reactiveValuesToList(rv)
       })
 
       observeEvent(input$spatial_data_select, {
@@ -268,7 +268,7 @@ mapping_server <- function(id,
         }
         # check_datamap <<- datamap
         pts_sf <- sf::st_as_sf(datamap, coords = c(".__longitude", ".__latitude"), crs = 4326)
-        check_pts_sf <<- pts_sf
+        # check_pts_sf <<- pts_sf
         data_rv$map <- pts_sf
         returned_rv$x <- NULL
       })
@@ -429,6 +429,7 @@ mapping_server <- function(id,
         }
         leaflet::leafletProxy(mapId = "map", data = data_map) %>%
           leaflet::clearMarkers() %>%
+          leaflet::clearMarkerClusters() %>%
           leaflet::addCircleMarkers(
             popup = data_map %>%
               sf::st_drop_geometry() %>%
@@ -490,7 +491,7 @@ mapping_server <- function(id,
         rect_rv$x[[paste0("rect", rect$properties$edit_id)]] <- NULL
       })
       output$test <- shiny::renderPrint({
-        rectangles <<- reactiveValuesToList(rect_rv)$x
+        # rectangles <<- reactiveValuesToList(rect_rv)$x
         length(rectangles)
       })
 

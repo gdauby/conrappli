@@ -24,6 +24,7 @@ utils::globalVariables(c(
   "tax_rank02", "tax_sp_level", "tax_submitted", "tax_tax",
   "bbox", "bbox_sf", "table_name", "type", "description", "reference",
   "category", "pair_unique_coordinates", "EOO", "priority",
-  "tax", "taxa"
+  "tax", "taxa",
+  "protected"
 ))
 

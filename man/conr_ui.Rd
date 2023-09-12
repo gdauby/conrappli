@@ -4,7 +4,10 @@
 \alias{conr_ui}
 \title{UI - ConR user interface}
 \usage{
-conr_ui()
+conr_ui(lang = c("en", "fr"))
+}
+\arguments{
+\item{lang}{Language to be used in the application : english ("en") or french ("fr").}
 }
 \value{
 An UI definition.

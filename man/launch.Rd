@@ -4,7 +4,10 @@
 \alias{launch}
 \title{Launch ConR application}
 \usage{
-launch()
+launch(lang = c("en", "fr"))
+}
+\arguments{
+\item{lang}{Language to be used in the application : english ("en") or french ("fr").}
 }
 \value{
 A \code{\link[shiny:shinyApp]{shiny::shinyApp()}} object.
