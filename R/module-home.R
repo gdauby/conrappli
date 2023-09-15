@@ -37,14 +37,14 @@ home_ui <- function(id) {
           class = "fs-5 mt-5",
           tags$ol(
             tags$ol(
-              "Obtain information on the distribution of Gabon's tree species and endangered species in particular."
+              i18n("Obtain information on the distribution of Gabon's threatened plant species.")
             )
           )
         ),
         actionButton(
           inputId = ns("start_mod2"),
           label = tagList(
-            "Get information on (threatened) tree species in Gabon (not yet available)",
+            i18n("Get information on (threatened) plant species in Gabon (not yet available)"),
             ph("arrow-circle-right")
           ),
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",
@@ -54,9 +54,9 @@ home_ui <- function(id) {
           class = "fs-5 mt-5",
           tags$ol(
             tags$ol(
-              "Obtain the published extinction risk status on the IUCN Red List (if it exists) of one or more species and define",
-              "a preliminary extinction risk status according to criterion B (geographic range) from the IUCN Red List based on",
-              "the most recent distribution data. This can be done from your own distribution data or by getting distribution data",
+              i18n("Obtain the published extinction risk status on the IUCN Red List (if it exists) of one or more species and define"),
+              i18n("a preliminary extinction risk status according to criterion B (geographic range) from the IUCN Red List based on"),
+              i18n("the most recent distribution data. This can be done from your own distribution data or by getting distribution data"),
               "from different databases (GBIF for all types of taxa or Rainbio and a database of Central African forest plots and transects for plants of tropical Africa."
             )
           )
@@ -64,7 +64,7 @@ home_ui <- function(id) {
         actionButton(
           inputId = ns("start_data"),
           label = tagList(
-            "Conduct a preliminary multi-species assessment of extinction risk under Criterion B",
+            i18n("Conduct a preliminary multi-species assessment of extinction risk under Criterion B"),
             ph("arrow-circle-right")
           ),
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",
@@ -76,7 +76,7 @@ home_ui <- function(id) {
         tags$br(),
 
         tags$p(
-          "The development of this application has been funded by the",
+          i18n("The development of this application has been funded by the"),
           tags$a(
             class = "text-reset",
             "Fondation Franklinia:",
@@ -103,7 +103,7 @@ home_ui <- function(id) {
         tags$br(),
         tags$br(),
 
-        tags$p("This is a collaborative work between several institutions:"),
+        tags$p(i18n("This is a collaborative work between several institutions:")),
         tags$br(),
 
         fluidRow(

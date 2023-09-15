@@ -204,7 +204,7 @@ criterion_b_server <- function(id,
         shinybusy::show_modal_spinner(
           spin = "half-circle",
           color = "#088A08",
-          text = "Launching calculation"
+          text = i18n("Launching calculation")
         )
 
         shinyWidgets::execute_safely({
@@ -223,14 +223,14 @@ criterion_b_server <- function(id,
 
           # browser()
 
-          shinybusy::update_modal_spinner("Extent of Occurrences multi-taxa computation")
+          shinybusy::update_modal_spinner(i18n("Extent of Occurrences multi-taxa computation"))
           eoo_res <- EOO.computing(
             XY = data,
             mode = input$mode_eoo,
             export_shp = TRUE
           )
 
-          shinybusy::update_modal_spinner("Area of occupancy computation")
+          shinybusy::update_modal_spinner(i18n("Area of occupancy computation"))
           aoo_res <- AOO.computing(
             XY = data,
             Cell_size_AOO = input$aoo_size,
@@ -238,7 +238,7 @@ criterion_b_server <- function(id,
             export_shp = TRUE
           )
 
-          shinybusy::update_modal_spinner("Number of locations computation")
+          shinybusy::update_modal_spinner(i18n("Number of locations computation"))
           locations <- locations.comp(
             XY = data,
             Cell_size_locations = input$locations_size,
@@ -249,7 +249,7 @@ criterion_b_server <- function(id,
           )
 
 
-          shinybusy::update_modal_spinner("Categorize taxa according to IUCN criterion B")
+          shinybusy::update_modal_spinner(i18n("Categorize taxa according to IUCN criterion B"))
           categories <- cat_criterion_b(
             EOO = eoo_res$results$eoo,
             AOO = aoo_res$AOO$aoo,
@@ -335,21 +335,21 @@ criterion_b_server <- function(id,
         
         col_defs <- list(
           EOO = reactable::colDef(name = i18n("Extent of occurence (EOO)")),
-          AOO = reactable::colDef(name = "Area of occupancy (AOO)"),
-          locations = reactable::colDef(name = "Estimated number of location"),
-          category = reactable::colDef(name = "IUCN preliminary category"),
+          AOO = reactable::colDef(name = i18n("Area of occupancy (AOO)")),
+          locations = reactable::colDef(name = i18n("Estimated number of location")),
+          category = reactable::colDef(name = i18n("IUCN preliminary category")),
           pair_unique_coordinates = reactable::colDef(name = "Number of unique occurences"),
-          range_restricted = reactable::colDef(name = "True if taxon is range-restricted"),
-          cat_codes = reactable::colDef(name = "IUCN code of assessment"),
-          issue_aoo = reactable::colDef(name = "Potential issue in AOO estimation"),
-          issue_eoo = reactable::colDef(name = "Potential issue in EOO estimation"),
-          main_threat = reactable::colDef(name = "Main threat identified"),
-          mining = reactable::colDef(name = "Number of location threatened by mining"),
+          range_restricted = reactable::colDef(name = i18n("True if taxon is range-restricted")),
+          cat_codes = reactable::colDef(name = i18n("IUCN code of assessment")),
+          issue_aoo = reactable::colDef(name = i18n("Potential issue in AOO estimation")),
+          issue_eoo = reactable::colDef(name = i18n("Potential issue in EOO estimation")),
+          main_threat = reactable::colDef(name = i18n("Main threat identified")),
+          mining = reactable::colDef(name = i18n("Number of location threatened by mining")),
           cities = reactable::colDef(name = "Number of location threatened by urban areas"),
-          agroindustry = reactable::colDef(name = "Number of location threatened by agroindustry"),
-          logging = reactable::colDef(name = "Number of location threatened by industrial logging"),
-          cropland = reactable::colDef(name = "Number of location threatened by small-scale agriculture"),
-          protected = reactable::colDef(name = "Number of location in protected areas")
+          agroindustry = reactable::colDef(name = i18n("Number of location threatened by agroindustry")),
+          logging = reactable::colDef(name = i18n("Number of location threatened by industrial logging")),
+          cropland = reactable::colDef(name = i18n("Number of location threatened by small-scale agriculture")),
+          protected = reactable::colDef(name = i18n("Number of location in protected areas"))
         )
         
         col_defs <- col_defs[names(col_defs) %in% names(rv$results)]
@@ -361,7 +361,7 @@ criterion_b_server <- function(id,
           compact = TRUE,
           pagination = FALSE,
           language = reactable::reactableLang(
-            noData = "No results of criterion b analysis to display"
+            noData = i18n("No results of criterion b analysis to display")
           ),
           height = 500,
           columns = col_defs)

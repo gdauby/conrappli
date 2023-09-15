@@ -19,11 +19,11 @@
 summary_report_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Summary report",
+    title = i18n("Summary report"),
 
     alert_no_data(
       id = ns("no-data"),
-      text = "You must perform the criterion b analysis before you can generate the report."
+      text = i18n("You must perform the criterion b analysis before you can generate the report.")
     ),
 
     bslib::navset_card_pill(
@@ -38,7 +38,7 @@ summary_report_ui <- function(id) {
             tags$label(class = "control-label", HTML("&nbsp;")),
             downloadButton(
               outputId = ns("download_all_taxa"),
-              label = "Download the report",
+              label = i18n("Download the report"),
               class = "disabled",
               style = "width: 100%;"
             )
@@ -47,14 +47,14 @@ summary_report_ui <- function(id) {
         uiOutput(outputId = ns("report_all_taxa"))
       ),
       nav_panel(
-        title = "by species",
+        title = i18n("by species"),
         fluidRow(
           class = "mb-3",
           column(
             width = 4,
             shinyWidgets::virtualSelectInput(
               inputId = ns("taxa"),
-              label = "Select the taxa for which to generate the report:",
+              label = i18n("Select the taxa for which to generate the report:"),
               choices = NULL,
               search = TRUE,
               width = "100%"
@@ -66,7 +66,7 @@ summary_report_ui <- function(id) {
             tags$label(class = "control-label", HTML("&nbsp;")),
             downloadButton(
               outputId = ns("download_taxa"),
-              label = "Download the report",
+              label = i18n("Download the report"),
               class = "disabled",
               style = "width: 100%;"
             )

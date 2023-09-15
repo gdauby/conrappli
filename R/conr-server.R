@@ -34,7 +34,7 @@ conr_server <- function() {
 
     home_server(id = "home", main_session = session)
 
-    data_rv <- reactiveValues(x = NULL, polygon = NULL)
+    data_rv <- reactiveValues(x = NULL, polygon = NULL, latlon = NULL)
 
     shp_lr <- data_2_server(id = "shp")
     data_lr <- data_server(id = "data")
