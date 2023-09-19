@@ -34,8 +34,7 @@ data_ui <- function(id) {
       ),
       class = "btn-outline-primary my-3",
       disabled = "disabled",
-      width = "100%",
-      onclick = "$(\"a[data-value='mapping']\").click();"
+      width = "100%"
     ),
 
     navset_pill(
@@ -95,7 +94,7 @@ data_ui <- function(id) {
 #' @importFrom shiny moduleServer reactive reactiveValues
 #'  observeEvent renderUI actionButton icon
 #' @importFrom bslib nav_select
-data_server <- function(id) {
+data_server <- function(id, main_session = shiny::getDefaultReactiveDomain()) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -103,6 +102,11 @@ data_server <- function(id) {
       ns <- session$ns
 
       rv <- reactiveValues(data = NULL)
+      
+      
+      observeEvent(input$go_next, {
+        updateRadioGroupButtons(session = main_session, inputId = "navigation", selected = "mapping")
+      })
 
 
       # Data Import ----

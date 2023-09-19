@@ -164,11 +164,7 @@ mapping_server <- function(id,
       rect_rv <- reactiveValues()
 
       observeEvent(input$go_next, {
-        bslib::nav_select(
-          session = main_session,
-          id = "navbar",
-          selected = "evaluation_criterion_b"
-        )
+        updateRadioGroupButtons(session = main_session, inputId = "navigation", selected = "evaluation_criterion_b")
       })
 
       observeEvent(input$show_in, {
