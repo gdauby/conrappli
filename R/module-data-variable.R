@@ -19,9 +19,9 @@ data_variable_ui <- function(id) {
   ns <- NS(id)
   tagList(
     tags$h5(
-      "Taxa column selection:",
+      i18n("Taxa column selection:"),
       btn_help(
-        "Select either a column identifying species or fill all other columns to contruct a taxa column.",
+        i18n("Select either a column identifying species or fill all other columns to contruct a taxa column."),
         class = "float-right"
       )
     ),
@@ -29,7 +29,7 @@ data_variable_ui <- function(id) {
       inputId = ns("taxa_cols"),
       label = NULL,
       choices = character(0),
-      sourceLabel = "Available variables",
+      sourceLabel = i18n("Available variables"),
       targetsLabels = taxa_cols("label"),
       targetsIds = taxa_cols("id"),
       ncolGrid = 3,
@@ -38,9 +38,9 @@ data_variable_ui <- function(id) {
     uiOutput(outputId = ns("feedback_sel_taxa")),
 
     tags$h5(
-      "Coordinates and altitude column selection:",
+      i18n("Coordinates and altitude column selection:"),
       btn_help(
-        "Latitude and longitude are required for analyse, altitude and year are optionnal.",
+        i18n("Latitude and longitude are required for analyse, altitude and year are optionnal."),
         class = "float-right"
       )
     ),
@@ -48,7 +48,7 @@ data_variable_ui <- function(id) {
       inputId = ns("other_cols"),
       label = NULL,
       choices = character(0),
-      sourceLabel = "Available variables",
+      sourceLabel = i18n("Available variables"),
       targetsLabels = other_cols("label"),
       targetsIds = other_cols("id"),
       replace = TRUE
@@ -56,9 +56,9 @@ data_variable_ui <- function(id) {
     uiOutput(outputId = ns("feedback_sel_other")),
 
     tags$h5(
-      "Other columns of interest:",
+      i18n("Other columns of interest:"),
       btn_help(
-        "Those columns won't be used in analysis but they will be kept with the data, others columns will be dropped..",
+        i18n("Those columns won't be used in analysis but they will be kept with the data, others columns will be dropped."),
         class = "float-right"
       )
     ),
@@ -66,8 +66,8 @@ data_variable_ui <- function(id) {
       inputId = ns("optionnal_cols"),
       label = NULL,
       choices = character(0),
-      sourceLabel = "Available variables",
-      targetsLabels = "Variables to keep",
+      sourceLabel = i18n("Available variables"),
+      targetsLabels = i18n("Variables to keep"),
       targetsIds = "keep"
     )
   )
@@ -130,7 +130,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         } else {
           shinyWidgets::alert(
             status = "info",
-            ph("info"), "Select either taxa OR others columns."
+            ph("info"), i18n("Select either taxa OR others columns.")
           )
         }
       })
@@ -146,7 +146,7 @@ data_variable_server <- function(id, data_r = reactive(NULL)) {
         } else {
           shinyWidgets::alert(
             status = "info",
-            ph("info"), "Longitude and latitude are required."
+            ph("info"), i18n("Longitude and latitude are required.")
           )
         }
       })

@@ -22,14 +22,14 @@
 data_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Import & validate data",
+    title = i18n("Import & validate data"),
 
     html_dependency_phosphor(),
 
     actionButton(
       inputId = ns("go_next"),
       label = tagList(
-        "You must import a dataset and select variables before proceeding to the next step.",
+        i18n("You must import a dataset and select variables before proceeding to the next step."),
         ph("arrow-circle-right")
       ),
       class = "btn-outline-primary my-3",
@@ -42,43 +42,43 @@ data_ui <- function(id) {
       id = ns("navs"),
       header = tags$hr(),
       nav_panel(
-        title = "Import dataset",
+        title = i18n("Import dataset"),
         value = "import_dataset",
         icon = ph_i("file-arrow-up", style = "vertical-align: -0.3em;"),
         data_import_ui(ns("import")),
         uiOutput(outputId = ns("btn_nav_import_dataset"))
       ),
       nav_panel(
-        title = "Variable selection",
+        title = i18n("Variable selection"),
         value = "variable_selection",
         icon = ph_i("table", style = "vertical-align: -0.3em;"),
         tags$p(
-          "Variables are automatically preselected, but you can modify them or add others in the fields by drag and drop."
+          i18n("Variables are automatically preselected, but you can modify them or add others in the fields by drag and drop.")
         ),
         data_variable_ui(ns("variable")),
         uiOutput(outputId = ns("btn_nav_variable_selection"))
       ),
       nav_panel(
-        title = "Data validation",
+        title = i18n("Data validation"),
         value = "data_validation",
         icon = ph_i("check", style = "vertical-align: -0.3em;"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
-          ph("info"), "You need to import data and select variable."
+          ph("info"), i18n("You need to import data and select variable.")
         ),
         data_validation_ui(ns("validation")),
         uiOutput(outputId = ns("btn_nav_data_validation"))
       ),
       nav_spacer(),
       nav_panel(
-        title = "Data",
+        title = i18n("Data"),
         value = "data",
         icon = ph_i("database", style = "vertical-align: -0.3em;"),
         shinyWidgets::alert(
           status = "info",
           class = "alert-no-data-no-variables",
-          ph("info"), "You need to import data and select variable."
+          ph("info"), i18n("You need to import data and select variable.")
         ),
         data_display_ui(ns("display"))
       )
@@ -115,7 +115,7 @@ data_server <- function(id) {
         if (is.data.frame(data_imported_r())) {
           actionButton(
             inputId = ns("go_to_variable_selection"),
-            label = "Go to variable selection",
+            label = i18n("Go to variable selection"),
             icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
@@ -128,7 +128,7 @@ data_server <- function(id) {
         shinyjs::html(
           id = "go_next",
           html = htmltools::doRenderTags(tagList(
-            "You must import a dataset and select variables before proceeding to the next step.",
+            i18n("You must import a dataset and select variables before proceeding to the next step."),
             ph("arrow-circle-right")
           ))
         )
@@ -147,7 +147,7 @@ data_server <- function(id) {
           shinyjs::hide(selector = ".alert-no-data-no-variables")
           actionButton(
             inputId = ns("go_to_data_validation"),
-            label = "Go to data validation",
+            label = i18n("Go to data validation"),
             icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary"
           )
@@ -176,7 +176,7 @@ data_server <- function(id) {
         if (nrow(validated) > 0) {
           actionButton(
             inputId = ns("go_to_mapping"),
-            label = "Go to mapping",
+            label = i18n("Go to mapping"),
             icon = ph_i("arrow-circle-right"),
             class = "float-end btn-outline-primary",
             onclick = "$(\"a[data-value='mapping']\").click();"
@@ -189,7 +189,7 @@ data_server <- function(id) {
         shinyjs::html(
           id = "go_next",
           html = htmltools::doRenderTags(tagList(
-            "Go to mapping", ph("arrow-circle-right")
+           i18n("Go to mapping"), ph("arrow-circle-right")
           ))
         )
         rv$data <- data_validated_r()

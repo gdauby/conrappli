@@ -50,7 +50,7 @@ mapping_ui <- function(id) {
         id = ns("container-show_in"),
         checkboxInput(
           inputId = ns("show_in"),
-          label = "Show only selected points (IN)",
+          label = i18n("Show only selected points (IN)"),
           value = FALSE
         )
       ),
@@ -73,7 +73,7 @@ mapping_ui <- function(id) {
           width = 6,
           actionButton(
             inputId = ns("cancel"),
-            label = "Restore original data",
+            label = i18n("Restore original data"),
             width = "100%",
             icon = ph_i("arrow-counter-clockwise"),
             class = "btn-outline-primary",
@@ -98,7 +98,7 @@ mapping_ui <- function(id) {
         id = ns("container-spatial-overlap"),
         shinyWidgets::virtualSelectInput(
           inputId = ns("spatial_data_select"),
-          label = "Spatial data to use :",
+          label = i18n("Spatial data to use :"),
           choices = NULL,
           multiple = TRUE,
           hasOptionDescription = TRUE,
@@ -121,7 +121,7 @@ mapping_ui <- function(id) {
       actionButton(
         inputId = ns("go_next"),
         label = tagList(
-          "Go to criterion B",
+          i18n("Go to criterion B"),
           ph("arrow-circle-right", title = "Go to criterion B")
         ),
         class = "btn-outline-primary",
@@ -212,7 +212,7 @@ mapping_server <- function(id,
           shinybusy::show_modal_spinner(
             spin = "half-circle",
             color = "#088A08",
-            text = "Collecting spatial data documenting threats distribution"
+            text = i18n("Collecting spatial data documenting threats distribution")
           )
           rv$all_shp <- collect_shp(
             table_names = check_overlap$shp_tables,
@@ -318,7 +318,7 @@ mapping_server <- function(id,
         }
         shinyWidgets::virtualSelectInput(
           inputId = ns("taxa"),
-          label = "Taxa to display:",
+          label = i18n("Taxa to display:"),
           choices = choices,
           selected = selected,
           search = TRUE,
@@ -330,7 +330,7 @@ mapping_server <- function(id,
         datamap <- req(data_r())
         sliderInput(
           inputId = ns("coord_accuracy"),
-          label = "Accuracy of coordinates:",
+          label = i18n("Accuracy of coordinates:"),
           min = 1,
           max = 8,
           value = c(1, 8),

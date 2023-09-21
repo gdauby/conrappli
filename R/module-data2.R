@@ -4,13 +4,13 @@
 data_2_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Choice of the site",
+    title = i18n("Choice of the site"),
 
     tags$p(
-      "Define your study area either by:",
+      i18n("Define your study area either by:"),
       tags$ul(
-        tags$li("Drawing a polygon on the map (\"Draw on map\" tab and drawing tools on the right of the map to define a polygon)"),
-        tags$li("By importing a shapefile from your computer (\"Read a file\" tab, all shapefile files must be loaded)")
+        tags$li(i18n("Drawing a polygon on the map ('Draw on map' tab and drawing tools on the right of the map to define a polygon)")),
+        tags$li(i18n("By importing a shapefile from your computer ('Read a file' tab, all shapefile files must be loaded)"))
       )
     ),
 
@@ -23,7 +23,7 @@ data_2_ui <- function(id) {
     actionButton(
       inputId = ns("go_next"),
       label = tagList(
-        "Continue to criterion B evaluation",
+        i18n("Continue to criterion B evaluation"),
         ph("arrow-circle-right")
       ),
       class = "btn-primary",
@@ -39,7 +39,7 @@ data_2_ui <- function(id) {
       role = "button",
       `data-bs-toggle` = "collapse",
       `data-bs-target` = paste0("#", ns("variable-container")),
-      "See variable selection",
+      i18n("See variable selection"),
       phosphoricons::ph("caret-down", title = "See variable selection")
     ),
     tags$button(
@@ -47,7 +47,7 @@ data_2_ui <- function(id) {
       role = "button",
       `data-bs-toggle` = "collapse",
       `data-bs-target` = paste0("#", ns("validation-container")),
-      "See data validation",
+      i18n("See data validation"),
       phosphoricons::ph("caret-down", title = "See data validation")
     ),
     tags$div(
@@ -84,9 +84,9 @@ data_2_server <- function(id) {
           shinyWidgets::alert(
             status = "success",
             ph("check"),
-            format(nbe_esp, big.mark = ","), "species",
+            format(nbe_esp, big.mark = ","), i18n("species"),
             ph("check"),
-            format(n, big.mark = ","), "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+            format(n, big.mark = ","), i18n("records successfully downloaded from Rainbio. Max first 1000 lines displayed below.")
           )
         }
       })
