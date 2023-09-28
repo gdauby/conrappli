@@ -367,7 +367,7 @@ mapping_server <- function(id,
             )
           )
       })
-      # outputOptions(outreq(trigger_map_r())put, "map", suspendWhenHidden = FALSE)
+      # outputOptions(output, "map", suspendWhenHidden = FALSE)
 
       observe({
         req(trigger_map_r(), rv$all_shp)
