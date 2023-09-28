@@ -42,9 +42,9 @@ home_ui <- function(id) {
           )
         ),
         actionButton(
-          inputId = ns("start_mod2"),
+          inputId = ns("start_country"),
           label = tagList(
-            i18n("Get information on (threatened) plant species in Gabon (not yet available)"),
+            i18n("Get information on (threatened) plant species in Gabon"),
             ph("arrow-circle-right")
           ),
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",
@@ -155,23 +155,17 @@ home_server <- function(id, main_session) {
     id = id,
     module = function(input, output, session) {
 
-      observeEvent(input$start_shp, {
-        # bslib::nav_select(
-        #   id = "navbar",
-        #   selected = "data_from_shp", 
-        #   session = main_session
-        # )
-        updateRadioGroupButtons(session = main_session, inputId = "navigation", selected = "data_from_shp")
-      })
-
-      observeEvent(input$start_data, {
-        # bslib::nav_select(
-        #   id = "navbar", 
-        #   selected = "data_other_options", 
-        #   session = main_session
-        # )
-        updateRadioGroupButtons(session = main_session, inputId = "navigation", selected = "data_other_options")
-      })
+      go_to <- function(page) {
+        updateRadioGroupButtons(
+          session = main_session,
+          inputId = "navigation",
+          selected = page
+        )
+      }
+      
+      observeEvent(input$start_shp, go_to("data_from_shp"))
+      observeEvent(input$start_country, go_to("habitat"))
+      observeEvent(input$start_data, go_to("data_other_options"))
 
     }
   )

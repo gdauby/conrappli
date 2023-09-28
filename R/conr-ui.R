@@ -55,7 +55,7 @@ conr_ui <- function(lang = c("en", "fr")) {
               "data_other_options",
               "mapping",
               "evaluation_criterion_b",
-              # "habitat",
+              "habitat",
               "summary_report"
             ),
             c(
@@ -64,7 +64,7 @@ conr_ui <- function(lang = c("en", "fr")) {
               i18n("Import data from other sources"),
               i18n("Mapping"),
               i18n("Evaluation - Criterion B"),
-              # i18n("Habitat quality/population decline"),
+              i18n("Habitat quality/population decline"),
               i18n("Summary report")
             )
           ),
@@ -114,6 +114,7 @@ conr_ui <- function(lang = c("en", "fr")) {
       ),
       nav_panel_hidden(
         value = "habitat"
+        , data_country_ui("data_country")
       ),
       nav_panel_hidden(
         value = "summary_report"

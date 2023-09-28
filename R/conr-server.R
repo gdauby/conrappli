@@ -33,6 +33,8 @@ conr_server <- function() {
     }, ignoreInit = TRUE)
 
     home_server(id = "home", main_session = session)
+    
+    data_country_server("data_country")
 
     data_rv <- reactiveValues(x = NULL, polygon = NULL, latlon = NULL)
 

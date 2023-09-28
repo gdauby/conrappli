@@ -15,7 +15,7 @@ data_country_ui <- function(id) {
             inputId = ns("country"),
             label = i18n("Country to explore:"),
             choices = c("Gabon"),
-            selected = "Gabon",
+            selected = character(0),
             search = TRUE,
             width = "100%"
           ),
@@ -85,9 +85,8 @@ data_country_server <- function(id) {
     id,
     function(input, output, session) {
       
-      dataset_rv <- reactiveValues(value = NULL)
-      
-      observeEvent(input$country, {
+      data_r <- reactive({
+        req(input$country)
         shinybusy::show_modal_spinner(
           spin = "half-circle",
           color = "#088A08",
@@ -106,20 +105,19 @@ data_country_server <- function(id) {
           species_name = unique(threat_taxa$accepetedtaxonname)
         )
         keys <- extract_sp$specieskey
-        dataset_rv$value <- retrieve_occ_data(keys)
+        data <- retrieve_occ_data(keys)
         # TEMP
         # Sys.sleep(2)
         # dataset_rv$value <- readRDS("D:\\work\\ConRapp\\conrappli\\dev\\data_country.rds")
         # TEMP
         
         shinybusy::remove_modal_spinner()
+        return(data)
       })
       
       variable_r <- data_variable_server(
         id = "variable",
-        data_r = reactive({
-          req(dataset_rv$value)
-        })
+        data_r = data_r
       )
       
       data_validated_r <- data_validation_server(
@@ -132,7 +130,9 @@ data_country_server <- function(id) {
       
       
       output$map <- leaflet::renderLeaflet({
-        check_data <<- data_validated_r()
+        shiny::validate(
+          shiny::need(input$country, "Please select a country")
+        )
         req(data_validated_r()) %>% 
           draw_map(resolution = input$resolution)
       })
