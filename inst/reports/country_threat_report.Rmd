@@ -1,0 +1,171 @@
+---
+date: '`r invisible( Sys.setlocale("LC_TIME", "C") ); format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+    self_contained: yes
+title: "Report for `r params$country`"
+params:
+  data: ""
+  resolution: ""
+  country: ""
+  type_map: ""
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+create_popup <- function(.data) {
+  template <- glue::glue("<b>{column}:</b>", column = names(.data))
+  template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
+  template <- paste(template, collapse = "")
+  glue::glue_data(.data, template)
+}
+```
+
+
+# Distribution of threatened plant species in _`r params$country`_ 
+
+</br>
+</br>
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+occdata <- params$data
+
+type_map <- params$type_map
+
+occdata_georef <- 
+  occdata %>% 
+  dplyr::filter(!is.na(decimalLongitude),!is.na(decimalLatitude)) %>% ## noms des variables à mettre à jour
+  dplyr::select(key, scientificName, decimalLongitude, decimalLatitude) ## noms des variables à mettre à jour
+
+occdata_georef <- sf::st_as_sf(occdata_georef, 
+                       coords = c("decimalLongitude", "decimalLatitude")) ## noms des variables à mettre à jour
+
+sf::st_crs(occdata_georef) <- 4326
+
+occdata_georef_proj <- 
+  sf::st_transform(occdata_georef, 'EPSG:6933')
+
+```
+
+
+
+```{r lf-production, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+if (params$contry == "Gabon") {
+  
+  bbox_ <- sf::st_sf(1, 
+                  geom = sf::st_geometry(sf::st_polygon(list(matrix(c(8, -4, 15, -4, 15, 3, 8, 3, 8, -4), 
+                                                                ncol = 2, byrow = TRUE)))))
+  sf::st_crs(bbox_) <- 4326
+  bbox_ <- sf::st_transform(bbox_, 'EPSG:6933')
+  
+}
+
+
+if (type_map == "grid") {
+  
+  resolution <- params$resolution
+  
+  grid <-
+    sf::st_make_grid(x = bbox_,
+                     cellsize = resolution)
+  grid <- sf::st_as_sf(grid) %>%
+    dplyr::mutate(id_grid = 1:nrow(.))
+  
+  intersect_grid <-
+    sf::st_intersection(occdata_georef_proj, grid)
+  
+  sampling_cell <-
+    intersect_grid %>%
+    dplyr::group_by(id_grid) %>%
+    dplyr::summarise(nbe_esp = length(unique(scientificName)),
+                     n = length(scientificName)) %>%
+    sf::st_set_geometry(NULL)
+  
+  grid_not_null <-
+    grid %>%
+    dplyr::left_join(sampling_cell) %>%
+    dplyr::filter(!is.na(n))
+  
+  grid_not_null <-
+    sf::st_transform(grid_not_null, 4326)
+  
+  pal <- leaflet::colorNumeric(palette = "Blues",
+                               domain = grid_not_null$nbe_esp)
+  
+  leaflet_map <-
+    leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+    leaflet::invokeMethod(data = NULL,
+                          method = "addZoom",
+                          list(position = "topright")) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+    leaflet::addLayersControl(
+      baseGroups = c("OSM", "Esri", "Open Topo Map"),
+      options = leaflet::layersControlOptions(collapsed = FALSE)
+    ) %>%
+    leaflet::addPolygons(
+      data = grid_not_null,
+      weight = 1,
+      color = ~ pal(nbe_esp),
+      fill =  ~ pal(nbe_esp),
+      popup = paste("Number of species: ", grid_not_null$nbe_esp)
+    )
+  
+}
+
+if (type_map == "Occurences") {
+  
+  intersect_bbox <-
+    sf::st_intersection(occdata_georef_proj, bbox_)
+  
+  intersect_bbox <- sf::st_transform(intersect_bbox, 4326) %>% select(-X1)
+  
+  leaflet_map <-
+    leaflet::leaflet(data = intersect_bbox,
+                     options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+    leaflet::invokeMethod(data = NULL,
+                          method = "addZoom",
+                          list(position = "topright")) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+    leaflet::addCircleMarkers(
+      popup = intersect_bbox %>%
+        sf::st_drop_geometry() %>%
+        dplyr::select(-starts_with(".__")) %>%
+        create_popup() %>%
+        lapply(htmltools::HTML)
+      ,
+      group = "Occurences"
+    )
+  
+}
+
+
+
+
+
+```
+
+
+
+```{r map-leaf, fig.show='asis', echo=FALSE, results='asis'}
+
+leaflet_map
+
+
+```
+
+
+
+

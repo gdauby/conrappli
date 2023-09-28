@@ -227,7 +227,6 @@ if (any(names(params$res_loc) == "threat")) {
         bringToFront = TRUE
       )
     )
-  
 }
 
 
@@ -284,9 +283,6 @@ leaf_map
 
 
 # Occurences data
-
-
-
 
 ```{r react-table, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 reactable::reactable(

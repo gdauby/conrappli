@@ -17,7 +17,7 @@
 criterion_b_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = "Evaluation - Criterion B",
+    title = i18n("Evaluation - Criterion B"),
 
     alert_no_data(id = ns("no-data")),
 
@@ -37,7 +37,7 @@ criterion_b_ui <- function(id) {
           radioButtons(
             inputId = ns("mode_eoo"),
             label = tagList(
-              "EOO mode:",
+              i18n("Method for estimating the EOO:"),
               btn_help(
                 "When spheroid, geodetic coordinates are used and EOO is calculated following great circle distances.
                 When planar, projected coordinates are used and euclidian distances are used."
@@ -49,9 +49,9 @@ criterion_b_ui <- function(id) {
           sliderInput(
             inputId = ns("aoo_size"),
             label = tagList(
-              "AOO grid size:",
+              i18n("AOO grid resolution:"),
               btn_help(
-                "Value indicating the grid size in kilometers used for estimating Area of Occupancy"
+                i18n("Value indicating the grid resolution in kilometers used for estimating the Area of Occupancy")
               )
             ),
             min = 0.1,
@@ -64,9 +64,9 @@ criterion_b_ui <- function(id) {
           sliderInput(
             inputId = ns("rep_rast"),
             label = tagList(
-              "Number of grid replicates with random position:",
+              i18n("Number of grid replicates with random starting position:"),
               btn_help(
-                "Indicate the number of raster with random starting position for estimating the AOO and the number of locations"
+                i18n("Indicate the number of grid with random starting position for estimating the AOO and the number of locations")
               )
             ),
             min = 0,
@@ -79,9 +79,9 @@ criterion_b_ui <- function(id) {
           sliderInput(
             inputId = ns("locations_size"),
             label = tagList(
-              "Locations grid size:",
+              i18n("Locations grid resolution:"),
               btn_help(
-                "Value indicating the grid size in kilometers used for estimating the number of location"
+                i18n("Value indicating the grid resolution in kilometers used for estimating the number of location")
               )
             ),
             min = 0.1,
@@ -101,7 +101,7 @@ criterion_b_ui <- function(id) {
           inputId = ns("launch"),
           label = tagList(
             ph("play"),
-            "Launch Criterion B analysis"
+            i18n("Launch Criterion B analysis")
           ),
           class = "mb-4",
           width = "100%",
@@ -111,7 +111,7 @@ criterion_b_ui <- function(id) {
         tags$div(
           downloadButton(
             outputId = ns("download"),
-            label = "Download results",
+            label = i18n("Download results"),
             class = "float-end mb-3 disabled"
           ),
           tags$div(class = "clearfix"),
@@ -120,7 +120,7 @@ criterion_b_ui <- function(id) {
             inputId = ns("go_report"),
             label = tagList(
               ph("file-text"),
-              "Go to summary report"
+              i18n("Go to summary report")
             ),
             class = "my-4",
             width = "100%",

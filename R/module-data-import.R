@@ -27,8 +27,8 @@ data_import_ui <- function(id) {
           choiceNames = c(
             "GBIF",
             "Rainbio",
-            "Polygon",
-            "Dataset"
+            i18n("Polygon"),
+            i18n("Dataset")
           ),
           choiceValues = c(
             "gbif",

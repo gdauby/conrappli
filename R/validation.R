@@ -65,10 +65,10 @@ validation_rules <- function() {
     .valid_year == TRUE
   )
   validate::label(validation_rules) <- c(
-    "Identify records with out-of-range geographic coordinates",
-    "Identify records with empty geographic coordinates",
-    "Identify records with empty scientific names",
-    "Identify records with invalid year (if provided)"
+    i18n("Identify records with out-of-range geographic coordinates"),
+    i18n("Identify records with empty geographic coordinates"),
+    i18n("Identify records with empty scientific names"),
+    i18n("Identify records with invalid year (if provided)")
   )
   return(validation_rules)
 }

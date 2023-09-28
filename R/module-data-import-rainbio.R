@@ -26,7 +26,7 @@ data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
     if (identical(from, "file")) {
       tagList(
         tags$h5(
-          "Import a file containing species names:"
+          i18n("Import a file containing species names:")
         ),
         datamods::import_file_ui(
           id = ns("file"),
@@ -38,7 +38,7 @@ data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
     if (identical(from, "copypaste")) {
       tagList(
         tags$h5(
-          "Paste species names below:"
+          i18n("Paste species names below:")
         ),
         datamods::import_copypaste_ui(
           id = ns("copypaste"),
@@ -47,17 +47,17 @@ data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
         )
       )
     },
-    tags$h4("Species found"),
+    tags$h4(i18n("Species found")),
     checkboxInput(
       inputId = ns("exact"),
-      label = "Show only exact matches",
+      label = i18n("Show only exact matches"),
       value = TRUE
     ),
     reactable::reactableOutput(outputId = ns("species")),
     tags$br(),
     actionButton(
       inputId = ns("import"),
-      label = "Import data for selected species",
+      label = i18n("Import data for selected species"),
       width = "100%",
       class = "mb-3"
     ),
@@ -144,15 +144,15 @@ data_import_rainbio_server <- function(id) {
         index <- reactable::getReactableState("species", "selected")
         if (length(index) < 1) {
           shinyWidgets::show_alert(
-            title = "No species specified",
-            text = "You must specify species for which to import data.",
+            title = i18n("No species specified"),
+            text = i18n("You must specify species for which to import data."),
             type = "warning"
           )
         } else {
           shinybusy::show_modal_spinner(
             spin = "fulfilling-bouncing-circle",
             color = "#088A08",
-            text = "Retrieving data, please wait..."
+            text = i18n("Retrieving data, please wait...")
           )
           keys <- species_rv$names$idtax_n[index]
           occdata <- shinyWidgets::execute_safely({
@@ -167,7 +167,7 @@ data_import_rainbio_server <- function(id) {
         if (isTruthy(dataset_rv$value)) {
           shinyWidgets::alert(
             status = "success",
-            ph("check"), "Data successfully downloaded from Rainbio.",
+            ph("check"), i18n("Data successfully downloaded from Rainbio."),
             actionLink(inputId = session$ns("see_data"), label = tagList(ph("table")))
           )
         }

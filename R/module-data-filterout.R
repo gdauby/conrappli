@@ -20,9 +20,9 @@ data_filterout_ui <- function(id) {
     numericInput(
       inputId = ns("max_occ_filterout"),
       label = tagList(
-        "Threshold to filter out taxa with high number of occurrences",
+        i18n("Threshold to filter out taxa with high number of occurrences"),
         btn_help(
-          "This is a threshold to filter out taxa with more than X unique pair of coordinates. All taxa with number of unique coordinates above this threshold will not be considerd saving computatoion time. Beware that a low number may discard taxa that are actually threatened."
+          i18n("This is a threshold to filter out taxa with more than X unique pair of coordinates. All taxa with number of unique coordinates above this threshold will not be considerd saving computation time. Beware that a low number may discard taxa that are actually threatened.")
         )
       ),
       min = 20,
