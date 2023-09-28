@@ -1,7 +1,7 @@
 
 #' @importFrom shiny NS actionButton uiOutput
 #' @importFrom htmltools tags tagList css
-data_2_ui <- function(id) {
+data_poly_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = i18n("Choice of the site"),
@@ -66,7 +66,7 @@ data_2_ui <- function(id) {
 #' @importFrom shiny moduleServer reactiveValues observeEvent req renderUI
 #'  eventReactive isTruthy reactive
 #' @importFrom shinyWidgets alert execute_safely
-data_2_server <- function(id) {
+data_poly_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {

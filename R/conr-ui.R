@@ -98,7 +98,7 @@ conr_ui <- function(lang = c("en", "fr")) {
       ),
       nav_panel_hidden(
         value = "data_from_shp"
-        , data_2_ui("shp")
+        , data_poly_ui("shp")
       ),
       nav_panel_hidden(
         value = "data_other_options"
