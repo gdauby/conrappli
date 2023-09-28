@@ -102,7 +102,7 @@ conr_ui <- function(lang = c("en", "fr")) {
       ),
       nav_panel_hidden(
         value = "data_other_options"
-        , data_ui("data")
+        , data_full_ui("data")
       ),
       nav_panel_hidden(
         value = "mapping"

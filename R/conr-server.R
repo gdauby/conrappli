@@ -37,7 +37,7 @@ conr_server <- function() {
     data_rv <- reactiveValues(x = NULL, polygon = NULL, latlon = NULL)
 
     shp_lr <- data_2_server(id = "shp")
-    data_lr <- data_server(id = "data", main_session = session)
+    data_lr <- data_full_server(id = "data", main_session = session)
 
     observeEvent(shp_lr$data(), {
       data_rv$x <- shp_lr$data()

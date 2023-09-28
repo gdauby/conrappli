@@ -13,13 +13,13 @@
 #'  * Server: a [shiny::reactive()] function returning a `data.frame`.
 
 #'
-#' @name module-data
+#' @name module-data-full
 #'
 #' @importFrom shiny NS uiOutput
 #' @importFrom htmltools tagList tags
 #' @importFrom bslib navset_pill nav nav_spacer
 #' @importFrom phosphoricons ph_i html_dependency_phosphor
-data_ui <- function(id) {
+data_full_ui <- function(id) {
   ns <- NS(id)
   template_ui(
     title = i18n("Import & validate data"),
@@ -88,13 +88,13 @@ data_ui <- function(id) {
 
 #' @export
 #'
-#' @rdname module-data
+#' @rdname module-data-full
 #'
 #'
 #' @importFrom shiny moduleServer reactive reactiveValues
 #'  observeEvent renderUI actionButton icon
 #' @importFrom bslib nav_select
-data_server <- function(id, main_session = shiny::getDefaultReactiveDomain()) {
+data_full_server <- function(id, main_session = shiny::getDefaultReactiveDomain()) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
