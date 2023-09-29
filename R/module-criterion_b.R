@@ -43,8 +43,21 @@ criterion_b_ui <- function(id) {
                 When planar, projected coordinates are used and euclidian distances are used."
               )
             ) ,
-            choices = c("spheroid", "planar"),
-            inline = TRUE
+            choices = c("planar", "spheroid")
+          ),
+          shinyWidgets::searchInput(
+            inputId = ns("projection"),
+            label = tagList(
+              i18n("EPSG or ESRI code"),
+              btn_help(
+                "Projection used for estimating EOO, if the mode is 'planar'. By default it is a Cylindrical Equal Area projection recommanded by the IUCN, but others projections may be more suited for specific areas.
+                Check https://epsg.io/"
+              )
+            ) ,
+            value = "ESRI:54034",
+            resetValue = "ESRI:54034",
+            btnSearch = icon("magnifying-glass"),
+            btnReset = icon("xmark")
           ),
           sliderInput(
             inputId = ns("aoo_size"),
@@ -227,7 +240,8 @@ criterion_b_server <- function(id,
           eoo_res <- EOO.computing(
             XY = data,
             mode = input$mode_eoo,
-            export_shp = TRUE
+            export_shp = TRUE, 
+            proj_type = input$projection
           )
 
           shinybusy::update_modal_spinner(i18n("Area of occupancy computation"))
@@ -244,7 +258,7 @@ criterion_b_server <- function(id,
             Cell_size_locations = input$locations_size,
             threat_list = spatial_data,
             threat_weight = table_overlap$priority,
-            method_polygons = "no_more_than_one",
+            method_polygons = table_overlap$polygon_method,
             nbe_rep = input$rep_rast
           )
 
@@ -261,7 +275,8 @@ criterion_b_server <- function(id,
             AOO_size = input$aoo_size,
             locations_size = input$locations_size,
             nbe_rep_grid = input$rep_rast,
-            threat_data = !is.null(spatial_data)
+            threat_data = !is.null(spatial_data),
+            projection = input$projection
           )
 
           count_unique_coord <- data %>%

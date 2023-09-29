@@ -226,7 +226,7 @@ mapping_server <- function(id,
           rv$spatial_data <- rv$all_shp[input$spatial_data_select]
           rv$table_overlap <-
             rv$check_overlap$shp_tables[which(rv$check_overlap$shp_tables$table_name %in% input$spatial_data_select),] %>%
-            dplyr::select(table_name, type, description, reference, priority)
+            dplyr::select(table_name, type, description, reference, priority, polygon_method)
         }
       }, ignoreNULL = FALSE)
 
