@@ -108,7 +108,7 @@ home_ui <- function(id) {
 
         fluidRow(
           column(
-            width = 4,
+            width = 6,
             class = "text-center",
             tags$a(
               href="https://en.ird.fr/",
@@ -130,20 +130,61 @@ home_ui <- function(id) {
                 src = "conrappli/medias/mobot-header-logo.svg"
               )
             )
-          ),
+          )
+        ),
+        
+        tags$br(),
+        tags$br(),
+        
+        fluidRow(
           column(
-            width = 4,
+            width = 6,
             class = "text-center",
             tags$a(
               href="https://www.ulb.be/",
               target="_blank",
               tags$img(
-                style = "height: 180px;",
-                src = "conrappli/medias/logo_ULB.jpg"
+                style = "height: 140px;",
+                src = "conrappli/medias/log_ulb.png"
+              )
+            )
+          ),
+          column(
+            width = 4,
+            class = "text-center",
+            tags$a(
+              href="https://univ-masuku.org/",
+              target="_blank",
+              tags$img(
+                style = "height: 220px;",
+                src = "conrappli/medias/Logo_USTM.png"
+              )
+            )
+          )
+        ),
+        
+        tags$br(),
+        tags$br(),
+        
+        fluidRow(
+          column(
+            width = 6,
+            class = "text-center",
+            tags$a(
+              href="http://herbiergabon.fr/gabon/",
+              target="_blank",
+              tags$img(
+                style = "height: 140px;",
+                src = "conrappli/medias/Logo_HNG.jpg"
               )
             )
           )
         )
+        
+        
+        
+        
+        
 
       )
     )

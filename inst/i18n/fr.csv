@@ -120,3 +120,4 @@ label,translation
 "Identify records with invalid year (if provided)","Identification des occurrences avec une année non valide"
 "Threshold to filter out taxa with high number of occurrences","Seuil pour filtrer les taxas avec un grand nombre d'occurrences"
 "This is a threshold to filter out taxa with more than X unique pair of coordinates. All taxa with number of unique coordinates above this threshold will not be considerd saving computation time. Beware that a low number may discard taxa that are actually threatened.","C'est un seuil pour éliminer les taxa avec plus de X paire de coordonnées uniques. Tous les taxas avec un nombre de paire de coordonnées unique supérieur à ce seuil ne seront pas considérés pour l'analyse ce qui permettra de gagner en temps de calcul. Attention cependant à ne pas chosir un seuil trop bas, pour ne pas élmiminer des taxas effectivement menacés"
+"Please select a country","Choisissez un pays"
