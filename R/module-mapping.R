@@ -35,9 +35,10 @@ mapping_ui <- function(id) {
     ),
 
     absolutePanel(
-      top = "80px",
-      left = "20px",
+      top = "5px",
+      left = "5px",
       width = "250px",
+      draggable = TRUE,
       style = htmltools::css(
         background = "#FFF",
         borderRadius = "5px",
@@ -85,9 +86,12 @@ mapping_ui <- function(id) {
 
     absolutePanel(
       id = ns("container-spatial-overlap"),
-      bottom = "20px",
-      left = "20px",
+      bottom = "5px",
+      left = "5px",
       width = "250px",
+      height = "170px",
+      style = "z-index: 99;",
+      draggable = TRUE,
       style = htmltools::css(
         background = "#FFF",
         borderRadius = "5px",
@@ -102,7 +106,7 @@ mapping_ui <- function(id) {
           choices = NULL,
           multiple = TRUE,
           hasOptionDescription = TRUE,
-          showValueAsTags = TRUE,
+          showValueAsTags = FALSE,
           disableSelectAll = TRUE,
           zIndex = 10,
           width = "100%"
