@@ -40,7 +40,7 @@ data_poly_ui <- function(id) {
       `data-bs-toggle` = "collapse",
       `data-bs-target` = paste0("#", ns("variable-container")),
       i18n("See variable selection"),
-      phosphoricons::ph("caret-down", title = "See variable selection")
+      phosphoricons::ph("caret-down", title = i18n("See variable selection"))
     ),
     tags$button(
       class = "btn btn-outline-primary",
@@ -48,7 +48,7 @@ data_poly_ui <- function(id) {
       `data-bs-toggle` = "collapse",
       `data-bs-target` = paste0("#", ns("validation-container")),
       i18n("See data validation"),
-      phosphoricons::ph("caret-down", title = "See data validation")
+      phosphoricons::ph("caret-down", title = i18n("See data validation"))
     ),
     tags$div(
       class = "collapse",
