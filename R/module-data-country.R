@@ -90,7 +90,7 @@ data_country_server <- function(id) {
         shinybusy::show_modal_spinner(
           spin = "half-circle",
           color = "#088A08",
-          text = i18n("Extracting data, please wait...")
+          text = i18n("Extracting data, please wait. It may takes several minutes.")
         )
         mydb_extract <- conn_mydb_rb(
           pass = "Anyuser2022",
@@ -131,7 +131,7 @@ data_country_server <- function(id) {
       
       output$map <- leaflet::renderLeaflet({
         shiny::validate(
-          shiny::need(input$country, "Please select a country")
+          shiny::need(input$country, i18n("Please select a country"))
         )
         req(data_validated_r()) %>% 
           draw_map(resolution = input$resolution)

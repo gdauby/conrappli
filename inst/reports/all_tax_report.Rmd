@@ -131,6 +131,8 @@ merged_data <- dplyr::left_join(
 merged_data_sf <- sf::st_as_sf(merged_data, coords = c(".__longitude", ".__latitude"))
 sf::st_crs(merged_data_sf) <- 4326
 
+# merged_data_sf <- sf::st_transform(merged_data_sf, sf::st_crs("EPSG:6933"))
+
 merged_data_sf_proj <- sf::st_transform(merged_data_sf, sf::st_crs("EPSG:6933"))
 
 merged_data_sf_proj_filtered_threat <-
@@ -285,46 +287,6 @@ leaf_map <-
     group = "Occurences"
   )
 
-# if (nrow(grid_s) > 0) {
-#   
-#     grid_s <- grid_s %>% 
-#     dplyr::rename(`Nbr. of taxa` = nbe_esp,
-#            `Nbr. of records` = n,
-#            `Nbr. of CR taxa` = n_cr,
-#            `Nbr. of EN taxa` = n_en,
-#            `Nbr. of VU taxa` = n_vu,
-#            `Nbr. of threatened taxa` = n_threatened,
-#            `Prop. of threatened taxa` = prop_threatened) %>% 
-#     dplyr::select(-id)
-#     
-#     leaf_map <-
-#       leaf_map %>%
-#       leaflet::addPolygons(
-#         # params$res_aoo,
-#         data = grid_s,
-#         fillColor = ~ pal(`Prop. of threatened taxa`),
-#         weight = 1,
-#         opacity = 1,
-#         color = "black",
-#         dashArray = "1",
-#         fillOpacity = 0.6,
-#         group = "grid",
-#         label = grid_s %>% dplyr::pull(`Prop. of threatened taxa`),
-#         popup = leafpop::popupTable(grid_s %>% sf::st_set_geometry(NULL),
-#                                     feature.id = FALSE),
-#         highlight = leaflet::highlightOptions(
-#           weight = 5,
-#           color = "red",
-#           fillOpacity = 0.7,
-#           bringToFront = TRUE
-#         )
-#       )
-#     
-#     group_lf <- 
-#       c(group_lf, "grid")
-#     
-# }
-
 if (!is.null(params$polygon_rv)) {
   
   poly_to_map <- sf::st_transform(params$polygon_rv, 4326)
@@ -356,22 +318,30 @@ if (!is.null(params$polygon_rv)) {
 
 if (!is.null(params$threat_sig)) {
   
+   crop_poly <- lapply(params$threat_sig,
+                         function(x) sf::st_transform(x, 4326))
+  
   if (!is.null(params$polygon_rv)) {
-    crop_poly <- lapply(params$threat_sig,
+
+    # crop_poly <- lapply(params$threat_sig,
+    #                     function(x) sf::st_transform(x, 4326))
+
+    crop_poly <- lapply(crop_poly,
                         function(x)
                           suppressWarnings(sf::st_crop(x = x, y = sf::st_bbox(
-                            sf::st_buffer(merged_data_sf_proj_filtered_threat, 2)
+                            sf::st_buffer(dat_to_map, 2)
                           ))))
-  } else {
-    crop_poly <- params$threat_sig
-  }
-  
+  } 
+  #  else {
+  #   crop_poly <- params$threat_sig
+  # }
+
   for (i in 1:length(crop_poly)) {
-    
+
     if (inherits(crop_poly[[i]], "sf")) {
-      
-      threat_to_map <- sf::st_transform(crop_poly[[i]], 4326)
-      
+
+      threat_to_map <- crop_poly[[i]]  # sf::st_transform(crop_poly[[i]], 4326)
+
       leaf_map <-
       leaf_map %>%
       leaflet::addPolygons(
@@ -392,11 +362,11 @@ if (!is.null(params$threat_sig)) {
           bringToFront = TRUE
         )
       )
-    
-    group_lf <- 
+
+    group_lf <-
       c(group_lf, names(params$threat_sig)[i])
     }
-    
+
   }
   
 }

@@ -14,7 +14,7 @@ draw_map <- function(.data, resolution = 10) {
     1,
     geom = st_geometry(st_polygon(list(
       matrix(
-        c(8,-4, 15,-4, 15, 3, 8, 3, 8,-4),
+        c(8,-4, 13,-4, 13, 3, 8, 3, 8,-4),
         ncol = 2,
         byrow = TRUE
       )
@@ -53,6 +53,13 @@ draw_map <- function(.data, resolution = 10) {
     domain = grid_not_null$nbe_esp
   )
   
+  # create_popup <- function(.data) {
+  #   template <- glue::glue("<b>{column}:</b>", column = names(.data))
+  #   template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
+  #   template <- paste(template, collapse = "")
+  #   glue::glue_data(.data, template)
+  # }
+  
   leaflet() %>%
     addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
@@ -65,9 +72,13 @@ draw_map <- function(.data, resolution = 10) {
       data = grid_not_null,
       weight = 1,
       opacity = 0.7,
-      fillOpacity = 0.7,
       color = ~pal(nbe_esp),
-      fill =  ~pal(nbe_esp),
-      popup = paste("Region: ", grid_not_null$nbe_esp)
+      fill =  "black",
+      popup = paste("Number of species: ", grid_not_null$nbe_esp),
+      fillOpacity = 0.5,
+      highlight = leaflet::highlightOptions(
+        color = "black",
+        weight = 4
+      )
     )
 }
