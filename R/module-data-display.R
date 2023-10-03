@@ -71,8 +71,21 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
           compact = TRUE,
           columns = columns,
           searchable = TRUE,
-          theme = reactable::reactableTheme(
-            searchInputStyle = list(width = "100%")
+          theme = reactable_theme(
+            searchInputStyle = list(
+              paddingLeft = "1.9rem",
+              paddingTop = "0.5rem",
+              paddingBottom = "0.5rem",
+              width = "100%",
+              border = "none",
+              backgroundColor = "hsl(0, 0%, 10%)",
+              backgroundSize = "1rem",
+              backgroundPosition = "left 0.5rem center",
+              backgroundRepeat = "no-repeat",
+              "&:focus" = list(backgroundColor = "rgba(255, 255, 255, 0.1)", border = "none"),
+              "::placeholder" = list(color = "#dfe2e5"),
+              "&:hover::placeholder, &:focus::placeholder" = list(color = "#FFF")
+            )
           )
         )
       })

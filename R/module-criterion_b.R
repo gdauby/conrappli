@@ -382,6 +382,7 @@ criterion_b_server <- function(id,
           language = reactableLang(
             noData = i18n("No results of criterion b analysis to display")
           ),
+          theme = reactable_theme(),
           height = 500,
           columns = col_defs)
       })

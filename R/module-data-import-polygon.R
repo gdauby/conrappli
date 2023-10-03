@@ -119,7 +119,8 @@ data_import_polygon_server <- function(id) {
           resizable = TRUE,
           defaultColDef = reactable::colDef(
             style = list(whiteSpace = "nowrap", textOverflow = "ellipsis")
-          )
+          ),
+          theme = reactable_theme()
         )
       })
 

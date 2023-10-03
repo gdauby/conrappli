@@ -135,7 +135,8 @@ data_import_rainbio_server <- function(id) {
           compact = TRUE,
           bordered = TRUE,
           defaultPageSize = 5,
-          searchable = TRUE
+          searchable = TRUE,
+          theme = reactable_theme()
         )
       })
 
