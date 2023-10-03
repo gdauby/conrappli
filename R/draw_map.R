@@ -57,21 +57,7 @@ draw_map_grid <- function(.data,
     domain = grid_not_null$nbe_esp
   )
 
-  # create_popup <- function(.data) {
-  #   template <- glue::glue("<b>{column}:</b>", column = names(.data))
-  #   template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
-  #   template <- paste(template, collapse = "")
-  #   glue::glue_data(.data, template)
-  # }
-
-  leaflet() %>%
-    addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
-    addProviderTiles(providers$OpenTopoMap, group = "Open Topo Map") %>%
-    addLayersControl(
-      baseGroups = c("OSM", "Esri", "Open Topo Map"),
-      options = layersControlOptions(collapsed = FALSE)
-    ) %>%
+  base_map(zoom_topright = FALSE) %>%
     addPolygons(
       data = grid_not_null,
       weight = 1,
@@ -101,12 +87,7 @@ draw_map_occ <- function(.data,
 
   intersect_bbox <- sf::st_transform(intersect_bbox, 4326)
 
-  leaflet(
-    data = intersect_bbox
-  ) %>%
-    addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
-    addProviderTiles(providers$OpenTopoMap, group = "Open Topo Map") %>%
+  base_map(data = intersect_bbox, zoom_topright = FALSE) %>%
     addCircles(
       popup = intersect_bbox %>%
         sf::st_drop_geometry() %>%
