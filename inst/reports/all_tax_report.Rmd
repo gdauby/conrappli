@@ -37,7 +37,7 @@ create_popup <- function(.data) {
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
 results <- params$results %>% 
-  tibble::as_tibble()
+  dplyr::as_tibble()
 
 count_cat <- 
   results %>% 
@@ -103,7 +103,7 @@ knitr::kable(count_cat %>% select(-rank),
 # )
 
 reactable::reactable(
-  data = params$results %>% tibble::as_tibble(),
+  data = as_tibble(params$results),
   filterable = TRUE,
   highlight = TRUE,
   searchable = TRUE,
@@ -124,7 +124,7 @@ reactable::reactable(
 merged_data <- dplyr::left_join(
   x = params$data,
   y = params$results %>%
-    tibble::as_tibble() %>%
+    dplyr::as_tibble() %>%
     dplyr::select(taxa, category), by = c(".__taxa" = "taxa")
 )
 
@@ -405,7 +405,7 @@ ggplot2::ggplot(eoo_res, ggplot2::aes(x = EOO)) +
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
 parameters_formated <-  params$parameters %>%
-  tibble::as_tibble() %>%
+  dplyr::as_tibble() %>%
   dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
   tidyr::pivot_longer(1:6, values_to = "value") %>%
   dplyr::left_join(dplyr::tibble(

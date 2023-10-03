@@ -1,7 +1,7 @@
 Package: conrappli
 Type: Package
 Title: Web Interface for 'ConR' package
-Version: 0.1.0.9510
+Version: 0.1.0.9600
 Authors@R: c(
       person("Gilles", "Dauby", , "gildauby@gmail.com", role = c("aut", "cre")),
       person("Victor", "Perrier", , "victor.perrier@dreamrs.fr", role = c("ctb"))
@@ -33,7 +33,6 @@ Imports:
     leafpm,
     measurements,
     phosphoricons,
-    pkgload,
     reactable (>= 0.4.4),
     rgbif,
     rmarkdown,
@@ -46,9 +45,7 @@ Imports:
     shinyWidgets (>= 0.7.0),
     taxize,
     terra,
-    tibble,
     tidyr,
-    tidyselect,
     validate
 Remotes: gdauby/ConR@devel
 Suggests: 

@@ -1,5 +1,6 @@
 
-
+#' @importFrom shiny NS fluidRow column conditionalPanel radioButtons sliderInput
+#' @importFrom shinyWidgets panel virtualSelectInput dropMenu
 data_country_ui <- function(id) {
   ns <- NS(id)
   template_ui(
@@ -116,10 +117,6 @@ data_country_server <- function(id) {
         )
         keys <- extract_sp$specieskey
         data <- retrieve_occ_data(keys)
-        # TEMP
-        # Sys.sleep(2)
-        # dataset_rv$value <- readRDS("D:\\work\\ConRapp\\conrappli\\dev\\data_country.rds")
-        # TEMP
 
         shinybusy::remove_modal_spinner()
         return(data)
@@ -143,7 +140,6 @@ data_country_server <- function(id) {
         shiny::validate(
           shiny::need(input$country, i18n("Please select a country"))
         )
-        CHECK_DATA <<- req(data_validated_r())
         if (identical(input$type_map, "grid")) {
           req(data_validated_r()) %>%
             draw_map_grid(resolution = input$resolution)

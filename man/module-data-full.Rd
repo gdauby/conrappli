@@ -12,6 +12,8 @@ data_full_server(id, main_session = shiny::getDefaultReactiveDomain())
 }
 \arguments{
 \item{id}{Module's ID.}
+
+\item{main_session}{Main session.}
 }
 \value{
 \itemize{

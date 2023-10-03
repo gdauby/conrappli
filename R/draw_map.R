@@ -90,8 +90,8 @@ draw_map_grid <- function(.data,
 
 
 
-
-
+#' @importFrom leaflet leaflet addProviderTiles providers addCircles
+#' @importFrom dplyr select starts_with
 draw_map_occ <- function(.data,
                          bbox_country = get_bbox_country()) {
 
@@ -101,13 +101,13 @@ draw_map_occ <- function(.data,
 
   intersect_bbox <- sf::st_transform(intersect_bbox, 4326)
 
-  leaflet::leaflet(
+  leaflet(
     data = intersect_bbox
   ) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-    leaflet::addCircles(
+    addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
+    addProviderTiles(providers$OpenTopoMap, group = "Open Topo Map") %>%
+    addCircles(
       popup = intersect_bbox %>%
         sf::st_drop_geometry() %>%
         dplyr::select(-starts_with(".__")) %>%
