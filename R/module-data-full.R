@@ -85,7 +85,7 @@ data_full_ui <- function(id) {
   )
 }
 
-
+#' @param main_session Main session.
 #' @export
 #'
 #' @rdname module-data-full
@@ -102,8 +102,8 @@ data_full_server <- function(id, main_session = shiny::getDefaultReactiveDomain(
       ns <- session$ns
 
       rv <- reactiveValues(data = NULL)
-      
-      
+
+
       observeEvent(input$go_next, {
         updateRadioGroupButtons(session = main_session, inputId = "navigation", selected = "mapping")
       })

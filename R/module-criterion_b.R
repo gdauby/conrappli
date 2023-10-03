@@ -156,7 +156,11 @@ criterion_b_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive req actionLink
 #' @importFrom ConR EOO.computing AOO.computing cat_criterion_b locations.comp
-#' @importFrom tidyselect everything
+#' @importFrom dplyr select filter group_by mutate n_distinct across everything ungroup distinct left_join relocate as_tibble
+#' @importFrom reactable renderReactable colDef reactable reactableLang
+#' @importFrom shinybusy show_modal_spinner update_modal_spinner remove_modal_spinner
+#' @importFrom shinyjs addClass removeCssClass
+#' @importFrom shinyWidgets updateVirtualSelect execute_safely
 criterion_b_server <- function(id,
                                data_r = reactive(NULL),
                                threat_sig_r = reactive(NULL),
@@ -192,7 +196,7 @@ criterion_b_server <- function(id,
           hasName(data_r(), ".__longitude"),
           hasName(data_r(), "STATUS_CONR")
         )
-        shinyjs::addClass(id = "no-data", class = "d-none")
+        addClass(id = "no-data", class = "d-none")
       })
 
 
@@ -203,7 +207,7 @@ criterion_b_server <- function(id,
           "All" = list("All"),
           "Species" = as.list(taxas)
         )
-        shinyWidgets::updateVirtualSelect(
+        updateVirtualSelect(
           inputId = "taxa",
           choices = choices,
           selected = taxa_selected_r()
@@ -214,18 +218,18 @@ criterion_b_server <- function(id,
       observeEvent(input$launch, {
         data <- req(data_r())
 
-        shinybusy::show_modal_spinner(
+        show_modal_spinner(
           spin = "half-circle",
           color = "#088A08",
           text = i18n("Launching calculation")
         )
 
-        shinyWidgets::execute_safely({
+        execute_safely({
           data <- data %>%
-            dplyr::select(.__latitude, .__longitude, .__taxa)
+            select(.__latitude, .__longitude, .__taxa)
 
           if (isTruthy(input$taxa) && !identical(input$taxa, "All")) {
-            data <- dplyr::filter(data, .__taxa == input$taxa)
+            data <- filter(data, .__taxa == input$taxa)
           }
 
           spatial_data <- threat_sig_r()
@@ -236,15 +240,15 @@ criterion_b_server <- function(id,
 
           # browser()
 
-          shinybusy::update_modal_spinner(i18n("Extent of Occurrences multi-taxa computation"))
+          update_modal_spinner(i18n("Extent of Occurrences multi-taxa computation"))
           eoo_res <- EOO.computing(
             XY = data,
             mode = input$mode_eoo,
-            export_shp = TRUE, 
+            export_shp = TRUE,
             proj_type = input$projection
           )
 
-          shinybusy::update_modal_spinner(i18n("Area of occupancy computation"))
+          update_modal_spinner(i18n("Area of occupancy computation"))
           aoo_res <- AOO.computing(
             XY = data,
             Cell_size_AOO = input$aoo_size,
@@ -252,7 +256,7 @@ criterion_b_server <- function(id,
             export_shp = TRUE
           )
 
-          shinybusy::update_modal_spinner(i18n("Number of locations computation"))
+          update_modal_spinner(i18n("Number of locations computation"))
           locations <- locations.comp(
             XY = data,
             Cell_size_locations = input$locations_size,
@@ -263,7 +267,7 @@ criterion_b_server <- function(id,
           )
 
 
-          shinybusy::update_modal_spinner(i18n("Categorize taxa according to IUCN criterion B"))
+          update_modal_spinner(i18n("Categorize taxa according to IUCN criterion B"))
           categories <- cat_criterion_b(
             EOO = eoo_res$results$eoo,
             AOO = aoo_res$AOO$aoo,
@@ -280,13 +284,13 @@ criterion_b_server <- function(id,
           )
 
           count_unique_coord <- data %>%
-            dplyr::group_by(.__taxa) %>%
-            dplyr::mutate(pair_unique_coordinates = dplyr::n_distinct(dplyr::across(tidyselect::everything())))%>%
-            dplyr::ungroup()
+            group_by(.__taxa) %>%
+            mutate(pair_unique_coordinates = n_distinct(across(everything())))%>%
+            ungroup()
 
           count_unique_coord <-
-            dplyr::distinct(count_unique_coord %>%
-                              dplyr::select(.__taxa, pair_unique_coordinates))
+            distinct(count_unique_coord %>%
+                       select(.__taxa, pair_unique_coordinates))
 
 
           results <- data.frame(
@@ -307,24 +311,24 @@ criterion_b_server <- function(id,
 
           results <-
             results %>%
-            dplyr::left_join(count_unique_coord %>%
-                        dplyr::select(.__taxa, pair_unique_coordinates),
+            left_join(count_unique_coord %>%
+                        select(.__taxa, pair_unique_coordinates),
                       by = c("taxa" = ".__taxa"))
 
           results <- results %>%
-            tibble::as_tibble() %>%
-            dplyr::mutate(category = replace(category, locations == 6, "VU+")) %>%
-            dplyr::mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>%
-            dplyr::mutate(category = replace(category, category == "LC or NT", "LC")) %>%
-            dplyr::mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
-          
-          if (any(names(results) == "protected"))
-            results <- 
-            results %>% 
-            dplyr::relocate(protected, .before = pair_unique_coordinates)
+            as_tibble() %>%
+            mutate(category = replace(category, locations == 6, "VU+")) %>%
+            mutate(category = replace(category, locations %in% c(11, 12, 13), "NT")) %>%
+            mutate(category = replace(category, category == "LC or NT", "LC")) %>%
+            mutate(range_restricted = ifelse(EOO < 50000, TRUE, FALSE))
 
-          shinyjs::removeCssClass(id = "download", class = "disabled")
-          shinyjs::removeCssClass(id = "go_report", class = "disabled")
+          if (any(names(results) == "protected"))
+            results <-
+            results %>%
+            relocate(protected, .before = pair_unique_coordinates)
+
+          removeCssClass(id = "download", class = "disabled")
+          removeCssClass(id = "go_report", class = "disabled")
           rv$eoo_res <- eoo_res
           rv$aoo_res <- aoo_res
           rv$locations <- locations
@@ -333,7 +337,7 @@ criterion_b_server <- function(id,
           rv$parameters <- parameters
           rv$taxa <- input$taxa
         })
-        shinybusy::remove_modal_spinner()
+        remove_modal_spinner()
       })
 
       output$download <- downloadHandler(
@@ -345,37 +349,37 @@ criterion_b_server <- function(id,
         }
       )
 
-      output$results <- reactable::renderReactable({
+      output$results <- renderReactable({
         req(rv$results)
-        
+
         col_defs <- list(
-          EOO = reactable::colDef(name = i18n("Extent of occurence (EOO)")),
-          AOO = reactable::colDef(name = i18n("Area of occupancy (AOO)")),
-          locations = reactable::colDef(name = i18n("Estimated number of location")),
-          category = reactable::colDef(name = i18n("IUCN preliminary category")),
-          pair_unique_coordinates = reactable::colDef(name = "Number of unique occurences"),
-          range_restricted = reactable::colDef(name = i18n("True if taxon is range-restricted")),
-          cat_codes = reactable::colDef(name = i18n("IUCN code of assessment")),
-          issue_aoo = reactable::colDef(name = i18n("Potential issue in AOO estimation")),
-          issue_eoo = reactable::colDef(name = i18n("Potential issue in EOO estimation")),
-          main_threat = reactable::colDef(name = i18n("Main threat identified")),
-          mining = reactable::colDef(name = i18n("Number of location threatened by mining")),
-          cities = reactable::colDef(name = "Number of location threatened by urban areas"),
-          agroindustry = reactable::colDef(name = i18n("Number of location threatened by agroindustry")),
-          logging = reactable::colDef(name = i18n("Number of location threatened by industrial logging")),
-          cropland = reactable::colDef(name = i18n("Number of location threatened by small-scale agriculture")),
-          protected = reactable::colDef(name = i18n("Number of location in protected areas"))
+          EOO = colDef(name = i18n("Extent of occurence (EOO)")),
+          AOO = colDef(name = i18n("Area of occupancy (AOO)")),
+          locations = colDef(name = i18n("Estimated number of location")),
+          category = colDef(name = i18n("IUCN preliminary category")),
+          pair_unique_coordinates = colDef(name = "Number of unique occurences"),
+          range_restricted = colDef(name = i18n("True if taxon is range-restricted")),
+          cat_codes = colDef(name = i18n("IUCN code of assessment")),
+          issue_aoo = colDef(name = i18n("Potential issue in AOO estimation")),
+          issue_eoo = colDef(name = i18n("Potential issue in EOO estimation")),
+          main_threat = colDef(name = i18n("Main threat identified")),
+          mining = colDef(name = i18n("Number of location threatened by mining")),
+          cities = colDef(name = "Number of location threatened by urban areas"),
+          agroindustry = colDef(name = i18n("Number of location threatened by agroindustry")),
+          logging = colDef(name = i18n("Number of location threatened by industrial logging")),
+          cropland = colDef(name = i18n("Number of location threatened by small-scale agriculture")),
+          protected = colDef(name = i18n("Number of location in protected areas"))
         )
-        
+
         col_defs <- col_defs[names(col_defs) %in% names(rv$results)]
-        
-        reactable::reactable(
+
+        reactable(
           data = rv$results,
           rownames = FALSE,
           bordered = TRUE,
           compact = TRUE,
           pagination = FALSE,
-          language = reactable::reactableLang(
+          language = reactableLang(
             noData = i18n("No results of criterion b analysis to display")
           ),
           height = 500,
@@ -390,3 +394,4 @@ criterion_b_server <- function(id,
     }
   )
 }
+

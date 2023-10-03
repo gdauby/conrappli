@@ -43,7 +43,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
   rs <- DBI::dbSendQuery(mydb_rb, sql)
   res <- DBI::dbFetch(rs)
   DBI::dbClearResult(rs)
-  res <- tibble::as_tibble(res)
+  res <- as_tibble(res)
 
   if (only_checked_georef) {
 
@@ -55,7 +55,7 @@ query_rb_taxa <- function(species = NULL, idtax = NULL, only_checked_georef = TR
 
   return(list(
     extract_all_tax = res,
-    idtax = tibble::tibble(idtax_f = idtax)
+    idtax = tibble(idtax_f = idtax)
   ))
 }
 
@@ -87,7 +87,7 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
-  
+
   poly <- sf::st_transform(poly, 4326)
 
   if (inherits(poly, "sf")) {
@@ -112,7 +112,7 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
 
   idtax_sel <- extract %>%
     sf::st_drop_geometry() %>%
-    tibble::as_tibble() %>%
+    as_tibble() %>%
     dplyr::filter(!is.na(tax_sp_level)) %>%
     dplyr::distinct(idtax_f)
 
@@ -120,13 +120,13 @@ query_rb_poly <- function(poly, only_checked_georef = TRUE) {
   sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE idtax_f IN ({vals*})",
                        vals = idtax_sel$idtax_f, .con = mydb_rb)
   res <- func_try_fetch(con = mydb_rb, sql = sql)
-  
+
   if (only_checked_georef) {
-    
+
     res <-
       res %>%
       dplyr::filter(georef_final == 1)
-    
+
   }
 
   cli::cli_alert_success("Extract from rainbio record done")
@@ -612,8 +612,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 #'
 #' @importFrom glue glue_sql
 #' @importFrom DBI dbSendQuery dbFetch dbClearResult
-#' @importFrom dplyr sym tibble mutate distinct left_join
-#' @importFrom tibble tibble
+#' @importFrom dplyr sym tibble mutate distinct left_join tibble
 #'
 #' @return A list of two elements, one with the extract if any, two with the names with id not NA when matched
 #' @export
@@ -623,11 +622,11 @@ query_exact_match <- function(tbl, field, values_q, con) {
 
     field_col <- dplyr::sym(field)
 
-    query_tb <- tibble::tibble(!!field_col := tolower(values_q))
+    query_tb <- tibble(!!field_col := tolower(values_q))
 
   } else {
 
-    query_tb <- tibble::tibble(species := tolower(values_q))
+    query_tb <- tibble(species := tolower(values_q))
 
   }
 
@@ -638,7 +637,8 @@ query_exact_match <- function(tbl, field, values_q, con) {
 
 
   rs <- DBI::dbSendQuery(con, sql)
-  res_q <-DBI::dbFetch(rs) %>% tibble::as_tibble()
+  res_q <-DBI::dbFetch(rs) %>%
+    as_tibble()
   DBI::dbClearResult(rs)
 
   if (length(field) == 1) {
@@ -655,7 +655,7 @@ query_exact_match <- function(tbl, field, values_q, con) {
   if (length(field) > 1) {
     query_tb <- query_tb %>%
       dplyr::left_join(
-        res_q %>% 
+        res_q %>%
           dplyr::select(dplyr::all_of(field)) %>%
           dplyr::mutate(species = paste(!!dplyr::sym(field[1]), !!dplyr::sym(field[2]), sep = " ")) %>%
           dplyr::mutate(species = tolower(species)) %>%
@@ -718,7 +718,7 @@ query_fuzzy_match <- function(tbl, field, values_q, con) {
 }
 
 
-
+#' @importFrom dplyr as_tibble
 func_try_fetch <- function(con, sql) {
   rep <- TRUE
   rep_try <- 1
@@ -741,7 +741,7 @@ func_try_fetch <- function(con, sql) {
     if (rep_try == 10)
       stop("Failed to connect to database")
   }
-  res_q <- res_q %>% tibble::as_tibble()
+  res_q <- as_tibble(res_q)
   DBI::dbClearResult(rs)
 
   return(res_q)

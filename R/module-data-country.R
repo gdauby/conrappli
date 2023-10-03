@@ -1,12 +1,12 @@
 
-
+#' @importFrom shiny NS fluidRow column conditionalPanel radioButtons sliderInput
+#' @importFrom shinyWidgets panel virtualSelectInput dropMenu
 data_country_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = i18n("Gabon's threatened tree species"),
-    
+    title = i18n("Gabon's threatened plant species"),
     fluidRow(
-      
+
       column(
         width = 3,
         shinyWidgets::panel(
@@ -67,15 +67,21 @@ data_country_ui <- function(id) {
           )
         )
       ),
-      
+
       column(
         width = 9,
         bslib::card(
           bslib::card_header("Map"),
-          leaflet::leafletOutput(outputId = ns("map"), height = "600px")
+          leaflet::leafletOutput(outputId = ns("map"), height = "600px"),
+          downloadButton(
+            outputId = ns("download_report"),
+            label = i18n("Download the report"),
+            class = "disabled",
+            style = "width: 100%;"
+          )
         )
       )
-      
+
     )
   )
 }
@@ -84,7 +90,7 @@ data_country_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
-      
+
       data_r <- reactive({
         req(input$country)
         shinybusy::show_modal_spinner(
@@ -106,20 +112,16 @@ data_country_server <- function(id) {
         )
         keys <- extract_sp$specieskey
         data <- retrieve_occ_data(keys)
-        # TEMP
-        # Sys.sleep(2)
-        # dataset_rv$value <- readRDS("D:\\work\\ConRapp\\conrappli\\dev\\data_country.rds")
-        # TEMP
-        
+
         shinybusy::remove_modal_spinner()
         return(data)
       })
-      
+
       variable_r <- data_variable_server(
         id = "variable",
         data_r = data_r
       )
-      
+
       data_validated_r <- data_validation_server(
         id = "validation",
         data_r = reactive({
@@ -127,16 +129,66 @@ data_country_server <- function(id) {
           variable_r()$data
         })
       )
-      
-      
+
+
       output$map <- leaflet::renderLeaflet({
         shiny::validate(
           shiny::need(input$country, i18n("Please select a country"))
         )
-        req(data_validated_r()) %>% 
-          draw_map(resolution = input$resolution)
+        if (identical(input$type_map, "grid")) {
+          req(data_validated_r()) %>%
+            draw_map_grid(resolution = input$resolution)
+        } else if (identical(input$type_map, "occ")) {
+          req(data_validated_r()) %>%
+            draw_map_occ()
+        }
       })
-      
+
+
+      observe({
+        if (isTruthy(input$country)) {
+          shinyjs::removeCssClass(id = "download_report", class = "disabled")
+        } else {
+          shinyjs::removeCssClass(id = "download_report", class = "disabled")
+        }
+      })
+
+
+      output$download_report <- downloadHandler(
+        filename = function() {
+          paste0("ConR-report-country", "-", Sys.Date(), ".html")
+        },
+        content = function(file) {
+
+          req(data_validated_r())
+
+          tmp <- tempfile(fileext = ".html")
+
+          shinyWidgets::execute_safely({
+            rmarkdown::render(
+              input =  system.file(package = "conrappli", "reports/country_threat_report.Rmd"),
+              output_format = rmarkdown::html_document(
+                theme = bs_theme_conr(),
+                number_sections = TRUE,
+                toc = TRUE,
+                toc_float = TRUE,
+                toc_depth = 5,
+                self_contained = TRUE
+              ),
+              params = list(
+                data = data_validated_r(),
+                resolution = input$resolution,
+                type_map = input$type_map,
+                country = input$country
+              ),
+              output_file = tmp
+            )
+          })
+
+          file.copy(from = tmp, to = file)
+        }
+      )
+
     }
   )
 }

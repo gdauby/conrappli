@@ -19,12 +19,6 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-create_popup <- function(.data) {
-  template <- glue::glue("<b>{column}:</b>", column = names(.data))
-  template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
-  template <- paste(template, collapse = "")
-  glue::glue_data(.data, template)
-}
 ```
 
 
@@ -35,184 +29,26 @@ create_popup <- function(.data) {
 
 
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
-
 occdata <- params$data
-
-type_map <- params$type_map
-
-occdata_georef <- 
-  occdata %>% 
-  dplyr::filter(!is.na(decimalLongitude),!is.na(decimalLatitude)) %>% ## noms des variables à mettre à jour
-  dplyr::select(key, scientificName, decimalLongitude, decimalLatitude) ## noms des variables à mettre à jour
-
-occdata_georef <- sf::st_as_sf(occdata_georef, 
-                       coords = c("decimalLongitude", "decimalLatitude")) ## noms des variables à mettre à jour
-
-sf::st_crs(occdata_georef) <- 4326
-
-occdata_georef_proj <- 
-  sf::st_transform(occdata_georef, 'EPSG:6933')
-
 ```
 
 
 
 ```{r lf-production, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
-if (params$contry == "Gabon") {
-  
-  # bbox_ <- sf::st_sf(1,
-  #                    geom = sf::st_geometry(sf::st_polygon(list(
-  #                      matrix(
-  #                        c(8,-4, 15,-4, 15, 2.5, 8, 2.5, 8,-4),
-  #                        ncol = 2,
-  #                        byrow = TRUE
-  #                      )
-  #                    ))))
-  all_c <- rnaturalearth::ne_countries(scale = 50, returnclass = "sf")
-  bbox_ <- all_c %>% filter(iso_a3 == "GAB")
-  sf::st_crs(bbox_) <- 4326
-  bbox_ <- sf::st_transform(bbox_, 'EPSG:6933')
-  
-}
+bbox_country <- get_bbox_country(params$country)
 
+if (identical(params$type_map, "grid")) {
 
-if (type_map == "grid") {
-  
-  resolution <- params$resolution
-  
-  occdata_georef_proj <- sf::st_intersection(occdata_georef_proj, bbox_)
-  
-  
-  grid <-
-    sf::st_make_grid(x = bbox_,
-                     cellsize = resolution*1000)
-  grid <- sf::st_as_sf(grid) %>%
-    dplyr::mutate(id_grid = 1:nrow(.))
-  
-  intersect_grid <-
-    sf::st_intersection(occdata_georef_proj, grid)
-  
-  sampling_cell <-
-    intersect_grid %>%
-    dplyr::group_by(id_grid) %>%
-    dplyr::summarise(nbe_esp = length(unique(scientificName)),
-                     n = length(scientificName)) %>%
-    sf::st_set_geometry(NULL)
-  
-  grid_not_null <-
-    grid %>%
-    dplyr::left_join(sampling_cell) %>%
-    dplyr::filter(!is.na(n))
-  
-  grid_not_null <-
-    sf::st_transform(grid_not_null, 4326)
-  
-  pal <- leaflet::colorNumeric(palette = "Reds",
-                               domain = grid_not_null$nbe_esp)
-  
-  # crs_leaflet <- leaflet::leafletCRS(crsClass = "L.Proj.CRS", code = "ESRI:53009",
-  #                                    resolutions = c(65536, 32768, 16384, 8192, 4096, 2048))
-  
-  # leaflet_map <-
-    leaflet::leaflet(options = leaflet::leafletOptions(zoomControl = FALSE)
-                     ) %>%
-    leaflet::invokeMethod(data = NULL,
-                          method = "addZoom",
-                          list(position = "topright")) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-    leaflet::addLayersControl(
-      baseGroups = c("OSM", "Esri", "Open Topo Map"),
-      options = leaflet::layersControlOptions(collapsed = FALSE)
-    ) %>%
-      leaflet::addPolygons(
-        data = grid_not_null,
-        weight = 0.5,
-        color = ~ pal(nbe_esp),
-        fill =  "black",
-        popup = paste("Number of species: ", grid_not_null$nbe_esp),
-        fillOpacity = 0.5,
-        highlight = leaflet::highlightOptions(
-          color = "black",
-          weight = 4
-        )
-      )
+  draw_map_grid(occdata, bbox_country = bbox_country, resolution = params$resolution)
     
-    
-    leaflet() %>%
-    addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
-    addProviderTiles(providers$OpenTopoMap, group = "Open Topo Map") %>%
-    addLayersControl(
-      baseGroups = c("OSM", "Esri", "Open Topo Map"),
-      options = layersControlOptions(collapsed = FALSE)
-    ) %>%
-    addPolygons(
-      data = grid_not_null,
-      weight = 1,
-      opacity = 0.7,
-      color = ~pal(nbe_esp),
-      fill =  "black",
-      popup = grid_not_null %>%
-        sf::st_drop_geometry() %>%
-        dplyr::select(-id_grid) %>% 
-        rename(Number_of_species = nbe_esp,
-               Number_of_occurences = n) %>%
-        create_popup() %>%
-        lapply(htmltools::HTML),
-      fillOpacity = 0.5,
-      highlight = leaflet::highlightOptions(
-        color = "black",
-        weight = 4
-      )
-    )
-  
+} else if (identical(params$type_map, "occ")) {
+
+  draw_map_occ(occdata, bbox_country = bbox_country)
+
 }
-
-if (type_map == "Occurences") {
-  
-  intersect_bbox <-
-    sf::st_intersection(occdata_georef_proj, bbox_)
-  
-  intersect_bbox <- sf::st_transform(intersect_bbox, 4326) %>% select(-X1)
-  
-  leaflet_map <-
-    leaflet::leaflet(data = intersect_bbox,
-                     options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
-    leaflet::invokeMethod(data = NULL,
-                          method = "addZoom",
-                          list(position = "topright")) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-    leaflet::addCircleMarkers(
-      popup = intersect_bbox %>%
-        sf::st_drop_geometry() %>%
-        dplyr::select(-starts_with(".__")) %>%
-        create_popup() %>%
-        lapply(htmltools::HTML)
-      ,
-      group = "Occurences"
-    )
-  
-}
-
-
-
-
-
 ```
 
-
-
-```{r map-leaf, fig.show='asis', echo=FALSE, results='asis'}
-
-leaflet_map
-
-
-```
 
 
 
