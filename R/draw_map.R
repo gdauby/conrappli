@@ -3,6 +3,7 @@
 #' @importFrom dplyr filter mutate group_by summarise n_distinct left_join
 #' @importFrom leaflet colorNumeric leaflet addProviderTiles providers addLayersControl layersControlOptions addPolygons
 #' @importFrom sf st_as_sf st_crs st_transform st_sf st_geometry st_polygon st_make_grid st_intersection st_set_geometry
+#' @importFrom rnaturalearth ne_countries
 draw_map <- function(.data, resolution = 10) {
   data_latlon_sf <- .data %>%
     filter(!is.na(.__longitude), !is.na(.__latitude)) %>%
@@ -10,16 +11,18 @@ draw_map <- function(.data, resolution = 10) {
   st_crs(data_latlon_sf) <- 4326
   data_latlon_sf <- st_transform(data_latlon_sf, "EPSG:6933")
   
-  bbox_gab <- st_sf(
-    1,
-    geom = st_geometry(st_polygon(list(
-      matrix(
-        c(8,-4, 13,-4, 13, 3, 8, 3, 8,-4),
-        ncol = 2,
-        byrow = TRUE
-      )
-    )))
-  )
+  all_c <- rnaturalearth::ne_countries(scale = 50, returnclass = "sf")
+  bbox_gab <- all_c %>% filter(iso_a3 == "GAB")
+  # bbox_gab <- st_sf(
+  #   1,
+  #   geom = st_geometry(st_polygon(list(
+  #     matrix(
+  #       c(8,-4, 15,-4, 15, 2.5, 8, 2.5, 8,-4),
+  #       ncol = 2,
+  #       byrow = TRUE
+  #     )
+  #   )))
+  # )
   
   st_crs(bbox_gab) <- 4326
   bbox_gab <- st_transform(bbox_gab, "EPSG:6933")
@@ -31,6 +34,8 @@ draw_map <- function(.data, resolution = 10) {
   grid <- st_as_sf(grid) %>%
     mutate(id_grid = dplyr::row_number())
   
+  
+  data_latlon_sf <- sf::st_intersection(data_latlon_sf, bbox_gab)
   intersect_grid <- st_intersection(data_latlon_sf, grid)
   
   sampling_cell <-
@@ -49,7 +54,7 @@ draw_map <- function(.data, resolution = 10) {
   grid_not_null <- st_transform(grid_not_null, 4326)
   
   pal <- colorNumeric(
-    palette = "Blues",
+    palette = "Reds",
     domain = grid_not_null$nbe_esp
   )
   

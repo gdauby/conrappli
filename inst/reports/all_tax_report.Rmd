@@ -244,7 +244,7 @@ if (!is.null(params$polygon_rv)) {
 # Synthetic map of threatened taxa
 
 
-```{r leaflet, fig.show='asis', echo=FALSE, results='asis', eval=chunk_map, warning=FALSE}
+```{r leaflet, fig.show='asis', echo=FALSE, results='asis', eval=chunk_map, warning=FALSE, message=FALSE}
 
 group_lf <- c("Occurences")
 # 
@@ -256,7 +256,7 @@ group_lf <- c("Occurences")
 #   domain = grid_s$prop_threatened
 # )
 
-dat_to_map <- sf::st_transform(merged_data_sf_proj_filtered_threat, 4326)
+dat_to_map <- suppressWarnings(sf::st_transform(merged_data_sf_proj_filtered_threat, 4326))
 
 leaf_map <- 
   leaflet::leaflet(
@@ -289,7 +289,7 @@ leaf_map <-
 
 if (!is.null(params$polygon_rv)) {
   
-  poly_to_map <- sf::st_transform(params$polygon_rv, 4326)
+  poly_to_map <- suppressWarnings(sf::st_transform(params$polygon_rv, 4326))
   
   center_m <- as.vector(sf::st_bbox(poly_to_map))
   leaf_map <- leaf_map  %>% 
@@ -318,8 +318,8 @@ if (!is.null(params$polygon_rv)) {
 
 if (!is.null(params$threat_sig)) {
   
-   crop_poly <- lapply(params$threat_sig,
-                         function(x) sf::st_transform(x, 4326))
+   crop_poly <- suppressWarnings(lapply(params$threat_sig,
+                         function(x) sf::st_transform(x, 4326)))
   
   if (!is.null(params$polygon_rv)) {
 
@@ -404,17 +404,21 @@ ggplot2::ggplot(eoo_res, ggplot2::aes(x = EOO)) +
 
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 
-parameters_formated <-  params$parameters %>% 
-  tibble::as_tibble() %>% 
-  dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>% 
-  tidyr::pivot_longer(1:5, values_to = "value") %>% 
-  dplyr::left_join(dplyr::tibble(name = c("EOO_mode",
-                            "EOO_mode"),
-                   value = c("planar",
-                             "spheroid"),
-                   details = c("Projected coordinates are used to estimate areas",
-                               "Spherical geometry is used to estimate area")),
-            by = c("name", "value"))
+parameters_formated <-  params$parameters %>%
+  tibble::as_tibble() %>%
+  dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
+  tidyr::pivot_longer(1:6, values_to = "value") %>%
+  dplyr::left_join(dplyr::tibble(
+    name = c("EOO_mode",
+             "EOO_mode"),
+    value = c("planar",
+              "spheroid"),
+    details = c(
+      "Projected coordinates are used to estimate areas",
+      "Spherical geometry is used to estimate area"
+    )
+  ),
+  by = c("name", "value"))
 
 
 

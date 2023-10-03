@@ -61,14 +61,16 @@ occdata_georef_proj <-
 
 if (params$contry == "Gabon") {
   
-  bbox_ <- sf::st_sf(1,
-                     geom = sf::st_geometry(sf::st_polygon(list(
-                       matrix(
-                         c(8,-4, 15,-4, 15, 3, 8, 3, 8,-4),
-                         ncol = 2,
-                         byrow = TRUE
-                       )
-                     ))))
+  # bbox_ <- sf::st_sf(1,
+  #                    geom = sf::st_geometry(sf::st_polygon(list(
+  #                      matrix(
+  #                        c(8,-4, 15,-4, 15, 2.5, 8, 2.5, 8,-4),
+  #                        ncol = 2,
+  #                        byrow = TRUE
+  #                      )
+  #                    ))))
+  all_c <- rnaturalearth::ne_countries(scale = 50, returnclass = "sf")
+  bbox_ <- all_c %>% filter(iso_a3 == "GAB")
   sf::st_crs(bbox_) <- 4326
   bbox_ <- sf::st_transform(bbox_, 'EPSG:6933')
   
@@ -78,6 +80,9 @@ if (params$contry == "Gabon") {
 if (type_map == "grid") {
   
   resolution <- params$resolution
+  
+  occdata_georef_proj <- sf::st_intersection(occdata_georef_proj, bbox_)
+  
   
   grid <-
     sf::st_make_grid(x = bbox_,
@@ -103,7 +108,7 @@ if (type_map == "grid") {
   grid_not_null <-
     sf::st_transform(grid_not_null, 4326)
   
-  pal <- leaflet::colorNumeric(palette = "Blues",
+  pal <- leaflet::colorNumeric(palette = "Reds",
                                domain = grid_not_null$nbe_esp)
   
   # crs_leaflet <- leaflet::leafletCRS(crsClass = "L.Proj.CRS", code = "ESRI:53009",
