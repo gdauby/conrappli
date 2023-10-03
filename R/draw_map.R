@@ -1,30 +1,40 @@
 
+get_bbox_gabon <- function() {
+  bbox_gab <- sf::st_geometry(rnaturalearth::ne_countries(scale = 110, country = "Gabon", returnclass = "sf"))
+  st_crs(bbox_gab) <- 4326
+  bbox_gab <- st_transform(bbox_gab, "EPSG:6933")
+  return(bbox_gab)
+}
 
-#' @importFrom dplyr filter mutate group_by summarise n_distinct left_join
-#' @importFrom leaflet colorNumeric leaflet addProviderTiles providers addLayersControl layersControlOptions addPolygons
-#' @importFrom sf st_as_sf st_crs st_transform st_sf st_geometry st_polygon st_make_grid st_intersection st_set_geometry
-#' @importFrom rnaturalearth ne_countries
-draw_map <- function(.data, resolution = 10) {
+
+prepare_map_data <- function(.data) {
   data_latlon_sf <- .data %>%
     filter(!is.na(.__longitude), !is.na(.__latitude)) %>%
     st_as_sf(coords = c(".__longitude", ".__latitude"))
   st_crs(data_latlon_sf) <- 4326
   data_latlon_sf <- st_transform(data_latlon_sf, "EPSG:6933")
+  return(data_latlon_sf)
+}
 
-  bbox_gab <- rnaturalearth::ne_countries(scale = 110, country = "Gabon", returnclass = "sf")
+#' @importFrom dplyr filter mutate group_by summarise n_distinct left_join
+#' @importFrom leaflet colorNumeric leaflet addProviderTiles providers addLayersControl layersControlOptions addPolygons
+#' @importFrom sf st_as_sf st_crs st_transform st_sf st_geometry st_polygon st_make_grid st_intersection st_set_geometry
+#' @importFrom rnaturalearth ne_countries
+draw_map_grid <- function(.data,
+                          bbox_country = get_bbox_gabon(),
+                          resolution = 10) {
 
-  st_crs(bbox_gab) <- 4326
-  bbox_gab <- st_transform(bbox_gab, "EPSG:6933")
+  data_latlon_sf <- prepare_map_data(.data)
 
   grid <- st_make_grid(
-    x = bbox_gab,
+    x = bbox_country,
     cellsize = resolution * 1000
   )
   grid <- st_as_sf(grid) %>%
     mutate(id_grid = dplyr::row_number())
 
 
-  data_latlon_sf <- sf::st_intersection(data_latlon_sf, bbox_gab)
+  data_latlon_sf <- sf::st_intersection(data_latlon_sf, bbox_country)
   intersect_grid <- st_intersection(data_latlon_sf, grid)
 
   sampling_cell <-
@@ -76,3 +86,38 @@ draw_map <- function(.data, resolution = 10) {
       )
     )
 }
+
+
+
+
+
+
+draw_map_occ <- function(.data,
+                         bbox_country = get_bbox_gabon()) {
+
+  data_latlon_sf <- prepare_map_data(.data)
+
+  intersect_bbox <- sf::st_intersection(data_latlon_sf, bbox_country)
+
+  intersect_bbox <- sf::st_transform(intersect_bbox, 4326)
+
+  leaflet::leaflet(
+    data = intersect_bbox
+  ) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+    leaflet::addCircles(
+      popup = intersect_bbox %>%
+        sf::st_drop_geometry() %>%
+        dplyr::select(-starts_with(".__")) %>%
+        create_popup(n_col = 2) %>%
+        lapply(htmltools::HTML),
+      group = "Occurences"
+    )
+}
+
+
+
+
+

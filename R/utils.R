@@ -19,10 +19,11 @@ is_valid_year_col <- function(.data) {
   return(TRUE)
 }
 
-create_popup <- function(.data) {
+create_popup <- function(.data, n_col = 1) {
   template <- glue::glue("<b>{column}:</b>", column = names(.data))
   template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
-  template <- paste(template, collapse = "")
+  template <- paste(sprintf("<div>%s</div>", template), collapse = "")
+  template <- sprintf("<div style='display: grid; grid-template-columns: repeat(%s, 1fr); grid-column-gap: 10px;'>%s</div>", n_col, template)
   glue::glue_data(.data, template)
 }
 
