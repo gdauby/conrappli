@@ -1,6 +1,6 @@
 
-get_bbox_gabon <- function() {
-  bbox_gab <- sf::st_geometry(rnaturalearth::ne_countries(scale = 110, country = "Gabon", returnclass = "sf"))
+get_bbox_country <- function(country = "Gabon") {
+  bbox_gab <- sf::st_geometry(rnaturalearth::ne_countries(scale = 110, country = country, returnclass = "sf"))
   st_crs(bbox_gab) <- 4326
   bbox_gab <- st_transform(bbox_gab, "EPSG:6933")
   return(bbox_gab)
@@ -21,7 +21,7 @@ prepare_map_data <- function(.data) {
 #' @importFrom sf st_as_sf st_crs st_transform st_sf st_geometry st_polygon st_make_grid st_intersection st_set_geometry
 #' @importFrom rnaturalearth ne_countries
 draw_map_grid <- function(.data,
-                          bbox_country = get_bbox_gabon(),
+                          bbox_country = get_bbox_country(),
                           resolution = 10) {
 
   data_latlon_sf <- prepare_map_data(.data)
@@ -93,7 +93,7 @@ draw_map_grid <- function(.data,
 
 
 draw_map_occ <- function(.data,
-                         bbox_country = get_bbox_gabon()) {
+                         bbox_country = get_bbox_country()) {
 
   data_latlon_sf <- prepare_map_data(.data)
 

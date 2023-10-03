@@ -76,7 +76,13 @@ data_country_ui <- function(id) {
         width = 9,
         bslib::card(
           bslib::card_header("Map"),
-          leaflet::leafletOutput(outputId = ns("map"), height = "600px")
+          leaflet::leafletOutput(outputId = ns("map"), height = "600px"),
+          downloadButton(
+            outputId = ns("download_report"),
+            label = i18n("Download the report"),
+            class = "disabled",
+            style = "width: 100%;"
+          )
         )
       )
 
@@ -146,6 +152,51 @@ data_country_server <- function(id) {
             draw_map_occ()
         }
       })
+
+
+      observe({
+        if (isTruthy(input$country)) {
+          shinyjs::removeCssClass(id = "download_report", class = "disabled")
+        } else {
+          shinyjs::removeCssClass(id = "download_report", class = "disabled")
+        }
+      })
+
+
+      output$download_report <- downloadHandler(
+        filename = function() {
+          paste0("ConR-report-country", "-", Sys.Date(), ".html")
+        },
+        content = function(file) {
+
+          req(data_validated_r())
+
+          tmp <- tempfile(fileext = ".html")
+
+          shinyWidgets::execute_safely({
+            rmarkdown::render(
+              input =  system.file(package = "conrappli", "reports/country_threat_report.Rmd"),
+              output_format = rmarkdown::html_document(
+                theme = bs_theme_conr(),
+                number_sections = TRUE,
+                toc = TRUE,
+                toc_float = TRUE,
+                toc_depth = 5,
+                self_contained = TRUE
+              ),
+              params = list(
+                data = data_validated_r(),
+                resolution = input$resolution,
+                type_map = input$type_map,
+                country = input$country
+              ),
+              output_file = tmp
+            )
+          })
+
+          file.copy(from = tmp, to = file)
+        }
+      )
 
     }
   )
