@@ -18,7 +18,7 @@ home_ui <- function(id) {
                 "<http://www.iucnredlist.org>",
                 href = "http://www.iucnredlist.org"
               ),
-              i18n(") or potentially threatened (preliminary extinction risk status) plant species at a site of your choice."),
+              i18n(") or potentially threatened (preliminary extinction risk status) tree species at a site of your choice."),
               i18n("To do this, you have the choice of importing a shapefile of your study area or drawing a polygon on a map.")
             )
           ),
@@ -37,14 +37,14 @@ home_ui <- function(id) {
           class = "fs-5 mt-5",
           tags$ol(
             tags$ol(
-              i18n("Obtain information on the distribution of Gabon's threatened plant species.")
+              i18n("Obtain information on the distribution of Gabon's threatened tree species.")
             )
           )
         ),
         actionButton(
           inputId = ns("start_country"),
           label = tagList(
-            i18n("Get information on (threatened) plant species in Gabon"),
+            i18n("Get information on (threatened) tree species in Gabon"),
             ph("arrow-circle-right")
           ),
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",

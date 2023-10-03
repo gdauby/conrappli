@@ -45,6 +45,7 @@ library(knitr)
 library(grDevices)
 library(stats)
 library(utils)
+library(rnaturalearth)
 
 shiny::shinyApp(
   ui = conr_ui(),

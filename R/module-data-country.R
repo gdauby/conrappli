@@ -3,7 +3,7 @@
 data_country_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = i18n("Gabon's threatened plant species"),
+    title = i18n("Gabon's threatened tree species"),
     
     fluidRow(
       
@@ -53,14 +53,14 @@ data_country_ui <- function(id) {
           sliderInput(
             inputId = ns("resolution"),
             label = tagList(
-              "Grid size (km):",
+              i18n("Grid size (km):"),
               btn_help(
-                "Grid size"
+                i18n("Define the resolution of the grid to show the density of threatened species")
               )
             ),
-            min = 5,
+            min = 2,
             max = 40,
-            value = 20,
+            value = 5,
             round = TRUE,
             step = 1,
             width = "100%"

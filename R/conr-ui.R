@@ -64,7 +64,7 @@ conr_ui <- function(lang = c("en", "fr")) {
               i18n("Import data from other sources"),
               i18n("Mapping"),
               i18n("Evaluation - Criterion B"),
-              i18n("Habitat quality/population decline"),
+              i18n("Distribution of threatened tree in Gabon"),
               i18n("Summary report")
             )
           ),
