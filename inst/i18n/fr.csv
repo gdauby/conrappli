@@ -124,3 +124,7 @@ label,translation
 "Get information on (threatened) tree species in Gabon","Obtenir des informations sur la distribution des arbres (menacés) du Gabon"
 "Grid size (km):","Résolution de la grille (km) :"
 "Define the resolution of the grid to show the density of threatened species","Définir la résolution de la grille pour montrer la densité en espèces menacées"
+"Gabon's threatened tree species","Les espèces d'arbres menacés du Gabon"
+"Country to explore:","Pays à explorer :"
+"Which kind of map:","Quelle type de carte :"
+"'Grid' map show the number of threatened species in grid of given resolution, while 'Occurrences' show all occurrences","La carte en grille montre la densité des espèces menacées dans des mailles de résolution choisie, alors que la carte 'Occurrences' montre toutes les occurrences"

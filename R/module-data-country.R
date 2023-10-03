@@ -4,7 +4,7 @@
 data_country_ui <- function(id) {
   ns <- NS(id)
   template_ui(
-    title = i18n("Gabon's threatened plant species"),
+    title = i18n("Gabon's threatened tree species"),
     fluidRow(
 
       column(
@@ -46,7 +46,12 @@ data_country_ui <- function(id) {
           ),
           radioButtons(
             inputId = ns("type_map"),
-            label = "Which kind of map:",
+            label = tagList(
+              i18n("Which kind of map:"),
+              btn_help(
+                i18n("'Grid' map show the number of threatened species in grid of given resolution, while 'Occurrences' show all occurrences")
+              )
+            ),
             choices = c("Occurences" = "occ", "Grid" = "grid"),
             selected = "grid"
           ),
