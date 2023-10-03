@@ -37,6 +37,7 @@ Imports:
     reactable (>= 0.4.4),
     rgbif,
     rmarkdown,
+    rnaturalearth,
     RPostgres,
     sf,
     shiny,

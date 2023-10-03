@@ -9,7 +9,7 @@ utils::globalVariables(c(
   "Latitude", "Longitude",
   ".__latitude", ".__longitude", ".__taxa", ".__year", ".id",
   ".__display_coord_accuracy", ".__display_taxa", ".__display_year",
-  ".__selected",
+  ".__selected", ".valid_year",
   "STATUS_CONR", "STATUS_DESC",
   "display_coord_accuracy", "display_taxa", "display_year",
   "calc_accuracy", "selected",
@@ -25,6 +25,9 @@ utils::globalVariables(c(
   "bbox", "bbox_sf", "table_name", "type", "description", "reference",
   "category", "pair_unique_coordinates", "EOO", "priority",
   "tax", "taxa",
-  "protected"
+  "protected",
+  "polygon_method",
+  "redlistcategory",
+  "id_grid"
 ))
 
