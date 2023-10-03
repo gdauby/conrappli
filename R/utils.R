@@ -72,6 +72,27 @@ base_map <- function(..., zoom_topright = TRUE) {
 }
 
 
-
-
+#' @importFrom reactable reactableTheme
+reactable_theme <- function(...) {
+  reactableTheme(
+    ...,
+    color = "hsl(233, 9%, 87%)",
+    backgroundColor = "hsl(233, 9%, 19%)",
+    borderColor = "hsl(233, 9%, 22%)",
+    stripedColor = "hsl(233, 12%, 22%)",
+    highlightColor = "hsl(233, 12%, 24%)",
+    headerStyle = list(
+      color = "#dfe2e5",
+      fontWeight = 400,
+      fontSize = "0.9rem",
+      letterSpacing = "1px",
+      textTransform = "uppercase",
+      "&:hover, &:focus" = list(color = "#FFF")
+    ),
+    inputStyle = list(backgroundColor = "#dfe2e5"),
+    selectStyle = list(backgroundColor = "hsl(233, 9%, 25%)"),
+    pageButtonHoverStyle = list(backgroundColor = "hsl(233, 9%, 25%)"),
+    pageButtonActiveStyle = list(backgroundColor = "hsl(233, 9%, 28%)")
+  )
+}
 

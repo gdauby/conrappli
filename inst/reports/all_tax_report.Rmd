@@ -108,7 +108,8 @@ reactable::reactable(
   highlight = TRUE,
   searchable = TRUE,
   pagination = FALSE,
-  height = 600
+  height = 600,
+  theme = reactable_theme()
 )
 
 
