@@ -56,12 +56,14 @@ get_max_obs <- function() {
 
 #' @importFrom leaflet leaflet leafletOptions invokeMethod addProviderTiles providers addLayersControl layersControlOptions
 base_map <- function(..., zoom_topright = TRUE) {
-  if (isTRUE(zoom_topright)) {
+  map <- if (isTRUE(zoom_topright)) {
     leaflet(..., options = leafletOptions(zoomControl = FALSE)) %>%
-      invokeMethod(data = NULL, method = "addZoom", list(position = "topright"))
+      invokeMethod(data = NULL, method = "addZoom", list(position = "topright")) %>% 
+      leaflet::setView(0, 0, 2)
   } else {
     leaflet(...)
-  } %>%
+  }
+  map %>%
     addProviderTiles(providers$OpenStreetMap, group = "OSM") %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
     addProviderTiles(providers$OpenTopoMap, group = "Open Topo Map") %>%
