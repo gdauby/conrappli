@@ -87,7 +87,7 @@ conr_ui <- function(lang = c("en", "fr")) {
         tags$style(
           ".btn-navs { border: none; }",
           ".btn-check:hover+.btn.btn-navs { background: #D8D8D8; }",
-          ".btn-check:checked+.btn.btn-navs { border-left: 5px solid #088A08; background: #E6E6E6; }"
+          ".btn-check:checked+.btn.btn-navs { border-left: 5px solid #088A08; background: #454545; }"
         )
       ),
 
