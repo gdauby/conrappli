@@ -309,7 +309,7 @@ reactable::reactable(
 parameters_formated <-  params$parameters %>% 
   as_tibble %>% 
   mutate(across(everything(), as.character)) %>% 
-  pivot_longer(1:5, values_to = "value") %>% 
+  pivot_longer(1:6, values_to = "value") %>% 
   left_join(tibble(name = c("EOO_mode",
                             "EOO_mode"),
                    value = c("planar",
