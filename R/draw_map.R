@@ -67,7 +67,7 @@ draw_map_grid <- function(.data,
   
   grid_not_null <- 
     grid_not_null %>% 
-    rename(number_of_species = nbe_esp,
+    dplyr::rename(number_of_species = nbe_esp,
            number_of_occurences = n)
 
   base_map(zoom_topright = FALSE) %>%
