@@ -128,3 +128,4 @@ label,translation
 "Country to explore:","Pays à explorer :"
 "Which kind of map:","Quelle type de carte :"
 "'Grid' map show the number of threatened species in grid of given resolution, while 'Occurrences' show all occurrences","La carte en grille montre la densité des espèces menacées dans des mailles de résolution choisie, alors que la carte 'Occurrences' montre toutes les occurrences"
+"Which IUCN category ?","Quelle catégorie UICN ?"
