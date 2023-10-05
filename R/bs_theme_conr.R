@@ -12,7 +12,8 @@ bs_theme_conr <- function() {
     primary = "#088A08",
     "navbar-light-color" = "#088A08",
     "navbar-bg" = "#FFF",
-    "enable-negative-margins" = TRUE, preset = "darkly"
+    "enable-negative-margins" = TRUE, 
+    preset = "darkly"
   )
   bslib::bs_add_rules(
     theme = theme,
