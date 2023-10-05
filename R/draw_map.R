@@ -10,8 +10,8 @@ get_bbox_country <- function(country = "Gabon") {
 prepare_map_data <- function(.data) {
   data_latlon_sf <- .data %>%
     filter(!is.na(.__longitude), !is.na(.__latitude)) %>%
-    mutate(.__longitude = jitter(.__longitude, factor = 0.5),
-           .__latitude = jitter(.__latitude, factor = 0.5)) %>%
+    mutate(.__longitude = jitter(.__longitude, factor = 0.2),
+           .__latitude = jitter(.__latitude, factor = 0.2)) %>%
     st_as_sf(coords = c(".__longitude", ".__latitude"))
   st_crs(data_latlon_sf) <- 4326
   data_latlon_sf <- st_transform(data_latlon_sf, "EPSG:6933")
@@ -110,6 +110,38 @@ draw_map_occ <- function(.data,
 
   bs_mp <- base_map(data = intersect_bbox, zoom_topright = FALSE)
   
+  if (any(categories == "VU")) {
+    intersect_bbox_sub <- 
+      intersect_bbox %>% dplyr::filter(redlistcategory == "VU")
+    bs_mp <- 
+      bs_mp %>% 
+      addCircles(data = intersect_bbox_sub,
+                 popup = intersect_bbox_sub %>%
+                   sf::st_drop_geometry() %>%
+                   dplyr::select(-starts_with(".__")) %>%
+                   create_popup(n_col = 2) %>%
+                   lapply(htmltools::HTML),
+                 group = "VU",
+                 color = "yellow"
+      )
+  }
+  
+  if (any(categories == "EN")) {
+    intersect_bbox_sub <- 
+      intersect_bbox %>% dplyr::filter(redlistcategory == "EN")
+    bs_mp <- 
+      bs_mp %>% 
+      addCircles(data = intersect_bbox_sub,
+                 popup = intersect_bbox_sub %>%
+                   sf::st_drop_geometry() %>%
+                   dplyr::select(-starts_with(".__")) %>%
+                   create_popup(n_col = 2) %>%
+                   lapply(htmltools::HTML),
+                 group = "EN",
+                 color = "orange"
+      )
+  }
+  
   if (any(categories == "CR")) {
     intersect_bbox_sub <- 
       intersect_bbox %>% dplyr::filter(redlistcategory == "CR")
@@ -126,37 +158,6 @@ draw_map_occ <- function(.data,
       )
   }
 
-  if (any(categories == "EN")) {
-    intersect_bbox_sub <- 
-      intersect_bbox %>% dplyr::filter(redlistcategory == "EN")
-    bs_mp <- 
-      bs_mp %>% 
-      addCircles(data = intersect_bbox_sub,
-        popup = intersect_bbox_sub %>%
-          sf::st_drop_geometry() %>%
-          dplyr::select(-starts_with(".__")) %>%
-          create_popup(n_col = 2) %>%
-          lapply(htmltools::HTML),
-        group = "EN",
-        color = "orange"
-      )
-  }
-  
-  if (any(categories == "VU")) {
-    intersect_bbox_sub <- 
-      intersect_bbox %>% dplyr::filter(redlistcategory == "VU")
-    bs_mp <- 
-      bs_mp %>% 
-      addCircles(data = intersect_bbox_sub,
-        popup = intersect_bbox_sub %>%
-          sf::st_drop_geometry() %>%
-          dplyr::select(-starts_with(".__")) %>%
-          create_popup(n_col = 2) %>%
-          lapply(htmltools::HTML),
-        group = "EN",
-        color = "yellow"
-      )
-  }
   
   bs_mp %>% 
     addLayersControl(
