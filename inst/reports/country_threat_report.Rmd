@@ -14,11 +14,12 @@ params:
   resolution: ""
   country: ""
   type_map: ""
+  categories: "
 ---
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
@@ -30,6 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
 occdata <- params$data
+categories <- params$categories
 ```
 
 
@@ -40,11 +42,13 @@ bbox_country <- get_bbox_country(params$country)
 
 if (identical(params$type_map, "grid")) {
 
-  draw_map_grid(occdata, bbox_country = bbox_country, resolution = params$resolution)
+  draw_map_grid(occdata, bbox_country = bbox_country, resolution = params$resolution, 
+                categories = categories)
     
 } else if (identical(params$type_map, "occ")) {
 
-  draw_map_occ(occdata, bbox_country = bbox_country)
+  draw_map_occ(occdata, bbox_country = bbox_country, 
+                categories = categories)
 
 }
 ```

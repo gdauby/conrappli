@@ -10,6 +10,8 @@ get_bbox_country <- function(country = "Gabon") {
 prepare_map_data <- function(.data) {
   data_latlon_sf <- .data %>%
     filter(!is.na(.__longitude), !is.na(.__latitude)) %>%
+    mutate(.__longitude = jitter(.__longitude, factor = 0.5),
+           .__latitude = jitter(.__latitude, factor = 0.5)) %>%
     st_as_sf(coords = c(".__longitude", ".__latitude"))
   st_crs(data_latlon_sf) <- 4326
   data_latlon_sf <- st_transform(data_latlon_sf, "EPSG:6933")
@@ -22,9 +24,15 @@ prepare_map_data <- function(.data) {
 #' @importFrom rnaturalearth ne_countries
 draw_map_grid <- function(.data,
                           bbox_country = get_bbox_country(),
-                          resolution = 10) {
+                          resolution = 10,
+                          categories) {
 
   data_latlon_sf <- prepare_map_data(.data)
+  
+  print(data_latlon_sf %>% dplyr::select(redlistcategory))
+  
+  data_latlon_sf <-
+    data_latlon_sf %>% dplyr::filter(redlistcategory %in% categories)
 
   grid <- st_make_grid(
     x = bbox_country,
@@ -56,15 +64,27 @@ draw_map_grid <- function(.data,
     palette = "Reds",
     domain = grid_not_null$nbe_esp
   )
+  
+  grid_not_null <- 
+    grid_not_null %>% 
+    rename(number_of_species = nbe_esp,
+           number_of_occurences = n)
 
   base_map(zoom_topright = FALSE) %>%
     addPolygons(
       data = grid_not_null,
       weight = 1,
       opacity = 0.7,
-      color = ~pal(nbe_esp),
+      color = ~pal(number_of_species),
       fill =  "black",
-      popup = paste("Number of species: ", grid_not_null$nbe_esp),
+      popup = 
+        grid_not_null %>%
+        sf::st_drop_geometry() %>%
+        dplyr::select(-id_grid) %>%
+        create_popup(n_col = 1) %>%
+        lapply(htmltools::HTML),
+        # 
+        # paste("Number of species: ", grid_not_null$nbe_esp),
       fillOpacity = 0.5,
       highlightOptions = leaflet::highlightOptions(
         color = "black",
@@ -79,7 +99,8 @@ draw_map_grid <- function(.data,
 #' @importFrom leaflet leaflet addProviderTiles providers addCircles
 #' @importFrom dplyr select starts_with
 draw_map_occ <- function(.data,
-                         bbox_country = get_bbox_country()) {
+                         bbox_country = get_bbox_country(),
+                         categories) {
 
   data_latlon_sf <- prepare_map_data(.data)
 
@@ -87,15 +108,70 @@ draw_map_occ <- function(.data,
 
   intersect_bbox <- sf::st_transform(intersect_bbox, 4326)
 
-  base_map(data = intersect_bbox, zoom_topright = FALSE) %>%
-    addCircles(
-      popup = intersect_bbox %>%
-        sf::st_drop_geometry() %>%
-        dplyr::select(-starts_with(".__")) %>%
-        create_popup(n_col = 2) %>%
-        lapply(htmltools::HTML),
-      group = "Occurences"
-    )
+  bs_mp <- base_map(data = intersect_bbox, zoom_topright = FALSE)
+  
+  if (any(categories == "CR")) {
+    intersect_bbox_sub <- 
+      intersect_bbox %>% dplyr::filter(redlistcategory == "CR")
+    bs_mp <- 
+      bs_mp %>% 
+      addCircles(data = intersect_bbox_sub,
+        popup = intersect_bbox_sub %>%
+          sf::st_drop_geometry() %>%
+          dplyr::select(-starts_with(".__")) %>%
+          create_popup(n_col = 2) %>%
+          lapply(htmltools::HTML),
+        group = "CR",
+        color = "red"
+      )
+  }
+
+  if (any(categories == "EN")) {
+    intersect_bbox_sub <- 
+      intersect_bbox %>% dplyr::filter(redlistcategory == "EN")
+    bs_mp <- 
+      bs_mp %>% 
+      addCircles(data = intersect_bbox_sub,
+        popup = intersect_bbox_sub %>%
+          sf::st_drop_geometry() %>%
+          dplyr::select(-starts_with(".__")) %>%
+          create_popup(n_col = 2) %>%
+          lapply(htmltools::HTML),
+        group = "EN",
+        color = "orange"
+      )
+  }
+  
+  if (any(categories == "VU")) {
+    intersect_bbox_sub <- 
+      intersect_bbox %>% dplyr::filter(redlistcategory == "VU")
+    bs_mp <- 
+      bs_mp %>% 
+      addCircles(data = intersect_bbox_sub,
+        popup = intersect_bbox_sub %>%
+          sf::st_drop_geometry() %>%
+          dplyr::select(-starts_with(".__")) %>%
+          create_popup(n_col = 2) %>%
+          lapply(htmltools::HTML),
+        group = "EN",
+        color = "yellow"
+      )
+  }
+  
+  bs_mp %>% 
+    addLayersControl(
+    overlayGroups = categories,
+    options = layersControlOptions(collapsed = FALSE)
+  )
+  # %>%
+  #   addCircles(
+  #     popup = intersect_bbox %>%
+  #       sf::st_drop_geometry() %>%
+  #       dplyr::select(-starts_with(".__")) %>%
+  #       create_popup(n_col = 2) %>%
+  #       lapply(htmltools::HTML),
+  #     group = "Occurences"
+  #   )
 }
 
 

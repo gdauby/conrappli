@@ -291,7 +291,8 @@ auto_selection_cols_optionnal <- function(.data) {
     "nbr",
     "detnam",
     "dety",
-    "loc_notes"
+    "loc_notes",
+    "redlistcategory"
   )
 
   for (variable in vars) {

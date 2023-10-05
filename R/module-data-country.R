@@ -69,6 +69,18 @@ data_country_ui <- function(id) {
             round = TRUE,
             step = 1,
             width = "100%"
+          ),
+          shinyWidgets::pickerInput(
+            inputId = ns("cat_chosen"),
+            label = i18n("Which IUCN category ?"), 
+            choices = c("CR", "EN", "VU"),
+            multiple = TRUE,
+            selected = c("CR", "EN", "VU"), 
+            # choicesOpt = list(
+            #   content = sprintf("<span class='badge text-bg-%s'>%s</span>", 
+            #                     c("info", "success", "danger", "primary", "warning"), 
+            #                     c("CR", "EN", "VU"))),
+            options = shinyWidgets::pickerOptions(container = "body")
           )
         )
       ),
@@ -111,12 +123,31 @@ data_country_server <- function(id) {
           full_table <- func_try_fetch(con = mydb_extract, sql = "SELECT * FROM table_threat_taxa_gab")
         threat_taxa <-  full_table %>%
           filter(redlistcategory %in% c("CR", "EN", "VU"))
+        
+        
+        # threat_taxa <- threat_taxa %>% dplyr::slice(1:20)
 
         extract_sp <- search_species_info(
           species_name = unique(threat_taxa$accepetedtaxonname)
         )
         keys <- extract_sp$specieskey
         data <- retrieve_occ_data(keys)
+        
+        
+        cat_keys <- threat_taxa %>% 
+          dplyr::left_join(extract_sp %>% dplyr::select(provided_sciname, specieskey), 
+                                              by = c("accepetedtaxonname" = "provided_sciname")) %>% 
+          dplyr::select(specieskey, redlistcategory, accepetedtaxonname)
+        cat_keys <- 
+          cat_keys %>% 
+          dplyr::group_by(specieskey) %>% 
+          dplyr::summarise(redlistcategory = dplyr::first(redlistcategory))
+        
+        data <- data %>%
+          dplyr::left_join(cat_keys,
+                    by = c("speciesKey" = "specieskey"))
+        
+        print(data %>% dplyr::select(redlistcategory))
 
         shinybusy::remove_modal_spinner()
         return(data)
@@ -138,14 +169,17 @@ data_country_server <- function(id) {
 
       output$map <- leaflet::renderLeaflet({
         shiny::validate(
+          shiny::need(input$cat_chosen, i18n("Please select at least one category"))
+        )
+        shiny::validate(
           shiny::need(input$country, i18n("Please select a country"))
         )
         if (identical(input$type_map, "grid")) {
           req(data_validated_r()) %>%
-            draw_map_grid(resolution = input$resolution)
+            draw_map_grid(resolution = input$resolution, categories = input$cat_chosen)
         } else if (identical(input$type_map, "occ")) {
           req(data_validated_r()) %>%
-            draw_map_occ()
+            draw_map_occ(categories = input$cat_chosen)
         }
       })
 
@@ -166,6 +200,12 @@ data_country_server <- function(id) {
         content = function(file) {
 
           req(data_validated_r())
+          
+          data = data_validated_r()
+          
+          print(data)
+          
+          print(names(data))
 
           tmp <- tempfile(fileext = ".html")
 
@@ -184,7 +224,8 @@ data_country_server <- function(id) {
                 data = data_validated_r(),
                 resolution = input$resolution,
                 type_map = input$type_map,
-                country = input$country
+                country = input$country,
+                categories = input$cat_chosen
               ),
               output_file = tmp
             )
