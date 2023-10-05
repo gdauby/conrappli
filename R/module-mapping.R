@@ -40,9 +40,10 @@ mapping_ui <- function(id) {
       width = "250px",
       draggable = TRUE,
       style = htmltools::css(
-        background = "#FFF",
+        background = "hsl(233, 9%, 19%)",
         borderRadius = "5px",
-        padding = "7px"
+        padding = "7px",
+        color = "#dfe2e5"
       ),
       # verbatimTextOutput(ns("test")),
       uiOutput(outputId = ns("summary")),
@@ -93,9 +94,10 @@ mapping_ui <- function(id) {
       style = "z-index: 99;",
       draggable = TRUE,
       style = htmltools::css(
-        background = "#FFF",
+        background = "hsl(233, 9%, 19%)",
         borderRadius = "5px",
-        padding = "7px"
+        padding = "7px",
+        color = "#dfe2e5"
       ),
       uiOutput(outputId = ns("filter_taxa")),
       tags$div(
