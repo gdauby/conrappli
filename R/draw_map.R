@@ -18,7 +18,7 @@ prepare_map_data <- function(.data) {
   return(data_latlon_sf)
 }
 
-#' @importFrom dplyr filter mutate group_by summarise n_distinct left_join
+#' @importFrom dplyr filter mutate group_by summarise n_distinct left_join rename
 #' @importFrom leaflet colorNumeric leaflet addProviderTiles providers addLayersControl layersControlOptions addPolygons
 #' @importFrom sf st_as_sf st_crs st_transform st_sf st_geometry st_polygon st_make_grid st_intersection st_set_geometry
 #' @importFrom rnaturalearth ne_countries
@@ -96,8 +96,8 @@ draw_map_grid <- function(.data,
 
 
 
-#' @importFrom leaflet leaflet addProviderTiles providers addCircles
-#' @importFrom dplyr select starts_with
+#' @importFrom leaflet leaflet addProviderTiles providers addCircles addScaleBar addLayersControl
+#' @importFrom dplyr select starts_with filter
 draw_map_occ <- function(.data,
                          bbox_country = get_bbox_country(),
                          categories) {
@@ -162,7 +162,8 @@ draw_map_occ <- function(.data,
   bs_mp %>% 
     addLayersControl(
     overlayGroups = categories,
-    options = layersControlOptions(collapsed = FALSE)
+    options = layersControlOptions(collapsed = FALSE) %>%
+      addScaleBar()
   )
   # %>%
   #   addCircles(
