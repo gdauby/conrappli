@@ -121,7 +121,7 @@ label,translation
 "This is a threshold to filter out taxa with more than X unique pair of coordinates. All taxa with number of unique coordinates above this threshold will not be considerd saving computation time. Beware that a low number may discard taxa that are actually threatened.","C'est un seuil pour éliminer les taxa avec plus de X paire de coordonnées uniques. Tous les taxas avec un nombre de paire de coordonnées unique supérieur à ce seuil ne seront pas considérés pour l'analyse ce qui permettra de gagner en temps de calcul. Attention cependant à ne pas chosir un seuil trop bas, pour ne pas élmiminer des taxas effectivement menacés"
 "Please select a country","Choisissez un pays"
 "Extracting data, please wait. It may takes several minutes.","Extraction des données, patience. Cela peut prendre quelques minutes."
-"Get information on (threatened) tree species in Gabon","Obtenir des informations sur la distribution des arbres (menacés) du Gabon"
+"Get information on threatened tree species in Gabon","Obtenir des informations sur la distribution des arbres menacés du Gabon"
 "Grid size (km):","Résolution de la grille (km) :"
 "Define the resolution of the grid to show the density of threatened species","Définir la résolution de la grille pour montrer la densité en espèces menacées"
 "Gabon's threatened tree species","Les espèces d'arbres menacés du Gabon"
@@ -129,3 +129,4 @@ label,translation
 "Which kind of map:","Quelle type de carte :"
 "'Grid' map show the number of threatened species in grid of given resolution, while 'Occurrences' show all occurrences","La carte en grille montre la densité des espèces menacées dans des mailles de résolution choisie, alors que la carte 'Occurrences' montre toutes les occurrences"
 "Which IUCN category ?","Quelle catégorie UICN ?"
+"Distribution of threatened tree in Gabon","Distribution des arbres menacés du Gabon"
