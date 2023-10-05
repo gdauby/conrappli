@@ -44,7 +44,7 @@ home_ui <- function(id) {
         actionButton(
           inputId = ns("start_country"),
           label = tagList(
-            i18n("Get information on (threatened) tree species in Gabon"),
+            i18n("Get information on threatened tree species in Gabon"),
             ph("arrow-circle-right")
           ),
           class = "btn-outline-primary text-center fs-5 mb-3 d-block",
