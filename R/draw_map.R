@@ -162,9 +162,9 @@ draw_map_occ <- function(.data,
   bs_mp %>% 
     addLayersControl(
     overlayGroups = categories,
-    options = layersControlOptions(collapsed = FALSE) %>%
-      addScaleBar()
-  )
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>%
+    addScaleBar()
   # %>%
   #   addCircles(
   #     popup = intersect_bbox %>%
