@@ -135,19 +135,23 @@ data_country_server <- function(id) {
         
         
         cat_keys <- threat_taxa %>% 
-          dplyr::left_join(extract_sp %>% dplyr::select(provided_sciname, specieskey), 
-                                              by = c("accepetedtaxonname" = "provided_sciname")) %>% 
+          dplyr::left_join(
+            extract_sp %>% 
+              dplyr::select(provided_sciname, specieskey), 
+            by = c("accepetedtaxonname" = "provided_sciname")
+          ) %>% 
           dplyr::select(specieskey, redlistcategory, accepetedtaxonname)
-        cat_keys <- 
-          cat_keys %>% 
+        cat_keys <- cat_keys %>% 
           dplyr::group_by(specieskey) %>% 
           dplyr::summarise(redlistcategory = dplyr::first(redlistcategory))
         
         data <- data %>%
-          dplyr::left_join(cat_keys,
-                    by = c("speciesKey" = "specieskey"))
+          dplyr::left_join(
+            cat_keys,
+            by = c("speciesKey" = "specieskey")
+          )
         
-        print(data %>% dplyr::select(redlistcategory))
+        # print(data %>% dplyr::select(redlistcategory))
 
         shinybusy::remove_modal_spinner()
         return(data)
@@ -200,12 +204,6 @@ data_country_server <- function(id) {
         content = function(file) {
 
           req(data_validated_r())
-          
-          data = data_validated_r()
-          
-          print(data)
-          
-          print(names(data))
 
           tmp <- tempfile(fileext = ".html")
 
@@ -227,7 +225,8 @@ data_country_server <- function(id) {
                 country = input$country,
                 categories = input$cat_chosen
               ),
-              output_file = tmp
+              output_file = tmp,
+              intermediates_dir = dirname(tmp)
             )
           })
 

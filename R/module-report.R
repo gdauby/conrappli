@@ -164,7 +164,8 @@ summary_report_server <- function(id,
               results = results$results %>%
                 filter(taxa == input$taxa)
             ),
-            output_file = tmp
+            output_file = tmp,
+            intermediates_dir = dirname(tmp)
           )
         })
         tags$iframe(
@@ -216,7 +217,8 @@ summary_report_server <- function(id,
               parameters = results$parameters,
               results = results$results
             ),
-            output_file = tmp
+            output_file = tmp,
+            intermediates_dir = dirname(tmp)
           )
         })
         tags$iframe(
