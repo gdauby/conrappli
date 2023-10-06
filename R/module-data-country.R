@@ -125,7 +125,7 @@ data_country_server <- function(id) {
           filter(redlistcategory %in% c("CR", "EN", "VU"))
         
         
-        threat_taxa <- threat_taxa %>% dplyr::slice(1:20)
+        # threat_taxa <- threat_taxa %>% dplyr::slice(1:20)
 
         extract_sp <- search_species_info(
           species_name = unique(threat_taxa$accepetedtaxonname)
