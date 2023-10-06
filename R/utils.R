@@ -70,7 +70,8 @@ base_map <- function(..., zoom_topright = TRUE) {
     addLayersControl(
       baseGroups = c("OSM", "Esri", "Open Topo Map"),
       options = layersControlOptions(collapsed = FALSE)
-    )
+    ) %>%
+    addScaleBar()
 }
 
 

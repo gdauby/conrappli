@@ -29,7 +29,7 @@ draw_map_grid <- function(.data,
 
   data_latlon_sf <- prepare_map_data(.data)
   
-  print(data_latlon_sf %>% dplyr::select(redlistcategory))
+  # print(data_latlon_sf %>% dplyr::select(redlistcategory))
   
   data_latlon_sf <-
     data_latlon_sf %>% dplyr::filter(redlistcategory %in% categories)
@@ -161,10 +161,10 @@ draw_map_occ <- function(.data,
   
   bs_mp %>% 
     addLayersControl(
+      baseGroups = c("OSM", "Esri", "Open Topo Map"),
     overlayGroups = categories,
     options = layersControlOptions(collapsed = FALSE)
-  ) %>%
-    addScaleBar()
+  )
   # %>%
   #   addCircles(
   #     popup = intersect_bbox %>%

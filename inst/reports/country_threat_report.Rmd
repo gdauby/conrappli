@@ -14,7 +14,7 @@ params:
   resolution: ""
   country: ""
   type_map: ""
-  categories: "
+  categories: ""
 ---
 
 
@@ -47,8 +47,9 @@ if (identical(params$type_map, "grid")) {
     
 } else if (identical(params$type_map, "occ")) {
 
-  draw_map_occ(occdata, bbox_country = bbox_country, 
+  draw_map_occ(occdata, bbox_country = bbox_country,
                 categories = categories)
+  
 
 }
 ```
