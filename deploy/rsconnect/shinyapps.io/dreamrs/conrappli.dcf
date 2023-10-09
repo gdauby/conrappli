@@ -1,12 +1,12 @@
-name: conrapp-dev
-title: conrapp-dev
+name: conrappli
+title: conrappli
 username: dreamrs
 account: dreamrs
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 9645076
-bundleId: 7772077
-url: https://dreamrs.shinyapps.io/conrapp-dev/
+appId: 5972687
+bundleId: 7781006
+url: https://dreamrs.shinyapps.io/conrappli/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
