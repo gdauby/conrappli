@@ -167,6 +167,7 @@ if (!is.null(params$polygon_rv)) {
 ```{r leaflet, fig.show='asis', echo=FALSE, results='asis', eval=chunk_map, warning=FALSE, message=FALSE}
 
 group_lf <- c("Occurences")
+
 # 
 # grid_s <- grid %>% 
 #   dplyr::filter(!is.na(prop_threatened))
@@ -178,26 +179,31 @@ group_lf <- c("Occurences")
 
 dat_to_map <- suppressWarnings(sf::st_transform(merged_data_sf_proj_filtered_threat, 4326))
 
-leaf_map <- 
-  leaflet::leaflet(
-  data = dat_to_map,
-  options = leaflet::leafletOptions(zoomControl = FALSE)
-) %>%
-  leaflet::invokeMethod(
-    data = NULL,
-    method = "addZoom",
-    list(position = "topright")
-  ) %>%
+
+pal <- leaflet::colorFactor(
+  palette = c('red', 'orange', 'yellow4', 'yellow'),
+  domain = dat_to_map$category
+)
+
+
+leaf_map <-
+  leaflet::leaflet(data = dat_to_map,
+                   options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+  leaflet::invokeMethod(data = NULL,
+                        method = "addZoom",
+                        list(position = "topright")) %>%
   leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
   leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
   leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
-  leaflet::addMarkers(
+  leaflet::addCircles(
     popup = dat_to_map %>%
       sf::st_drop_geometry() %>%
       dplyr::select(-starts_with(".__")) %>%
       create_popup() %>%
-      lapply(htmltools::HTML
-      )
+      lapply(htmltools::HTML),
+    color = ~ pal(category),
+    radius = 19,
+    opacity = 0.9
     ,
     # fillOpacity = 1,
     # clusterOptions = leaflet::markerClusterOptions(
@@ -205,7 +211,9 @@ leaf_map <-
     #   # zoomToBoundsOnClick = FALSE
     # ),
     group = "Occurences"
-  )
+  ) %>% 
+    leaflet::addLegend("bottomright", pal = pal, values = ~category,
+            title = "Threatened category")
 
 if (!is.null(params$polygon_rv)) {
   
@@ -297,7 +305,8 @@ leaf_map <- leaf_map %>%
     baseGroups = c("OSM", "Esri", "Open Topo Map"),
     options = leaflet::layersControlOptions(collapsed = FALSE),
     overlayGroups = group_lf
-  )
+  ) %>%
+    addScaleBar()
 
 leaf_map
 ```

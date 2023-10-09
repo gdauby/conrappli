@@ -44,7 +44,7 @@ data_display_server <- function(id, data_r = reactive(NULL)) {
         content = function(file) {
           data_r() %>%
             unselect_internal_vars() %>%
-            write.csv(file, row.names = FALSE)
+            write.csv(file, row.names = FALSE, na = "")
         }
       )
 

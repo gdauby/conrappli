@@ -345,7 +345,7 @@ criterion_b_server <- function(id,
           "conr-criterion_b.csv"
         },
         content = function(file) {
-          write.csv(x = rv$results, file = file, row.names = FALSE)
+          write.csv(x = rv$results, file = file, row.names = FALSE, na = "")
         }
       )
 

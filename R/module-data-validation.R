@@ -91,7 +91,8 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
             unselect_internal_vars() %>%
             extract_violating_records(),
           title = "Violating validation rules records",
-          type = "modal"
+          type = "modal",
+          options = list(theme = reactable_theme())
         )
       })
 
@@ -103,7 +104,7 @@ data_validation_server <- function(id, data_r = reactive(NULL)) {
           to_validate_r() %>%
             unselect_internal_vars() %>%
             extract_violating_records() %>%
-            write.csv(file, row.names = FALSE)
+            write.csv(file, row.names = FALSE, na = "")
         }
       )
 

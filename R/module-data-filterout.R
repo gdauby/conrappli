@@ -27,7 +27,7 @@ data_filterout_ui <- function(id) {
       ),
       min = 20,
       max = 2000,
-      value = 100,
+      value = 50,
       step = 1,
       width = "100%"
     )
