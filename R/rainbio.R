@@ -180,6 +180,7 @@ conn_mydb_rb <- function(pass = NULL, user = NULL) {
 #' @param genus string
 #' @param order string
 #' @param species string genus followed by species name separated by one space
+#' @param only_species logical
 #' @param only_genus logical
 #' @param only_family logical
 #' @param only_class logical
@@ -196,6 +197,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                        genus = NULL,
                        order = NULL,
                        species = NULL,
+                       only_species = TRUE,
                        only_genus = FALSE,
                        only_family = FALSE,
                        only_class = FALSE,
@@ -441,8 +443,13 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       cli::cli_alert_danger("no matching names")
       no_match <- TRUE
     }
-
   }
+  
+  
+  if (only_species)
+    res <-
+    res %>%
+    dplyr::filter(!is.na(tax_esp))
 
   if (only_genus)
     res <-
