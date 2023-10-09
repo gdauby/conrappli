@@ -1,7 +1,7 @@
 Package: conrappli
 Type: Package
 Title: Web Interface for 'ConR' package
-Version: 0.1.0.9700
+Version: 0.1.1
 Authors@R: c(
       person("Gilles", "Dauby", , "gildauby@gmail.com", role = c("aut", "cre")),
       person("Victor", "Perrier", , "victor.perrier@dreamrs.fr", role = c("ctb"))
