@@ -273,7 +273,8 @@ leaf_map <- leaf_map %>%
     baseGroups = c("OSM", "Esri", "Open Topo Map"),
     options = leaflet::layersControlOptions(collapsed = FALSE),
     overlayGroups = group_lf
-  )
+  ) %>%
+    addScaleBar()
 
 
 leaf_map
