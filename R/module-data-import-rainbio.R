@@ -175,7 +175,11 @@ data_import_rainbio_server <- function(id) {
       })
       observeEvent(
         input$see_data,
-        datamods::show_data(dataset_rv$value, title = "Rainbio data", show_classes = FALSE, type = "modal")
+        datamods::show_data(dataset_rv$value, 
+                            title = "Rainbio data", 
+                            show_classes = FALSE, 
+                            type = "modal",
+                            options = list(theme = reactable_theme()))
       )
 
 

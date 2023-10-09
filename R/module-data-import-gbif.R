@@ -176,7 +176,11 @@ data_import_gbif_server <- function(id) {
       })
       observeEvent(
         input$see_data,
-        datamods::show_data(dataset_rv$value, title = "GBIF data", show_classes = FALSE, type = "modal")
+        datamods::show_data(dataset_rv$value, 
+                            title = "GBIF data", 
+                            show_classes = FALSE, 
+                            type = "modal",
+                            options = list(theme = reactable_theme()))
       )
 
 
