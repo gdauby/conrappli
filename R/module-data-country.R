@@ -65,7 +65,7 @@ data_country_ui <- function(id) {
             ),
             min = 2,
             max = 40,
-            value = 5,
+            value = 15,
             round = TRUE,
             step = 1,
             width = "100%"

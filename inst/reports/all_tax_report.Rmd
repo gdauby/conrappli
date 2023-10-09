@@ -193,6 +193,7 @@ leaf_map <-
   leaflet::invokeMethod(data = NULL,
                         method = "addZoom",
                         list(position = "topright")) %>%
+  leaflet::addMapPane("Occurences", zIndex = 450) %>% 
   leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
   leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
   leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
@@ -211,7 +212,8 @@ leaf_map <-
     #   # maxClusterRadius = 1,
     #   # zoomToBoundsOnClick = FALSE
     # ),
-    group = "Occurences"
+    group = "Occurences",
+    options = leaflet::pathOptions(pane = "Occurences")
   ) %>% 
     leaflet::addLegend("bottomright", pal = pal, values = ~category,
             title = "Threatened category")
@@ -228,6 +230,7 @@ if (!is.null(params$polygon_rv)) {
       lat1 = center_m[2],
       lat2 = center_m[4]
     ) %>%
+  leaflet::addMapPane("polygon", zIndex = 430) %>%
     leaflet::addPolygons(
       # params$res_aoo,
       data = poly_to_map,
@@ -238,7 +241,8 @@ if (!is.null(params$polygon_rv)) {
       dashArray = "1",
       fillOpacity = 0.1,
       group = "polygon",
-      label = "polygon"
+      label = "polygon",
+    options = leaflet::pathOptions(pane = "polygon")
     )
   
     group_lf <- 
@@ -273,6 +277,7 @@ if (!is.null(params$threat_sig)) {
         
         leaf_map <-
           leaf_map %>%
+  leaflet::addMapPane(names(params$threat_sig)[i], zIndex = 420) %>%
           leaflet::addPolygons(
             # params$res_aoo,
             data = threat_to_map,
@@ -289,7 +294,8 @@ if (!is.null(params$threat_sig)) {
               color = "black",
               fillOpacity = 0.7,
               bringToFront = TRUE
-            )
+            ),
+    options = leaflet::pathOptions(pane = names(params$threat_sig)[i])
           )
         
         group_lf <-
