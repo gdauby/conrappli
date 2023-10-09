@@ -109,8 +109,6 @@ summary_report_server <- function(id,
           !is.null(results_r()$results$taxa)
         )
 
-        # print(results_r()$locations)
-
         species <- results_r()$results$taxa
         shinyWidgets::updateVirtualSelect(
           inputId = "taxa",
@@ -194,6 +192,8 @@ summary_report_server <- function(id,
         # check_polygon_r <<- polygon_r()
         data_sf <- req(data_sf_r())
         results <- req(results_r())
+        
+        print(results$locations$threat_list)
 
         tmp <- tempfile(tmpdir = report_dir, fileext = ".html")
         rv$all_tax_report <- tmp
