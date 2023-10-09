@@ -132,7 +132,7 @@ conr_ui <- function(lang = c("en", "fr")) {
             inputId = "app_lang",
             label = NULL,
             choices = c("en", "fr"),
-            selected = lang,
+            selected = getOption("conrappli.i18n"),
             width = "80px"
           ),
           style = css(display = "inline-block"),
