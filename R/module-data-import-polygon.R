@@ -71,7 +71,9 @@ data_import_polygon_server <- function(id) {
           text = "Retrieving data, please wait..."
         )
         occdata <- shinyWidgets::execute_safely({
-          query_rb_poly(poly = polygon_rv$x)
+          # query_rb_poly(poly = polygon_rv$x)
+          query_gbif_poly(poly = polygon_rv$x)
+          
         })
         shinybusy::remove_modal_spinner()
         dataset_rv$value <- occdata$extract_all_tax
