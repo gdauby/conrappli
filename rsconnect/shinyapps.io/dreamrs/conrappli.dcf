@@ -1,0 +1,14 @@
+name: conrappli
+title: conrappli
+username:
+account: dreamrs
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5972687
+bundleId: 7343966
+url: https://dreamrs.shinyapps.io/conrappli/
+when: 1686736409.03592
+lastSyncTime: 1686736409.03594
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: dev/ConR-analysis.R|dev/ConR-workflow.R|dev/ex-draw-poly.R|dev/ex-mod-criterion_b.R|dev/ex-mod-map.R

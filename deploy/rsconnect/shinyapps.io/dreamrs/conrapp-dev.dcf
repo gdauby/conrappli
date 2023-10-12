@@ -1,0 +1,12 @@
+name: conrapp-dev
+title: conrapp-dev
+username: dreamrs
+account: dreamrs
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9645076
+bundleId: 7772077
+url: https://dreamrs.shinyapps.io/conrapp-dev/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

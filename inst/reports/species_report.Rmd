@@ -1,0 +1,335 @@
+---
+date: '`r invisible( Sys.setlocale("LC_TIME", "C") ); format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+    self_contained: yes
+title: "Report for `r params$tax`"
+params:
+  tax: ""
+  data: ""
+  data_sf: ""
+  res_aoo: ""
+  res_eoo: ""
+  threat_sig: ""
+  parameters: ""
+  res_loc: ""
+  results: ""
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center")
+options(knitr.kable.NA = '')
+library(knitr)
+create_popup <- function(.data) {
+  template <- glue::glue("<b>{column}:</b>", column = names(.data))
+  template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
+  template <- paste(template, collapse = "")
+  glue::glue_data(.data, template)
+}
+```
+
+
+# Preliminary Conservation Assessment of _`r params$tax`_ 
+
+</br>
+</br>
+
+<center> The taxa has been assessed as : </center>
+</br>
+<font size="6.5">
+<center> **`r params$results$category`** </center>
+</font>
+
+</br>
+
+
+```{r table-res, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+knitr::kable(t(params$results), 
+             caption = "Results of the assessment", 
+             format = "html", escape = F,
+             format.args = list(big.mark = ".")
+) %>%
+  kableExtra::kable_styling("striped", 
+                            full_width = F)
+
+
+```
+
+
+</br>
+</br>
+</br>
+
+```{r map-leaf, fig.show='asis', echo=FALSE, results='asis'}
+
+group_lf <- c("Occurences", "AOO grid")
+
+dataset <- params$data_sf %>% 
+  sf::st_drop_geometry() %>% 
+  # dplyr::bind_cols(sf::st_coordinates(params$data_sf) %>% 
+  #             tibble::as_tibble() %>% 
+  #             dplyr::rename(ddlat = Y,
+  #                           ddlon = X)) %>% 
+  dplyr::mutate(ID = 1:nrow(.))
+
+dataset <- 
+  dataset %>% 
+  dplyr::relocate(ID, .before = names(dataset)[1])
+
+dataset <- 
+  dataset %>% 
+  dplyr::select(-starts_with(".__"))
+
+leaf_map <-
+  leaflet::leaflet(
+    options = leaflet::leafletOptions(zoomControl = FALSE), 
+    width = "100%",
+    height = "500px") %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+  leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+  leaflet::addMarkers(
+    data = params$data_sf,
+    clusterOptions = leaflet::markerClusterOptions(
+      zoomToBoundsOnClick = TRUE),
+    group = "Occurences",
+    popup = dataset %>% dplyr::select(ID) %>%
+      create_popup() %>% 
+      lapply(htmltools::HTML)
+  ) %>%
+  leaflet::addPolygons(
+    # params$res_aoo,
+    data = params$res_aoo,
+    fillColor = "blue",
+    weight = 1,
+    opacity = 0.4,
+    color = "blue",
+    dashArray = "1",
+    fillOpacity = 0.4,
+    group = "AOO grid",
+    label = "AOO grid",
+    highlight = leaflet::highlightOptions(
+      weight = 5,
+      color = "red",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    )
+  ) 
+
+if (nrow(params$res_eoo) > 0) {
+  
+  group_lf <- c(group_lf, "EOO")
+  
+  leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+      data = params$res_eoo,
+      fillColor = "red",
+      weight = 1,
+      opacity = 0.2,
+      color = "blue",
+      dashArray = "1",
+      fillOpacity = 0.4,
+      group = "EOO",
+      label = "EOO"
+    )
+}
+
+if (any(names(params$res_loc) == "threat")) {
+  
+  if (nrow(params$res_loc %>% filter(threat == "unidentified_threat")) > 0) {
+    
+    group_lf <- c(group_lf, "Locations - unidentified threat")
+    
+    leaf_map <-
+      leaf_map %>%
+      leaflet::addPolygons(
+        data = params$res_loc %>% filter(threat == "unidentified_threat"),
+        fillColor = "green",
+        weight = 1,
+        opacity = 0.4,
+        color = "blue",
+        dashArray = "1",
+        fillOpacity = 0.4,
+        group = "Locations - unidentified threat",
+        label = "Locations unidentified threat",
+        highlight = leaflet::highlightOptions(
+          weight = 5,
+          color = "red",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+        )
+      )
+  }
+  
+  
+  if (nrow(params$res_loc %>% filter(threat != "unidentified_threat")) > 0) {
+    
+    distinct_loc_threat <- params$res_loc %>% filter(threat != "unidentified_threat") %>% distinct(threat)
+    
+    for (i in 1:nrow(distinct_loc_threat)) {
+      
+      group_lf <- c(group_lf, paste("locations -", distinct_loc_threat$threat[i]))
+          
+      poly_subset <- params$res_loc %>% filter(threat == distinct_loc_threat$threat[i])
+      
+      leaf_map <-
+        leaf_map %>%
+        leaflet::addPolygons(
+          data = poly_subset,
+          fillColor = "red",
+          weight = 1,
+          opacity = 0.4,
+          color = "blue",
+          dashArray = "1",
+          fillOpacity = 0.4,
+          group = paste("locations -", distinct_loc_threat$threat[i]),
+          label = distinct_loc_threat$threat[i],
+          highlight = leaflet::highlightOptions(
+            weight = 5,
+            color = "red",
+            fillOpacity = 0.7,
+            bringToFront = TRUE
+          )
+        )
+      
+    }
+    
+
+  }
+} else {
+  
+  group_lf <- c(group_lf, "Locations")
+  
+  leaf_map <-
+    leaf_map %>%
+    leaflet::addPolygons(
+      data = params$res_loc,
+      fillColor = "red",
+      weight = 1,
+      opacity = 0.4,
+      color = "blue",
+      dashArray = "1",
+      fillOpacity = 0.4,
+      group = "Locations",
+      label = "Locations",
+      highlight = leaflet::highlightOptions(
+        weight = 5,
+        color = "red",
+        fillOpacity = 0.7,
+        bringToFront = TRUE
+      )
+    )
+}
+
+
+if (any(!is.na(params$threat_sig))) {
+  
+  for (i in 1:length(params$threat_sig)) {
+    
+    threat_layer <- st_transform(params$threat_sig[[i]], 4326)
+  
+    group_lf <- c(group_lf, names(params$threat_sig)[i])
+    
+    if (names(params$threat_sig)[i] == "protected")
+      col_poly <- "darkgreen"
+        
+    if (names(params$threat_sig)[i] != "cities")
+      col_poly <- "black"
+    
+    if (!names(params$threat_sig)[i] %in% c("protected", "cities"))
+      col_poly <- "grey"
+    
+    leaf_map <-
+      leaf_map %>%
+      leaflet::addPolygons(
+        data = threat_layer,
+        fillColor = col_poly,
+        weight = 1,
+        opacity = 0.2,
+        color = "blue",
+        dashArray = "1",
+        fillOpacity = 0.4,
+        group = names(params$threat_sig)[i],
+        label = names(params$threat_sig)[i]
+      )
+    
+  }
+  
+  
+  
+}
+
+
+leaf_map <- leaf_map %>%
+  leaflet::addLayersControl(
+    baseGroups = c("OSM", "Esri", "Open Topo Map"),
+    options = leaflet::layersControlOptions(collapsed = FALSE),
+    overlayGroups = group_lf
+  ) %>%
+    addScaleBar()
+
+
+leaf_map
+
+
+```
+
+
+# Occurences data
+
+```{r react-table, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+reactable::reactable(
+  data = dataset,
+  filterable = TRUE,
+  highlight = TRUE,
+  searchable = TRUE,
+  pagination = FALSE,
+  height = 600,
+  theme = reactable_theme()
+)
+```
+
+
+</br>
+</br>
+</br>
+
+# Summary of parameters analysis
+
+
+```{r param-table, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+parameters_formated <-  params$parameters %>% 
+  as_tibble %>% 
+  mutate(across(everything(), as.character)) %>% 
+  pivot_longer(1:6, values_to = "value") %>% 
+  left_join(tibble(name = c("EOO_mode",
+                            "EOO_mode"),
+                   value = c("planar",
+                             "spheroid"),
+                   details = c("Projected coordinates are used to estimate areas",
+                               "Spherical geometry is used to estimate area")),
+            by = c("name", "value"))
+
+knitr::kable(
+  parameters_formated, 
+  caption = "Parameters used for the Criterion B analysis", 
+  format = "html",
+  escape = FALSE, 
+  booktabs = TRUE
+) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = "striped", 
+    full_width = FALSE
+  )
+
+
+```

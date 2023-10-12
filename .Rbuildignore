@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^rsconnect$
+^app\.R$
+^dev$
+^deploy$
+^\.github$

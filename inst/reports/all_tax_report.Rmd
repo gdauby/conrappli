@@ -1,0 +1,372 @@
+---
+date: '`r invisible( Sys.setlocale("LC_TIME", "C") ); format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+    self_contained: yes
+title: "Report of preliminary and automatic IUCN evaluation"
+params:
+  polygon_rv: ""
+  data: ""
+  threat_sig: ""
+  parameters: ""
+  results: ""
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NA, fig.align = "center")
+options(knitr.kable.NA = '')
+library(knitr)
+sf::sf_use_s2(FALSE)
+create_popup <- function(.data, n_col = 1) {
+  template <- glue::glue("<b>{column}:</b>", column = names(.data))
+  template <- glue::glue("{template} {valeur}</br>", template = template, valeur = sprintf("{%s}", names(.data)))
+  template <- paste(sprintf("<div>%s</div>", template), collapse = "")
+  template <- sprintf("<div style='display: grid; grid-template-columns: repeat(%s, 1fr); grid-column-gap: 10px;'>%s</div>", n_col, template)
+  glue::glue_data(.data, template)
+}
+```
+
+
+# Preliminary Conservation Assessment of _`r nrow(params$results)`_  taxa 
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+results <- params$results %>% 
+  dplyr::as_tibble()
+
+count_cat <- 
+  results %>% 
+  dplyr::group_by() %>% 
+  dplyr::group_by(category) %>% 
+  dplyr::count() %>%
+  dplyr::left_join(tibble(category = c("CR", "EN", "VU+", "VU", "NT", "LC"), rank = seq(1, 6, 1))) %>% 
+  dplyr::arrange(rank)
+# %>%
+#   tidyr::pivot_wider(names_from = category, values_from = n)
+
+knitr::kable(count_cat %>% select(-rank),
+             caption = "Number of taxa per IUCN category",
+             format = "html",
+             escape = F,
+             col.names = c("Category",
+                           "Number of taxa")) %>%
+  kableExtra::kable_styling("striped",
+                            full_width = F)
+
+
+```
+
+</br>
+</br>
+</br>
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+# parameters_formated <- params$results %>%
+#   as_tibble %>%
+#   knitr::kable(caption = "",
+#                format = "html",
+#                escape = FALSE) %>%
+#   kableExtra::kable_styling(
+#     bootstrap_options = c("responsive"),
+#     full_width = FALSE
+#   ) %>%
+#   kableExtra::row_spec(
+#     which(params$results$category == "CR"), 
+#     bold = TRUE, color = "white", background = "darkred"
+#   ) %>%
+#   kableExtra::row_spec(
+#     which(params$results$category == "EN"), 
+#     bold = TRUE, color = "white", background = "red"
+#   ) %>%
+#   kableExtra::row_spec(
+#     which(params$results$category == "VU"), 
+#     bold = TRUE, color = "white", background = "darkorange"
+#   )
+# 
+# parameters_formated %>%
+#   kableExtra::scroll_box(width = "1400px", height = "500px")
+
+# table_all_tax <- DT::datatable(
+#   params$results %>% tibble::as_tibble(),
+#   filter = 'top',
+#   options = list(pageLength = 10, autoWidth = TRUE)
+# ) %>% DT::formatStyle(
+#   'category',
+#   backgroundColor = DT::styleEqual(c("CR", "EN", "VU"), c('darkred', 'red', 'pink'))
+# )
+
+reactable::reactable(
+  data = as_tibble(params$results),
+  filterable = TRUE,
+  highlight = TRUE,
+  searchable = TRUE,
+  pagination = FALSE,
+  height = 600,
+  theme = reactable_theme()
+)
+
+
+```
+
+
+</br>
+</br>
+</br>
+
+```{r prep-data, warning=F, message=F, echo=F}
+
+merged_data <- dplyr::left_join(
+  x = params$data,
+  y = params$results %>%
+    dplyr::as_tibble() %>%
+    dplyr::select(taxa, category), by = c(".__taxa" = "taxa")
+)
+
+merged_data_sf <- sf::st_as_sf(merged_data, coords = c(".__longitude", ".__latitude"))
+sf::st_crs(merged_data_sf) <- 4326
+
+# merged_data_sf <- sf::st_transform(merged_data_sf, sf::st_crs("EPSG:6933"))
+
+merged_data_sf_proj <- sf::st_transform(merged_data_sf, sf::st_crs("EPSG:6933"))
+
+merged_data_sf_proj_filtered_threat <-
+  merged_data_sf_proj %>% 
+  filter(category %in% c("CR", "EN", "VU", "VU+"))
+
+if (nrow(merged_data_sf_proj_filtered_threat) > 0) {
+ chunk_map <- TRUE
+} else {
+  chunk_map <- FALSE
+}
+
+if (!is.null(params$polygon_rv)) {
+  
+  polygon_rv <- 
+    sf::st_transform(params$polygon_rv, "EPSG:6933")
+  
+  merged_data_sf_proj_filtered_threat <-
+    sf::st_intersection(merged_data_sf_proj_filtered_threat, polygon_rv)
+  
+}
+  
+
+```
+
+
+# Synthetic map of threatened taxa
+
+
+```{r leaflet, fig.show='asis', echo=FALSE, results='asis', eval=chunk_map, warning=FALSE, message=FALSE}
+
+group_lf <- c("Occurences")
+
+# 
+# grid_s <- grid %>% 
+#   dplyr::filter(!is.na(prop_threatened))
+# 
+# pal <- leaflet::colorNumeric(
+#   palette = "viridis",
+#   domain = grid_s$prop_threatened
+# )
+
+dat_to_map <- suppressWarnings(sf::st_transform(merged_data_sf_proj_filtered_threat, 4326))
+
+
+pal <- leaflet::colorFactor(
+  palette = c('red', 'orange', 'yellow4', 'yellow'),
+  domain = dat_to_map$category
+)
+
+
+leaf_map <-
+  leaflet::leaflet(data = dat_to_map,
+                   options = leaflet::leafletOptions(zoomControl = FALSE)) %>%
+  leaflet::invokeMethod(data = NULL,
+                        method = "addZoom",
+                        list(position = "topright")) %>%
+  leaflet::addMapPane("Occurences", zIndex = 450) %>% 
+  leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, group = "OSM") %>%
+  leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery, group = "Esri") %>%
+  leaflet::addProviderTiles(leaflet::providers$OpenTopoMap, group = "Open Topo Map") %>%
+  leaflet::addCircles(
+    popup = dat_to_map %>%
+      sf::st_drop_geometry() %>%
+      dplyr::select(-starts_with(".__")) %>%
+      create_popup(n_col = 2) %>%
+      lapply(htmltools::HTML),
+    color = ~ pal(category),
+    radius = 19,
+    opacity = 0.9
+    ,
+    # fillOpacity = 1,
+    # clusterOptions = leaflet::markerClusterOptions(
+    #   # maxClusterRadius = 1,
+    #   # zoomToBoundsOnClick = FALSE
+    # ),
+    group = "Occurences",
+    options = leaflet::pathOptions(pane = "Occurences")
+  ) %>% 
+    leaflet::addLegend("bottomright", pal = pal, values = ~category,
+            title = "Threatened category")
+
+if (!is.null(params$polygon_rv)) {
+  
+  poly_to_map <- suppressWarnings(sf::st_transform(params$polygon_rv, 4326))
+  
+  center_m <- as.vector(sf::st_bbox(poly_to_map))
+  leaf_map <- leaf_map  %>% 
+    leaflet::fitBounds(
+      lng1 = center_m[1],
+      lng2 = center_m[3],
+      lat1 = center_m[2],
+      lat2 = center_m[4]
+    ) %>%
+  leaflet::addMapPane("polygon", zIndex = 430) %>%
+    leaflet::addPolygons(
+      # params$res_aoo,
+      data = poly_to_map,
+      fillColor = "blue",
+      weight = 1,
+      opacity = 0.1,
+      color = "blue",
+      dashArray = "1",
+      fillOpacity = 0.1,
+      group = "polygon",
+      label = "polygon",
+    options = leaflet::pathOptions(pane = "polygon")
+    )
+  
+    group_lf <- 
+      c(group_lf, "grid", "polygon")
+}
+
+if (!is.null(params$threat_sig)) {
+  
+  if (any(!is.na(params$threat_sig))) {
+    crop_poly <- suppressWarnings(lapply(params$threat_sig,
+                                         function(x)
+                                           sf::st_transform(x, 4326)))
+    
+    if (!is.null(params$polygon_rv)) {
+      # crop_poly <- lapply(params$threat_sig,
+      #                     function(x) sf::st_transform(x, 4326))
+      
+      crop_poly <- lapply(crop_poly,
+                          function(x)
+                            suppressWarnings(sf::st_crop(
+                              x = x, y = sf::st_bbox(sf::st_buffer(dat_to_map, 2))
+                            )))
+    }
+    #  else {
+    #   crop_poly <- params$threat_sig
+    # }
+    
+    for (i in 1:length(crop_poly)) {
+      if (inherits(crop_poly[[i]], "sf")) {
+        threat_to_map <-
+          crop_poly[[i]]  # sf::st_transform(crop_poly[[i]], 4326)
+        
+        leaf_map <-
+          leaf_map %>%
+  leaflet::addMapPane(names(params$threat_sig)[i], zIndex = 420) %>%
+          leaflet::addPolygons(
+            # params$res_aoo,
+            data = threat_to_map,
+            fillColor = "grey",
+            weight = 1,
+            opacity = 1,
+            color = "black",
+            dashArray = "1",
+            fillOpacity = 0.3,
+            group = names(params$threat_sig)[i],
+            label = names(params$threat_sig)[i],
+            highlight = leaflet::highlightOptions(
+              weight = 5,
+              color = "black",
+              fillOpacity = 0.7,
+              bringToFront = TRUE
+            ),
+    options = leaflet::pathOptions(pane = names(params$threat_sig)[i])
+          )
+        
+        group_lf <-
+          c(group_lf, names(params$threat_sig)[i])
+      }
+      
+    }
+  }
+  
+}
+
+leaf_map <- leaf_map %>%
+  leaflet::addLayersControl(
+    baseGroups = c("OSM", "Esri", "Open Topo Map"),
+    options = leaflet::layersControlOptions(collapsed = FALSE),
+    overlayGroups = group_lf
+  ) %>%
+    addScaleBar()
+
+leaf_map
+```
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE, eval=F}
+
+eoo_res <- 
+  results %>% 
+  dplyr::filter(!is.na(EOO))
+
+ggplot2::ggplot(eoo_res, ggplot2::aes(x = EOO)) + 
+  ggplot2::geom_histogram(ggplot2::aes(y = ..density..),
+                 colour = 1, fill = "white") +
+  ggplot2::geom_density()
+
+
+
+```
+
+
+
+# Summary of parameters analysis
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+parameters_formated <-  params$parameters %>%
+  dplyr::as_tibble() %>%
+  dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
+  tidyr::pivot_longer(1:6, values_to = "value") %>%
+  dplyr::left_join(dplyr::tibble(
+    name = c("EOO_mode",
+             "EOO_mode"),
+    value = c("planar",
+              "spheroid"),
+    details = c(
+      "Projected coordinates are used to estimate areas",
+      "Spherical geometry is used to estimate area"
+    )
+  ),
+  by = c("name", "value"))
+
+
+
+knitr::kable(parameters_formated, 
+             caption = "Parameters used for the Criterion B analysis", 
+             format = "html", escape = F
+) %>%
+  kableExtra::kable_styling("striped", 
+                            full_width = F)
+
+
+```
+
+

@@ -1,0 +1,60 @@
+---
+date: '`r invisible( Sys.setlocale("LC_TIME", "C") ); format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+    self_contained: yes
+title: "Report for `r params$country`"
+params:
+  data: ""
+  resolution: ""
+  country: ""
+  type_map: ""
+  categories: ""
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# Distribution of threatened plant species in _`r params$country`_ 
+
+</br>
+</br>
+
+
+```{r, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+occdata <- params$data
+categories <- params$categories
+```
+
+
+
+```{r lf-production, echo=FALSE, include=TRUE, results='asis', message=FALSE, warning=FALSE}
+
+bbox_country <- get_bbox_country(params$country)
+
+if (identical(params$type_map, "grid")) {
+
+  draw_map_grid(occdata, bbox_country = bbox_country, resolution = params$resolution, 
+                categories = categories)
+    
+} else if (identical(params$type_map, "occ")) {
+
+  draw_map_occ(occdata, bbox_country = bbox_country,
+                categories = categories)
+  
+
+}
+```
+
+
+
+
+
