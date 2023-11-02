@@ -25,31 +25,31 @@ prepare_data_validate <- function(data,
   data <- bdc::bdc_coordinates_outOfRange(data, lat = lat, lon = lon)
   data <- bdc::bdc_coordinates_empty(data, lat = lat, lon = lon)
   data <- bdc::bdc_scientificName_empty(data, sci_names = sci_names)
-  if (hasName(data, ".__year")) {
-    data <-
-      data %>%
-      mutate(.__year = as.numeric(.__year)) %>%
-      mutate(.__year = replace(.__year,
-                                 .__year < 1700 |
-                                   .__year > as.numeric(format(
-                                     as.Date(Sys.Date(),
-                                             format = "%d/%m/%Y"), "%Y"
-                                   )), NA))
-    data <- dplyr::mutate(
-      data,
-      .valid_year = TRUE
-    )
-  } else {
-    data <- dplyr::mutate(
-      data,
-      .valid_year = TRUE
-    )
-  }
+  # if (hasName(data, ".__year")) {
+  #   data <-
+  #     data %>%
+  #     mutate(.__year = as.numeric(.__year)) %>%
+  #     mutate(.__year = replace(.__year,
+  #                                .__year < 1700 |
+  #                                  .__year > as.numeric(format(
+  #                                    as.Date(Sys.Date(),
+  #                                            format = "%d/%m/%Y"), "%Y"
+  #                                  )), NA))
+  #   data <- dplyr::mutate(
+  #     data,
+  #     .valid_year = TRUE
+  #   )
+  # } else {
+  #   data <- dplyr::mutate(
+  #     data,
+  #     .valid_year = TRUE
+  #   )
+  # }
   return(data)
 }
 
 validation_cols <- function() {
-  c(".coordinates_outOfRange", ".coordinates_empty", ".scientificName_empty", ".valid_year")
+  c(".coordinates_outOfRange", ".coordinates_empty", ".scientificName_empty")
 }
 
 #' @export
@@ -61,14 +61,16 @@ validation_rules <- function() {
   validation_rules <- validate::validator(
     .coordinates_outOfRange == TRUE,
     .coordinates_empty == TRUE,
-    .scientificName_empty == TRUE,
-    .valid_year == TRUE
+    .scientificName_empty == TRUE
+    # ,
+    # .valid_year == TRUE
   )
   validate::label(validation_rules) <- c(
     i18n("Identify records with out-of-range geographic coordinates"),
     i18n("Identify records with empty geographic coordinates"),
-    i18n("Identify records with empty scientific names"),
-    i18n("Identify records with invalid year (if provided)")
+    i18n("Identify records with empty scientific names")
+    # ,
+    # i18n("Identify records with invalid year (if provided)")
   )
   return(validation_rules)
 }
@@ -116,7 +118,7 @@ identify_violating_records <- function(data) {
         validation_result == FALSE & STATUS_DESC == ".coordinates_outOfRange" ~ "out-of-range geographic coordinates",
         validation_result == FALSE & STATUS_DESC == ".coordinates_empty" ~ "empty geographic coordinates",
         validation_result == FALSE & STATUS_DESC == ".scientificName_empty" ~ "empty scientific names",
-        validation_result == FALSE & STATUS_DESC == ".valid_year" ~ "invalid year",
+        # validation_result == FALSE & STATUS_DESC == ".valid_year" ~ "invalid year",
         TRUE ~ NA_character_
       )
     ) %>%
@@ -145,7 +147,7 @@ extract_violating_records <- function(data) {
         validation_label == ".coordinates_outOfRange" ~ "out-of-range geographic coordinates",
         validation_label == ".coordinates_empty" ~ "empty geographic coordinates",
         validation_label == ".scientificName_empty" ~ "empty scientific names",
-        validation_label == ".valid_year" ~ "invalid year",
+        # validation_label == ".valid_year" ~ "invalid year",
         TRUE ~ ""
       )
     ) %>%

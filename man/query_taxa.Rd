@@ -10,6 +10,7 @@ query_taxa(
   genus = NULL,
   order = NULL,
   species = NULL,
+  only_species = TRUE,
   only_genus = FALSE,
   only_family = FALSE,
   only_class = FALSE,
@@ -30,6 +31,8 @@ query_taxa(
 \item{order}{string}
 
 \item{species}{string genus followed by species name separated by one space}
+
+\item{only_species}{logical}
 
 \item{only_genus}{logical}
 
