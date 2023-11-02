@@ -8,7 +8,11 @@
 \usage{
 data_import_polygon_ui(id)
 
-data_import_polygon_server(id)
+data_import_polygon_server(
+  id,
+  source_r = reactive(NULL),
+  threshold_gbif = reactive(NULL)
+)
 }
 \arguments{
 \item{id}{Module's ID.}

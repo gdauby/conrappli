@@ -115,7 +115,8 @@ data_import_gbif_server <- function(id) {
       # search species names
       observeEvent(species_rv$data, {
         shinyWidgets::execute_safely({
-          species_rv$names <- search_species_info(species_rv$data[[1]])
+          print(species_rv$data[[1]])
+          species_rv$names <- search_species_info(species_rv$data[[1]][which(species_rv$data[[1]] != "")])
         })
       })
 

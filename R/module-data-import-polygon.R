@@ -49,13 +49,33 @@ data_import_polygon_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer observeEvent reactive
 #' @importFrom utils read.csv head
-data_import_polygon_server <- function(id) {
+data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_gbif = reactive(NULL)) {
   moduleServer(
     id = id,
     module = function(input, output, session) {
 
       polygon_rv <- reactiveValues()
       dataset_rv <- reactiveValues(value = NULL)
+      source_rv <- reactiveValues(value = NULL)
+      threshold_rv <- reactiveValues(value = NULL)
+      
+      observeEvent(source_r(), 
+                   source_rv$value <- source_r())
+      
+      observeEvent(threshold_gbif(), 
+                   threshold_rv$value <- threshold_gbif())
+      
+      observe(print(source_r()))
+      
+      observe(print(threshold_gbif()))
+      
+      # observe(print(threshold_gbif()))
+      
+      # observe(print(threshold_gbif()))
+      
+      # ddd <- isolate(source_r())
+      # # 
+      # print(ddd)
 
       polygon_draw_r <- draw_poly_server(id = "draw")
       observeEvent(polygon_draw_r(), polygon_rv$x <- polygon_draw_r())
@@ -70,25 +90,54 @@ data_import_polygon_server <- function(id) {
           color = "#088A08",
           text = "Retrieving data, please wait..."
         )
-        occdata <- shinyWidgets::execute_safely({
-          # query_rb_poly(poly = polygon_rv$x)
-          query_gbif_poly(poly = polygon_rv$x)
-          
-        })
+        
+        if (identical(source_rv$value, "GBIF")) {
+          occdata <- shinyWidgets::execute_safely({
+            query_gbif_poly(poly = polygon_rv$x, threshold = threshold_rv$value)
+          })
+        }
+        
+        if (identical(source_rv$value, "RAINBIO")) {
+          occdata <- shinyWidgets::execute_safely({
+            query_rb_poly(poly = polygon_rv$x)
+          })
+        }
+        
         shinybusy::remove_modal_spinner()
         dataset_rv$value <- occdata$extract_all_tax
+        
+        print(occdata$extract_all_tax)
+        
       })
 
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)
-          nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
+          
+          print(dataset_rv$value)
+          
+          if (identical(source_rv$value, "RAINBIO")) {
+            nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
+            msg <- 
+              "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+          }
+          
+          if (identical(source_rv$value, "GBIF")) {
+            nbe_esp <- dataset_rv$value %>% 
+              select(genus, species) %>% 
+              filter(!is.na(species)) %>% 
+              distinct() %>% nrow()
+            msg <- 
+              "records successfully downloaded from Gbif Max first 1000 lines displayed below."
+            
+          }
+          
           shinyWidgets::alert(
             status = "success",
             ph("check"),
             format(nbe_esp, big.mark = ","), "species",
             ph("check"),
-            format(n, big.mark = ","), "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+            format(n, big.mark = ","), msg
           )
         }
       })

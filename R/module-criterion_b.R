@@ -251,15 +251,16 @@ criterion_b_server <- function(id,
           update_modal_spinner(i18n("Area of occupancy computation"))
           aoo_res <- AOO.computing(
             XY = data,
-            Cell_size_AOO = input$aoo_size,
+            cell_size_AOO = input$aoo_size,
             nbe.rep.rast.AOO = input$rep_rast,
             export_shp = TRUE
           )
+          
 
           update_modal_spinner(i18n("Number of locations computation"))
           locations <- locations.comp(
             XY = data,
-            Cell_size_locations = input$locations_size,
+            cell_size_locations = input$locations_size,
             threat_list = spatial_data,
             threat_weight = table_overlap$priority,
             method_polygons = table_overlap$polygon_method,
@@ -294,7 +295,7 @@ criterion_b_server <- function(id,
 
 
           results <- data.frame(
-            taxa = row.names(aoo_res$AOO),
+            taxa = aoo_res$AOO$tax,
             EOO = eoo_res$results$eoo,
             AOO = aoo_res$AOO$aoo,
             locations = locations$locations$locations,
