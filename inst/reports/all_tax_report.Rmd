@@ -246,7 +246,7 @@ if (!is.null(params$polygon_rv)) {
     )
   
     group_lf <- 
-      c(group_lf, "grid", "polygon")
+      c(group_lf, "polygon")
 }
 
 if (!is.null(params$threat_sig)) {

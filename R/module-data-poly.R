@@ -15,8 +15,26 @@ data_poly_ui <- function(id) {
     ),
 
     data_filterout_ui(id = ns("filterout")),
-
-    # read_poly_ui(id = ns("read")),
+    
+    data_source_ui(id = ns("source")),
+    
+    conditionalPanel(condition = "input['source-source_data'] == 'GBIF'", ns = ns,
+                         numericInput(
+                           inputId = ns("gbif_filterout"),
+                           label = tagList(
+                             i18n("Threshold to filter out taxa with high number of occurrences"),
+                             btn_help(
+                               i18n("")
+                             )
+                           ),
+                           min = 20,
+                           max = 5000,
+                           value = 500,
+                           step = 1,
+                           width = "100%"
+                         )
+                     ),
+    
     data_import_polygon_ui(id = ns("read")),
     uiOutput(outputId = ns("feedback"), class = "my-3"),
 
@@ -70,24 +88,78 @@ data_poly_server <- function(id) {
   moduleServer(
     id,
     function(input, output, session) {
-
+      
       dataset_rv <- reactiveValues(value = NULL)
+      
+      source <- reactiveValues(value = NULL)
+      # gbif_threshold_rv <- reactiveValues(value = NULL)
+      
+      data_source <- data_source_server(id = "source")
+      
+      observeEvent(data_source(), 
+                   source$value <- data_source())
+      
+      
+      gbif_threshold_rv <- reactive({
+        input$gbif_filterout
+      })
+      
+      
+      # observeEvent(data_source(), {
+      #   if (identical("GBIF", source$value))
+      #     gbif_threshold$value <- output$gbif_threshold
+      #   
+      # })
+      
+       # observe(print(gbif_threshold_rv()))
+      
+      # observeEvent(data_source(), 
+      #              source$value <- data_source())
+                    
+      # ddd <- isolate(source$value())
+      # 
+      # print(ddd)}
+      
 
-      polygon_read_r <- data_import_polygon_server(id = "read")
+      polygon_read_r <- data_import_polygon_server(id = "read", 
+                                                   source_r = reactive({data_source()}),
+                                                   threshold_gbif = reactive({gbif_threshold_rv()})
+      )
+      
+      # ,
+      # threshold_gbif = reactive({gbif_threshold$value})
+      
+      
       observeEvent(polygon_read_r$value(), dataset_rv$value <- polygon_read_r$value())
       observeEvent(polygon_read_r$poly(), dataset_rv$poly <- polygon_read_r$poly())
 
       output$feedback <- renderUI({
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)
-          nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
+          
+          if (identical("RAINBIO", source$value)) {
+            nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))
+            msg <- 
+              "records successfully downloaded from Rainbio. Max first 1000 lines displayed below."
+          }
+          
+          if (identical("GBIF", source$value)) {
+            nbe_esp <- dataset_rv$value %>% 
+              select(genus, species) %>% 
+              filter(!is.na(species)) %>% 
+              distinct() %>% nrow()
+            msg <- 
+              "records successfully downloaded from Gbif Max first 1000 lines displayed below."
+          }
+          
           shinyWidgets::alert(
             status = "success",
             ph("check"),
             format(nbe_esp, big.mark = ","), i18n("species"),
             ph("check"),
-            format(n, big.mark = ","), i18n("records successfully downloaded from Rainbio. Max first 1000 lines displayed below.")
+            format(n, big.mark = ","), msg
           )
+          
         }
       })
 
