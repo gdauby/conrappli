@@ -1,6 +1,6 @@
 
-library(ConR) # remotes::install_github("gdauby/ConR@devel")
-library(conrappli) # remotes::install_github("dreamRs/conrappli", upgrade = FALSE)
+library(ConR) # remotes::install_github("gdauby/ConR")
+library(conrappli) # remotes::install_github("gdauby/conrappli", upgrade = FALSE)
 
 # BiocManager::install("BiocVersion")
 library(shiny)
@@ -46,6 +46,7 @@ library(grDevices)
 library(stats)
 library(utils)
 library(rnaturalearth)
+library(lwgeom)
 
 shiny::shinyApp(
   ui = conr_ui(),

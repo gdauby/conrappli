@@ -8,6 +8,8 @@ query_gbif_poly(poly, threshold = 500)
 }
 \arguments{
 \item{poly}{A sf}
+
+\item{threshold}{numeric}
 }
 \value{
 A \code{tibble}.
