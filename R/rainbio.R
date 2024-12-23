@@ -446,39 +446,44 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
   }
   
   
-  if (only_species)
-    res <-
-    res %>%
-    dplyr::filter(!is.na(tax_esp))
 
-  if (only_genus)
+  if (!no_match) {
+    
+    if (only_species)
+      res <-
+        res %>%
+        dplyr::filter(!is.na(tax_esp))
+    
+    if (only_genus)
+      res <-
+        res %>%
+        dplyr::filter(is.na(tax_esp))
+    
+    if (only_family)
+      res <-
+        res %>%
+        dplyr::filter(is.na(tax_esp),
+                      is.na(tax_gen))
+    
+    if (only_class)
+      res <-
+        res %>%
+        dplyr::filter(is.na(tax_esp),
+                      is.na(tax_gen),
+                      is.na(tax_order),
+                      is.na(tax_fam))
+    
     res <-
-    res %>%
-    dplyr::filter(is.na(tax_esp))
-
-  if (only_family)
-    res <-
-    res %>%
-    dplyr::filter(is.na(tax_esp),
-                  is.na(tax_gen))
-
-  if (only_class)
-    res <-
-    res %>%
-    dplyr::filter(is.na(tax_esp),
-                  is.na(tax_gen),
-                  is.na(tax_order),
-                  is.na(tax_fam))
-
-  if (!no_match)
-    res <-
-    res %>% dplyr::mutate(tax_submitted = paste(tax_gen, tax_esp))
+      res %>% dplyr::mutate(tax_submitted = paste(tax_gen, tax_esp)) %>% 
+      filter(!grepl("ZZ auct", author1))
+  }
+    
 
   ## checking synonymies
   if (!no_match & check_syn) {
 
     ## if selected taxa are synonyms
-    if(any(!is.na(res$idtax_good_n))) {
+    if (any(!is.na(res$idtax_good_n))) {
 
       if (any(res$idtax_good_n > 1)) {
 
@@ -520,6 +525,14 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
 
       }
     }
+  }
+  
+  if (!no_match & !check_syn) {
+    
+    res <- 
+      res %>% 
+      filter(!is.na(idtax_good_n))
+    
   }
 
   if (extract_known_syn & !no_match) {

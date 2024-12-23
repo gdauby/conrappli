@@ -2,6 +2,7 @@
 % Please edit documentation in R/conrappli-package.R
 \docType{package}
 \name{conrappli-package}
+\alias{conrappli}
 \alias{conrappli-package}
 \title{Web Interface for 'ConR' package}
 \description{

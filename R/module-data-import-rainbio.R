@@ -53,6 +53,11 @@ data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
       label = i18n("Show only exact matches"),
       value = TRUE
     ),
+    checkboxInput(
+      inputId = ns("synonym"),
+      label = i18n("Do not search into synonyms"),
+      value = TRUE
+    ),
     reactable::reactableOutput(outputId = ns("species")),
     tags$br(),
     actionButton(
@@ -118,9 +123,9 @@ data_import_rainbio_server <- function(id) {
           species_rv$names <- query_taxa(
             species = species_rv$data[[1]],
             ids = NULL,
-            check_syn = TRUE,
             class = NULL,
-            exact_match = input$exact
+            exact_match = input$exact, 
+            check_syn = !input$synonym
           )
         })
       })
