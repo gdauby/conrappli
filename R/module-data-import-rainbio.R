@@ -58,6 +58,14 @@ data_import_rainbio_ui <- function(id, from = c("file", "copypaste")) {
       label = i18n("Do not search into synonyms"),
       value = TRUE
     ),
+    numericInput(
+      inputId = ns("n_fuzz"),
+      label = i18n("Number of entries to return when fuzzy search"),
+      value = 1,
+      min = 1,
+      max = 15,
+      step = 1
+    ),
     reactable::reactableOutput(outputId = ns("species")),
     tags$br(),
     actionButton(
@@ -125,7 +133,8 @@ data_import_rainbio_server <- function(id) {
             ids = NULL,
             class = NULL,
             exact_match = input$exact, 
-            check_syn = !input$synonym
+            check_syn = !input$synonym, 
+            nbr_fuzz = input$n_fuzz
           )
         })
       })

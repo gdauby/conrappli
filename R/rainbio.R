@@ -189,6 +189,7 @@ conn_mydb_rb <- function(pass = NULL, user = NULL) {
 #' @param exact_match logical
 #' @param check_syn logical
 #' @param extract_known_syn logical
+#' @param nbr_fuzz number of entries to return when fuzzy search
 #'
 #' @return A tibble of plots or individuals if extract_individuals is TRUE
 #' @export
@@ -205,10 +206,12 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
                        verbose = TRUE,
                        exact_match = FALSE,
                        check_syn = TRUE,
-                       extract_known_syn = FALSE) {
+                       extract_known_syn = FALSE, 
+                       nbr_fuzz = 1) {
 
   mydb_rb <- conn_mydb_rb(pass = "Anyuser2022", user = "common")
   on.exit(DBI::dbDisconnect(mydb_rb))
+  
 
   if(!is.null(class)) {
 
@@ -255,7 +258,8 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
             tbl = "table_taxa",
             field = "tax_order",
             values_q = query_tb_miss$tax_order[i],
-            con = mydb_rb
+            con = mydb_rb, 
+            n_fuzz = n_fuzz
           )
 
         }
@@ -341,7 +345,8 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
             tbl = "table_taxa",
             field = "tax_gen",
             values_q = query_tb_miss$tax_gen[i],
-            con = mydb_rb
+            con = mydb_rb, 
+            n_fuzz = nbr_fuzz
           )
 
         }
@@ -372,7 +377,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
       if (!exact_match & any(is.na(q_res$query_tb$id))) {
 
         if (verbose) cli::cli_alert_info("Fuzzy search for species for {sum(is.na(q_res$query_tb$id))} name(s)")
-
+        
         query_tb_miss <-
           q_res$query_tb %>%
           dplyr::filter(is.na(id))
@@ -384,7 +389,8 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
             tbl = "table_taxa",
             field = c("tax_gen", "tax_esp"),
             values_q = query_tb_miss$species[i],
-            con = mydb_rb
+            con = mydb_rb, 
+            n_fuzz = nbr_fuzz
           )
 
         }
@@ -431,7 +437,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
     }
 
     tbl <- "table_taxa"
-    sql <-glue::glue_sql("SELECT * FROM {`tbl`} WHERE idtax_n IN ({vals*})",
+    sql <- glue::glue_sql("SELECT * FROM {`tbl`} WHERE idtax_n IN ({vals*})",
                          vals = ids, .con = mydb_rb)
 
     res <- func_try_fetch(con = mydb_rb, sql = sql)
@@ -531,7 +537,7 @@ query_taxa <- function(class = c("Magnoliopsida", "Pinopsida", "Lycopsida", "Pte
     
     res <- 
       res %>% 
-      filter(!is.na(idtax_good_n))
+      filter(is.na(idtax_good_n))
     
   }
 
@@ -707,7 +713,7 @@ query_exact_match <- function(tbl, field, values_q, con) {
 #'
 #' @return A list of two elements, one with the extract if any, two with the names with id not NA when matched
 #' @export
-query_fuzzy_match <- function(tbl, field, values_q, con) {
+query_fuzzy_match <- function(tbl, field, values_q, con, n_fuzz = 1) {
 
   # if (length(field) == 1) sql <-glue::glue_sql("SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower({`field`}), {values_q}) DESC LIMIT 1;",
   #                                              .con = con)
@@ -721,7 +727,7 @@ query_fuzzy_match <- function(tbl, field, values_q, con) {
 
   if (length(field) > 1) {
     sql <- glue::glue_sql(
-      "SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT 2;",
+      "SELECT * FROM {`tbl`} ORDER BY SIMILARITY (lower(concat({`field[1]`},' ',{`field[2]`})), {values_q}) DESC LIMIT {n_fuzz};",
       .con = con
     )
   }
