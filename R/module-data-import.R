@@ -86,6 +86,23 @@ data_import_ui <- function(id) {
           bslib::nav_panel_hidden(
             value = "polygon",
             tags$h3(i18n("Import data from polygon"), class = "mt-0"),
+            data_source_ui(id = ns("source_full")),
+            conditionalPanel(condition = "input['source_full-source_data'] == 'GBIF'", ns = ns,
+                                                                    numericInput(
+                                                                      inputId = ns("gbif_filterout"),
+                                                                      label = tagList(
+                                                                        i18n("Threshold to filter out taxa with high number of occurrences"),
+                                                                        btn_help(
+                                                                          i18n("")
+                                                                        )
+                                                                      ),
+                                                                      min = 20,
+                                                                      max = 5000,
+                                                                      value = 500,
+                                                                      step = 1,
+                                                                      width = "100%"
+                                                                    )
+            ),
             data_import_polygon_ui(id = ns("polygon"))
           ),
           bslib::nav_panel_hidden(
@@ -133,7 +150,13 @@ data_import_server <- function(id) {
       observeEvent(raw_data_gbif_file(), {
         dataset_rv$value <- raw_data_gbif_file()
       })
-
+      
+      data_source <- data_source_server(id = "source_full")
+      
+      gbif_threshold_rv <- reactive({
+        input$gbif_filterout
+      })
+      
       raw_data_gbif_copypaste <- data_import_gbif_server(
         id = "gbif_copypaste"
       )
@@ -156,7 +179,9 @@ data_import_server <- function(id) {
       })
 
       raw_data_polygon <- data_import_polygon_server(
-        id = "polygon"
+        id = "polygon", 
+        source_r = reactive({data_source()}),
+        threshold_gbif = reactive({gbif_threshold_rv()})
       )
       observeEvent(raw_data_polygon$value(), {
         dataset_rv$value <- raw_data_polygon$value()

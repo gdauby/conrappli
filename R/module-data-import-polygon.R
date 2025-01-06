@@ -54,7 +54,7 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
     id = id,
     module = function(input, output, session) {
 
-      polygon_rv <- reactiveValues()
+      polygon_rv <- reactiveValues(x = NULL)
       dataset_rv <- reactiveValues(value = NULL)
       source_rv <- reactiveValues(value = NULL)
       threshold_rv <- reactiveValues(value = NULL)
@@ -65,13 +65,8 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
       observeEvent(threshold_gbif(), 
                    threshold_rv$value <- threshold_gbif())
       
-      observe(print(source_r()))
       
-      observe(print(threshold_gbif()))
-      
-      # observe(print(threshold_gbif()))
-      
-      # observe(print(threshold_gbif()))
+
       
       # ddd <- isolate(source_r())
       # # 
@@ -82,7 +77,15 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
 
       polygon_read_r <- read_poly_server(id = "read")
       observeEvent(polygon_read_r(), polygon_rv$x <- polygon_read_r())
-
+      
+      # observe(print(class(st_as_sf(polygon_draw_r()))))
+      # 
+      # observe(print(polygon_rv$x))
+      
+      observe(print(polygon_draw_r()))
+      observe(print(lwgeom::st_is_polygon_cw(polygon_draw_r())))
+      # observe(print(polygon_rv$x))
+      
       observeEvent(polygon_rv$x, {
         req(polygon_rv$x)
         shinybusy::show_modal_spinner(
@@ -97,6 +100,12 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
           })
         }
         
+        
+        # print("check identical")
+        observe(print(source_r()))
+        # 
+        # print(identical(source_rv$value, "RAINBIO"))
+        
         if (identical(source_rv$value, "RAINBIO")) {
           occdata <- shinyWidgets::execute_safely({
             query_rb_poly(poly = polygon_rv$x)
@@ -106,7 +115,8 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
         shinybusy::remove_modal_spinner()
         dataset_rv$value <- occdata$extract_all_tax
         
-        print(occdata$extract_all_tax)
+        # observe(print(dataset_rv$value))
+        
         
       })
 
@@ -114,7 +124,7 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
         if (isTruthy(dataset_rv$value)) {
           n <- nrow(dataset_rv$value)
           
-          print(dataset_rv$value)
+          # print(dataset_rv$value)
           
           if (identical(source_rv$value, "RAINBIO")) {
             nbe_esp <- length(unique(dataset_rv$value$tax_sp_level))

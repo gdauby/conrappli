@@ -75,7 +75,9 @@ draw_poly_server <- function(id) {
             geojson_to_sf(polys) %>%
               sf::st_combine() %>%
               sf::st_cast(to = "POLYGON") %>%
-              sf::st_cast(to = "MULTIPOLYGON")
+              sf::st_cast(to = "MULTIPOLYGON") %>% 
+              sf::st_sf() %>% 
+              sf::st_make_valid()
           )
         } else {
           NULL
