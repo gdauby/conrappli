@@ -19,7 +19,7 @@ draw_poly_ui <- function(id) {
 
 #' @importFrom leaflet renderLeaflet leaflet leafletOptions setView invokeMethod addProviderTiles providers addLayersControl layersControlOptions
 #' @importFrom leafpm addPmToolbar pmToolbarOptions pmDrawOptions pmEditOptions pmCutOptions
-#' @importFrom sf st_combine
+#' @importFrom sf st_combine st_make_valid st_sf
 #' @importFrom shiny moduleServer reactiveValues observeEvent eventReactive reactiveValuesToList
 draw_poly_server <- function(id) {
   shiny::moduleServer(

@@ -73,6 +73,8 @@ retrieve_occ_data <- function(specieskey) {
 #' @return A `tibble`.
 #' 
 #' @importFrom rgbif occ_count
+#' @importFrom sf st_make_valid
+#' 
 #' @export
 query_gbif_poly <- function(poly, threshold = 500) {
   

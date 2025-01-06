@@ -18,7 +18,8 @@ query_taxa(
   verbose = TRUE,
   exact_match = FALSE,
   check_syn = TRUE,
-  extract_known_syn = FALSE
+  extract_known_syn = FALSE,
+  nbr_fuzz = 1
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ query_taxa(
 \item{check_syn}{logical}
 
 \item{extract_known_syn}{logical}
+
+\item{nbr_fuzz}{number of entries to return when fuzzy search}
 }
 \value{
 A tibble of all taxa

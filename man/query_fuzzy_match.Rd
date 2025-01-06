@@ -4,7 +4,7 @@
 \alias{query_fuzzy_match}
 \title{Query fuzzy match}
 \usage{
-query_fuzzy_match(tbl, field, values_q, con)
+query_fuzzy_match(tbl, field, values_q, con, n_fuzz = 1)
 }
 \arguments{
 \item{tbl}{tibble with one field listing names to be searched}
