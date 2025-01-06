@@ -76,7 +76,7 @@ retrieve_occ_data <- function(specieskey) {
 #' @export
 query_gbif_poly <- function(poly, threshold = 500) {
   
-  poly <- sf::st_transform(poly, 4326)
+  poly <- sf::st_transform(sf::st_make_valid(poly), 4326)
   
   if (inherits(poly, "sf")) {
     # st_union(st_cast(p_geo, "POLYGON"))
