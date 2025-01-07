@@ -83,7 +83,7 @@ data_import_polygon_server <- function(id, source_r = reactive(NULL), threshold_
       # observe(print(polygon_rv$x))
       
       observe(print(polygon_draw_r()))
-      observe(print(lwgeom::st_is_polygon_cw(polygon_draw_r())))
+      # observe(print(lwgeom::st_is_polygon_cw(polygon_draw_r())))
       # observe(print(polygon_rv$x))
       
       observeEvent(polygon_rv$x, {
