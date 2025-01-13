@@ -42,6 +42,7 @@ library(tidyr)
 library(tidyselect)
 library(utils)
 library(validate)
+library(lwgeom)
 
 # remotes::install_github("dreamRs/conrappli")
 library(conrappli)
