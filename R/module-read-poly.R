@@ -43,6 +43,9 @@ read_poly_server <- function(id) {
         } else {
           rv$error <- "File read does not return any geometry."
         }
+        polygon <- sf::st_zm(polygon)
+        print(polygon)
+        
       })
 
       output$error <- renderUI({

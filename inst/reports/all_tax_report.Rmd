@@ -249,63 +249,63 @@ if (!is.null(params$polygon_rv)) {
       c(group_lf, "polygon")
 }
 
-if (!is.null(params$threat_sig)) {
-  
-  if (any(!is.na(params$threat_sig))) {
-    crop_poly <- suppressWarnings(lapply(params$threat_sig,
-                                         function(x)
-                                           sf::st_transform(x, 4326)))
-    
-    if (!is.null(params$polygon_rv)) {
-      # crop_poly <- lapply(params$threat_sig,
-      #                     function(x) sf::st_transform(x, 4326))
-      
-      crop_poly <- lapply(crop_poly,
-                          function(x)
-                            suppressWarnings(sf::st_crop(
-                              x = x, y = sf::st_bbox(sf::st_buffer(dat_to_map, 2))
-                            )))
-    }
-    #  else {
-    #   crop_poly <- params$threat_sig
-    # }
-    
-    for (i in 1:length(crop_poly)) {
-      if (inherits(crop_poly[[i]], "sf")) {
-        threat_to_map <-
-          crop_poly[[i]]  # sf::st_transform(crop_poly[[i]], 4326)
-        
-        leaf_map <-
-          leaf_map %>%
-  leaflet::addMapPane(names(params$threat_sig)[i], zIndex = 420) %>%
-          leaflet::addPolygons(
-            # params$res_aoo,
-            data = threat_to_map,
-            fillColor = "grey",
-            weight = 1,
-            opacity = 1,
-            color = "black",
-            dashArray = "1",
-            fillOpacity = 0.3,
-            group = names(params$threat_sig)[i],
-            label = names(params$threat_sig)[i],
-            highlight = leaflet::highlightOptions(
-              weight = 5,
-              color = "black",
-              fillOpacity = 0.7,
-              bringToFront = TRUE
-            ),
-    options = leaflet::pathOptions(pane = names(params$threat_sig)[i])
-          )
-        
-        group_lf <-
-          c(group_lf, names(params$threat_sig)[i])
-      }
-      
-    }
-  }
-  
-}
+# if (!is.null(params$threat_sig)) {
+#   
+#   if (any(!is.na(params$threat_sig))) {
+#     crop_poly <- suppressWarnings(lapply(params$threat_sig,
+#                                          function(x)
+#                                            sf::st_transform(x, 4326)))
+#     
+#     if (!is.null(params$polygon_rv)) {
+#       # crop_poly <- lapply(params$threat_sig,
+#       #                     function(x) sf::st_transform(x, 4326))
+#       
+#       crop_poly <- lapply(crop_poly,
+#                           function(x)
+#                             suppressWarnings(sf::st_crop(
+#                               x = x, y = sf::st_bbox(sf::st_buffer(dat_to_map, 2))
+#                             )))
+#     }
+#     #  else {
+#     #   crop_poly <- params$threat_sig
+#     # }
+#     
+#     for (i in 1:length(crop_poly)) {
+#       if (inherits(crop_poly[[i]], "sf")) {
+#         threat_to_map <-
+#           crop_poly[[i]]  # sf::st_transform(crop_poly[[i]], 4326)
+#         
+#         leaf_map <-
+#           leaf_map %>%
+#   leaflet::addMapPane(names(params$threat_sig)[i], zIndex = 420) %>%
+#           leaflet::addPolygons(
+#             # params$res_aoo,
+#             data = threat_to_map,
+#             fillColor = "grey",
+#             weight = 1,
+#             opacity = 1,
+#             color = "black",
+#             dashArray = "1",
+#             fillOpacity = 0.3,
+#             group = names(params$threat_sig)[i],
+#             label = names(params$threat_sig)[i],
+#             highlight = leaflet::highlightOptions(
+#               weight = 5,
+#               color = "black",
+#               fillOpacity = 0.7,
+#               bringToFront = TRUE
+#             ),
+#     options = leaflet::pathOptions(pane = names(params$threat_sig)[i])
+#           )
+#         
+#         group_lf <-
+#           c(group_lf, names(params$threat_sig)[i])
+#       }
+#       
+#     }
+#   }
+#   
+# }
 
 leaf_map <- leaf_map %>%
   leaflet::addLayersControl(
